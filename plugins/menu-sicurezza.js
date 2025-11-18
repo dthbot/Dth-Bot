@@ -80,6 +80,5 @@ function generateMenuText(chat, userId, groupId) {
         .map(([name, state]) => `${state ? '🟢' : '🔴'} - *${name}*`)
         .join('\n');
 
-    return `
-⋆ ︵︵ ★ ${menuTitle} ★ ︵︵ ⋆
+ 
 
