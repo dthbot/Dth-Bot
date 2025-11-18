@@ -2,7 +2,7 @@ let handler = async (m, { conn, isAdmin, isBotAdmin }) => {
   if (!m.isGroup || !isBotAdmin || !isAdmin) return
   try {
     const pending = await conn.groupRequestParticipantsList(m.chat)
-    if (!pending.length) return m.reply("Nessuna richiesta da accettare.")
+    if (!pending.length) return m.reply("𝐍𝐞𝐬𝐬𝐮𝐧 𝐧𝐞𝐠𝐫𝐨 𝐡𝐚 𝐟𝐚𝐭𝐭𝐨 𝐫𝐢𝐜𝐡𝐢𝐞𝐬𝐭𝐚.")
     let count = 0
     for (let p of pending) {
       try {
