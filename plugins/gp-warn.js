@@ -8,20 +8,20 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
     who = m.chat
   }
 
-  if (!who) return m.reply("❌ Devi menzionare un utente o rispondere a un suo messaggio.")
+  if (!who) return m.reply("𝐃𝐞𝐯𝐢 𝐦𝐞𝐧𝐳𝐢𝐨𝐧𝐚𝐫𝐞 𝐮𝐧 𝐮𝐭𝐞𝐧𝐭𝐞 𝐨 𝐫𝐢𝐬𝐩𝐨𝐧𝐝𝐞𝐫𝐞 𝐚 𝐮𝐧 𝐬𝐮𝐨 𝐦𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨 𝐟𝐫𝐨𝐜𝐢𝐨")
 
   // 🔒 BLOCCA AVVERTIMENTI AL BOT
   if (who === conn.user.jid) {
-    return m.reply("🚫 Non puoi warnare il bot.")
+    return m.reply("𝐍𝐨𝐧 𝐩𝐮𝐨𝐢 𝐰𝐚𝐫𝐧𝐚𝐫𝐞 𝐢𝐥 𝐛𝐨𝐭 𝐝𝐨𝐰𝐧")
   }
 
   if (!(who in global.db.data.users)) {
-    return m.reply("❌ Utente non trovato nel database.")
+    return m.reply("𝙉𝙤𝙣 𝙝𝙤 𝙩𝙧𝙤𝙫𝙖𝙩𝙤 𝙞𝙡 𝙘𝙖𝙯𝙯𝙤 𝙙𝙞 𝙪𝙩𝙚𝙣𝙩𝙚")
   }
 
   let user = global.db.data.users[who]
   let warn = user.warn || 0
-  let nomeDelBot = global.db.data.nomedelbot || `𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲`
+  let nomeDelBot = global.db.data.nomedelbot || `𝔻𝕋ℍ-𝔹𝕆𝕋`
 
   const messageOptions = {
     contextInfo: {
@@ -29,7 +29,7 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
       forwardingScore: 999,
       isForwarded: true,
       forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363259442839354@newsletter',
+        newsletterJid: '',
         serverMessageId: '',
         newsletterName: `${nomeDelBot}`
       }
