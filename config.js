@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 
 global.botnumber = '';
 global.confirmCode = '';
-global.nomebot = '𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲-𝐁𝐨𝐭';
-global.packname = '𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲-𝐁𝐨𝐭';
+global.nomebot = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+global.packname = '𝔻𝕋ℍ-𝔹𝕆𝕋';
 global.author = '𝐌𝐝';
 global.vs = '8.3';
 global.collab = 'Demon Slayer';
