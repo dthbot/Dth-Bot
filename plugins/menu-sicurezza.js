@@ -68,6 +68,7 @@ function generateMenuText(chat, userId, groupId) {
         Antimedia: !!chat?.antimedia,
         Antisondaggi: !!chat?.antisondaggi,
         AntiTikTok: !!chat?.antitiktok
+        AntiBho: !!chat?.antibho
     };
 
     const howToUse = `
