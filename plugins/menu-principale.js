@@ -13,8 +13,9 @@ const __dirname = path.dirname(__filename);
 const handler = async (message, { conn, usedPrefix, command }) => {
     const userId = message.sender
     const groupId = message.isGroup ? message.chat : null
-    
+
     const userCount = Object.keys(global.db.data.users).length;
+    const botName = global.db.data.nomedelbot || 'ChatUnity';
     const botName = global.db.data.nomedelbot || '𝔻𝕋ℍ-𝔹𝕆𝕋';
 
 
@@ -22,14 +23,14 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 
 
     const imagePath = path.join(__dirname, '../media/principale.jpeg'); 
-    
+
     const footerText = global.t('menuFooter', userId, groupId) || 'Scegli un menu:'
-    const adminMenuText = global.t('menuAdmin', userId, groupId) || '🛡️ Menu King Gruppo'
-    const ownerMenuText = global.t('menuOwner', userId, groupId) || '👑 Menu Padroni Bot'
-    const securityMenuText = global.t('menuSecurity', userId, groupId) || '🚨 Menu Sicurezza Gruppo'
-    const groupMenuText = global.t('menuGroup', userId, groupId) || '👥 Menu Gruppo '
-    const aiMenuText = global.t('menuAI', userId, groupId) || '🤖 Menu IA Bot'
-    
+    const adminMenuText = global.t('menuAdmin', userId, groupId) || '🛡️ 𝐌𝐞𝐧𝐮 𝐊𝐢𝐧𝐠 𝐝𝐞𝐥 𝐆𝐫𝐮𝐩𝐩𝐨'
+    const ownerMenuText = global.t('menuOwner', userId, groupId) || '👑 𝐌𝐞𝐧𝐮 𝐏𝐚𝐝𝐫𝐨𝐧𝐢 𝐝𝐞𝐥 𝐁𝐨𝐭'
+    const securityMenuText = global.t('menuSecurity', userId, groupId) || '🚨 𝐒𝐢𝐜𝐮𝐫𝐞𝐳𝐳𝐚 𝐩𝐞𝐫 𝐢𝐥 𝐆𝐫𝐮𝐩𝐩𝐨'
+    const groupMenuText = global.t('menuGroup', userId, groupId) || '👥 𝐌𝐞𝐧𝐮 𝐩𝐞𝐫 𝐠𝐥𝐢 𝐒𝐜𝐡𝐢𝐚𝐯𝐢'
+    const aiMenuText = global.t('menuAI', userId, groupId) || '🤖 𝐌𝐞𝐧𝐮 𝐈𝐀 𝐝𝐞𝐥 𝐁𝐨𝐭'
+
     await conn.sendMessage(
         message.chat,
         {
@@ -61,11 +62,21 @@ export default handler;
 function generateMenuText(prefix, botName, userCount, userId, groupId) {
     const menuTitle = global.t('mainMenuTitle', userId, groupId) || '𝑴𝑬𝑵𝑼 𝑫𝑬𝑳 𝑩𝑶𝑻'
     const staffText = global.t('staffCommand', userId, groupId) || 'staff'
+    const hegemoniaText = global.t('hegemoniaCommand', userId, groupId) || 'egemonia'
+    const candidatesText = global.t('candidatesCommand', userId, groupId) || 'candidati'
+    const installText = global.t('installCommand', userId, groupId) || 'installa'
+    const guideText = global.t('guideCommand', userId, groupId) || 'guida'
+    const channelsText = global.t('channelsCommand', userId, groupId) || 'canali'
+    const systemText = global.t('systemCommand', userId, groupId) || 'sistema'
+    const faqText = global.t('faqCommand', userId, groupId) || 'FAQ'
     const pingText = global.t('pingCommand', userId, groupId) || 'ping'
+    const reportText = global.t('reportCommand', userId, groupId) || 'segnala'
+    const suggestText = global.t('suggestCommand', userId, groupId) || 'consiglia'
+    const newsText = global.t('newsCommand', userId, groupId) || 'novità'
     const versionText = global.t('versionLabel', userId, groupId) || '𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬'
     const collabText = global.t('collabLabel', userId, groupId) || '𝐂𝐎𝐋𝐋𝐀𝐁: 𝐎𝐍𝐄 𝐏𝐈𝐄𝐂𝐄'
     const usersText = global.t('usersLabel', userId, groupId) || '𝐔𝐓𝐄𝐍𝐓𝐈'
-    
+
     return `
 ⋆ ︵★ ${menuTitle} ★︵ ⋆
 ୧ 👑 ୭ *${prefix}${staffText}*
