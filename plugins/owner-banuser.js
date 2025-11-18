@@ -45,7 +45,7 @@ END:VCARD`
         participant: "0@s.whatsapp.net"
     };
 
-    conn.reply(message.chat, "✅ 𝐐𝐮𝐞𝐬𝐭𝐨 𝐮𝐭𝐞𝐧𝐭𝐞 è 𝐬𝐭𝐚𝐭𝐨 𝐛𝐥𝐨𝐜𝐜𝐚𝐭𝐨 𝐝𝐚𝐥 𝐛𝐨𝐭", fakeMsg);
+    conn.reply(message.chat, "✅ 𝐈 𝐦𝐢𝐞𝐢 𝐩𝐚𝐝𝐫𝐨𝐧𝐢 𝐭𝐢 𝐡𝐚𝐧𝐧𝐨 𝐛𝐥𝐨𝐜𝐜𝐚𝐭𝐨 𝐝𝐨𝐰𝐧", fakeMsg);
 };
 
 handler.command = /^banuser$/i;
