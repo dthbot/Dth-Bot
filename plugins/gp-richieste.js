@@ -50,8 +50,8 @@ let handler = async (m, { conn, isAdmin, isBotAdmin, args, usedPrefix, command }
       text: `📨 Richieste in sospeso: ${pending.length}\nSeleziona un'opzione:`,
       footer: 'Gestione richieste gruppo',
       buttons: [
-        { buttonId: `${usedPrefix}${command} accetta`, buttonText: { displayText: "✅ Accetta tutte" }, type: 1 },
-        { buttonId: `${usedPrefix}${command} rifiuta`, buttonText: { displayText: "❌ Rifiuta tutte" }, type: 1 },
+        { buttonId: `${usedPrefix}${command} accetta`, buttonText: { displayText: "✅ Accetta tutti questi negri" }, type: 1 },
+        { buttonId: `${usedPrefix}${command} rifiuta`, buttonText: { displayText: "❌ Rifiuta tutti questi negri" }, type: 1 },
         { buttonId: `${usedPrefix}${command} accetta39`, buttonText: { displayText: "🇮🇹 Accetta +39" }, type: 1 },
         { buttonId: `${usedPrefix}${command} gestisci`, buttonText: { displayText: "📥 Gestisci richieste" }, type: 1 }
       ],
