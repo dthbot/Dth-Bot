@@ -1,8 +1,8 @@
 // Definizione delle stringhe in italiano
 const lenguajeIT = {
-    smsNam2: () => "⚠️ Per favore inserisci il nuovo nome per il gruppo",
-    smsNam1: () => "✅ Nome del gruppo modificato con successo!",
-    smsNam3: () => "✅ Nome del gruppo modificato con successo!",
+    smsNam2: () => "𝐈𝐧𝐬𝐞𝐫𝐢𝐬𝐜𝐢 𝐢𝐥 𝐜𝐚𝐳𝐳𝐨 𝐝𝐢 𝐧𝐨𝐦𝐞 𝐝𝐚 𝐜𝐚𝐦𝐛𝐢𝐚𝐫𝐞 𝐟𝐫𝐨𝐜𝐢𝐨",
+    smsNam1: () => "𝐇𝐨 𝐜𝐚𝐦𝐛𝐢𝐚𝐭𝐨 𝐢𝐥 𝐧𝐨𝐦𝐞 𝐜𝐨𝐧𝐭𝐞𝐧𝐭𝐨?",
+    smsNam3: () => "",𝐇𝐨 𝐜𝐚𝐦𝐛𝐢𝐚𝐭𝐨 𝐢𝐥 𝐧𝐨𝐦𝐞 𝐜𝐨𝐧𝐭𝐞𝐧𝐭𝐨?
     smsConMenu: () => "🔙 Torna al Menu"
   }
   
