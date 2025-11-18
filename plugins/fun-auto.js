@@ -96,7 +96,7 @@ handler.before = async (m, { conn }) => {
 ┃
 ╰━━━━━━━━━━━━━━━━╯
 
-> \\by chatunity\\`;
+> \\by 𝔻𝕋ℍ-𝔹𝕆𝕋\\`;
 
     await conn.reply(m.chat, congratsMessage, m);
     delete global.logoGame[m.chat];
