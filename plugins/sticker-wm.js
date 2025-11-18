@@ -15,7 +15,7 @@ console.error(e)
 if (Buffer.isBuffer(e)) stiker = e
 } finally {
 if (stiker) conn.sendFile(m.chat, stiker, 'wm.webp', '', m, false, { asSticker: true })
-else throw 'errore'
+else throw '𝐍𝐨𝐧 𝐩𝐨𝐬𝐬𝐨 𝐟𝐚𝐫𝐥𝐨'
 }}
 handler.help = ['wm <packname>|<author>']
 handler.tags = ['sticker']
