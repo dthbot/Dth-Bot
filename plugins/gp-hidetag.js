@@ -67,9 +67,9 @@ const handler = async (m, { conn, text, participants, command }) => {
   }
 };
 
-handler.help = ['hidetag', 'totag', 'tag', 'dthtag'];
+handler.help = ['hidetag', 'totag', 'tag', 'dthtag', 'death'];
 handler.tags = ['gruppo'];
-handler.command = /^(\.?hidetag|dthtag|totag|tag)$/i;
+handler.command = /^(\.?hidetag|dthtag|death|totag|tag)$/i;
 handler.admin = true;
 handler.group = true;
 
