@@ -1,4 +1,4 @@
-// Plugin .dominadeath - cambia nome al gruppo
+// Plugin .deathdomina - cambia nome al gruppo
 let handler = async (m, { conn, participants, groupMetadata, isAdmin, isBotAdmin }) => {
 
     // Controllo che il comando sia usato in un gruppo
@@ -21,7 +21,7 @@ let handler = async (m, { conn, participants, groupMetadata, isAdmin, isBotAdmin
     }
 }
 
-handler.help = ['dominadeath']
+handler.help = ['deathdomina']
 handler.tags = ['group']
 handler.command = /^dominadeath$/i
 
