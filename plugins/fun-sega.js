@@ -1,7 +1,7 @@
 import { performance } from 'perf_hooks'
 
 let handler = async (m, { conn, text }) => {
-  let nomeDelBot = global.db.data.nomedelbot || `𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲`
+  let nomeDelBot = global.db.data.nomedelbot || `𝔻𝕋ℍ-𝔹𝕆𝕋`
 
   // Identifica il destinatario: risposto o menzionato
   let destinatario;
@@ -36,7 +36,7 @@ let handler = async (m, { conn, text }) => {
 
   // Messaggio finale
   return conn.sendMessage(m.chat, { 
-    text: `Oh ${nomeDestinatario} ha sborrato! 😋💦`,
+    text: `Oh ${nomeDestinatario} finalmente ha sborrato! 😋💦`,
     edit: key,
     mentions: [destinatario]
   }, { quoted: m })
