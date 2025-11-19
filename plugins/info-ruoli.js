@@ -1,5 +1,3 @@
-// Codice di promozione-retrocessione.js
-
 //Plugin fatto da Axtral_WiZaRd
 import fs from 'fs';
 
@@ -49,7 +47,7 @@ handler.before = async function (message, { conn }) {
         const senderUsername = sender.split('@')[0];
 
         await conn.sendMessage(message.chat, {
-            text: `@${senderUsername} 𝐡𝐚 𝐩𝐫𝐨𝐦𝐨𝐬𝐬𝐨 @${promotedUsername}`,
+            text: `@${senderUsername} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUsername}`,
             contextInfo: {
                 mentionedJid: [sender, promotedUser],
                 externalAdReply: {
@@ -75,7 +73,7 @@ handler.before = async function (message, { conn }) {
         const senderUsername = sender.split('@')[0];
 
         await conn.sendMessage(message.chat, {
-            text: `@${senderUsername} 𝐡𝐚 𝐫𝐞𝐭𝐫𝐨𝐜𝐞𝐬𝐬𝐨 @${demotedUsername}`,
+            text: `@${senderUsername} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${demotedUsername}`,
             contextInfo: {
                 mentionedJid: [sender, demotedUser],
                 externalAdReply: {
