@@ -1,13 +1,46 @@
-let handler = async (m, { conn }) => {
+//Plugin fatto da Axtral_WiZaRd
+import { existsSync, promises as fsPromises } from 'fs';
+import path from 'path';
 
-    // Numero casuale tra 156 e 2578
-    let random = Math.floor(Math.random() * (2578 - 156 + 1)) + 156;
+const handler = async (m, { conn }) => {
 
-    let msg = `🗑️ 𝐇𝐨 𝐞𝐥𝐢𝐦𝐢𝐧𝐚𝐭𝐨 ${random} 𝐚𝐫𝐜𝐡𝐢𝐯𝐢 𝐝𝐞𝐥𝐥𝐚 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐞!  
-𝐆𝐫𝐚𝐳𝐢𝐞 𝐩𝐞𝐫 𝐚𝐯𝐞𝐫𝐦𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐨 𝐥𝐞 𝐩𝐚𝐥𝐥𝐞 ❤️`;
+  try {
+    const sessionFolder = "./sessioni/";
+
+    if (!existsSync(sessionFolder)) {
+      return conn.sendMessage(m.chat, {
+        text: "❗ *Non c’erano sessioni da eliminare.*"
+      }, { quoted: m });
+    }
+
+    const sessionFiles = await fsPromises.readdir(sessionFolder);
+    let deleted = 0;
+
+    for (const file of sessionFiles) {
+      if (file !== "creds.json") {
+        await fsPromises.unlink(path.join(sessionFolder, file));
+        deleted++;
+      }
+    }
+
+    const msg =
+      deleted === 0
+        ? "❗ *Non c’erano sessioni da eliminare.*"
+        : `🔥 *Sono stati eliminati ${deleted} file di sessione!*`;
 
     await conn.sendMessage(m.chat, { text: msg }, { quoted: m });
+
+  } catch (e) {
+    await conn.sendMessage(m.chat, {
+      text: "❌ *Errore durante l’eliminazione delle sessioni!*"
+    }, { quoted: m });
+  }
+
 };
 
-handler.command = /^ds$/i;
+handler.help = ['clearallsession'];
+handler.tags = ["owner"];
+handler.command = /^(deletession|ds|clearallsession)$/i;
+handler.admin = true;
+
 export default handler;
