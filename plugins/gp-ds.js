@@ -26,7 +26,7 @@ const handler = async (m, { conn }) => {
     const msg =
       deleted === 0
         ? "❗ *Non c’erano sessioni da eliminare.*"
-        : `🔥 *Sono stati eliminati ${deleted} file di sessione!*`;
+        : `🔥 *Sono stati eliminati ${deleted} spermatozoi 💦! Grazie per avermi svuotato le palle 🪽*`;
 
     await conn.sendMessage(m.chat, { text: msg }, { quoted: m });
 
