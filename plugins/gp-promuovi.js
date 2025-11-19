@@ -1,30 +1,18 @@
-let handler = async (m, { conn,usedPrefix, text }) => {
-if(isNaN(text) && !text.match(/@/g)){
-	
-}else if(isNaN(text)) {
-var number = text.split`@`[1]
-}else if(!isNaN(text)) {
-var number = text
+// plugin-promuovi.js
+
+let handler = async (m, { conn, args }) => {
+    if (!m.isGroup) throw '❌ Questo comando funziona solo nei gruppi.'
+    if (!m.isAdmin) throw '❌ Solo gli admin possono usare questo comando.'
+    if (!m.mentionedJid[0]) throw '📌 Tagga la persona da promuovere.'
+
+    let user = m.mentionedJid[0]
+
+    await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
+
+    let msg = `@${m.sender.split('@')[0]} 𝐇𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${user.split('@')[0]}`
+
+    await conn.sendMessage(m.chat, { text: msg, mentions: [m.sender, user] }, { quoted: m })
 }
-	
-if(!text && !m.quoted) return
-if(number.length > 13 || (number.length < 11 && number.length > 0)) return
-	
-try {
-if(text) {
-var user = number + '@s.whatsapp.net'
-} else if(m.quoted.sender) {
-var user = m.quoted.sender
-} else if(m.mentionedJid) {
-var user = number + '@s.whatsapp.net'
-} 
-} catch (e) {
-} finally {
-conn.groupParticipantsUpdate(m.chat, [user], 'promote')
-}}
-handler.command = /^(p|promuovi|mettiadmin|p)$/i
-handler.group = true
-handler.admin = true
-handler.botAdmin = true
-handler.fail = null
+
+handler.command = /^(promuovi|p)$/i
 export default handler
