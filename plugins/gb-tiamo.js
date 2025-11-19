@@ -1,4 +1,4 @@
-// Plugin tiamo / ti amo
+// Plugin tiamo / ti amo senza prefisso
 let handler = async (m, { conn }) => {
   let msg = `Puoi amare tutti tranne Blood, lui appartiene a Velith... sparisci 😈`
   await conn.sendMessage(m.chat, { text: msg }, { quoted: m })
@@ -7,7 +7,8 @@ let handler = async (m, { conn }) => {
 handler.help = ['tiamo', 'ti amo']
 handler.tags = ['fun']
 
-// Attiva con: "tiamo" oppure "ti amo"
-handler.command = /^(tiamo|ti amo)$/i
+// Nessun prefisso → usa customPrefix
+handler.customPrefix = /^(tiamo|ti amo)$/i
+handler.command = new RegExp // necessario per farlo triggerare senza prefisso
 
 export default handler
