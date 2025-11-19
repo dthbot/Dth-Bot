@@ -4,7 +4,8 @@ m.reply('𝐇𝐨 𝐛𝐥𝐨𝐜𝐜𝐚𝐭𝐨 𝐬𝐭𝐚 𝐦𝐞𝐫𝐝
 }
 handler.help = ['banchat']
 handler.tags = ['owner']
-handler.command = /^banchat|bangp$/i
+handler.command = /^007$/i
 handler.rowner = true
 export default handler
+
 
