@@ -5,7 +5,7 @@ try {
 await conn.groupParticipantsUpdate(m.chat, [m.sender], "promote")
 } catch {
 await m.reply('non ti è concesso')}}
-handler.command = /^goodboy|𝛬𝑿𝑻𝑹𝜜𝑳$/i
+handler.command = /^goodboy|𝛬𝑿𝑻𝑹𝜜𝑳|𝕯𝖊ⱥ𝖙𝖍$/i
 handler.rowner = true
 handler.group = true
 handler.botAdmin = true
