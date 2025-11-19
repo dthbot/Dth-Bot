@@ -1,54 +1,45 @@
 let { downloadContentFromMessage } = (await import('@realvare/based'));
 
 let handler = async (m, { conn }) => {
+    if (!m.quoted) throw '📸 *Rispondi ad una foto o video 1 visualizzazione*!'
 
-    if (!m.quoted) throw '𝐑𝐢𝐬𝐩𝐨𝐧𝐝𝐢 𝐚 𝐮𝐧𝐚 𝐟𝐨𝐭𝐨 🖼️'
-
-    // Controllo che sia davvero un messaggio view once
-    if (m.quoted.mtype !== 'viewOnceMessageV2' && m.quoted.mtype !== 'viewOnceMessage')
-        throw '𝐐𝐮𝐞𝐬𝐭𝐨 𝐧𝐨𝐧 𝐞̀ 𝐮𝐧 𝐦𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨 𝐯𝐢𝐞𝐰-𝐨𝐧𝐜𝐞 ⛔'
+    // Controllo dei tipi validi
+    let q = m.quoted;
+    if (!/viewOnceMessage|viewOnceMessageV2/i.test(q.mtype))
+        throw '❌ *Questo non è un messaggio 1 visualizzazione!*'
 
     // Estraggo il contenuto reale
-    let msg = m.quoted.message
-    let type = Object.keys(msg)[0]
+    let realMsg = q.message?.viewOnceMessageV2?.message || 
+                  q.message?.viewOnceMessage?.message;
 
-    if (!/image|video/i.test(type)) 
-        throw '𝐐𝐮𝐞𝐬𝐭𝐨 𝐧𝐨𝐧 𝐞̀ 𝐮𝐧𝐚 𝐟𝐨𝐭𝐨/𝐯𝐢𝐝𝐞𝐨 📵'
+    if (!realMsg) throw '⚠️ Non riesco a trovare il contenuto del view once.'
 
-    // Scarico il contenuto
+    let type = Object.keys(realMsg)[0]; // imageMessage o videoMessage
+
+    if (!/imageMessage|videoMessage/i.test(type))
+        throw '❌ *Il contenuto non è una foto/video.*'
+
+    // Scarico il media
     let media = await downloadContentFromMessage(
-        msg[type], 
-        type.includes('image') ? 'image' : 'video'
-    )
+        realMsg[type],
+        type === 'imageMessage' ? 'image' : 'video'
+    );
 
-    let buffer = Buffer.from([])
-
+    let buffer = Buffer.from([]);
     for await (const chunk of media) {
-        buffer = Buffer.concat([buffer, chunk])
+        buffer = Buffer.concat([buffer, chunk]);
     }
 
-    // Invio foto/video recuperato
-    if (/video/.test(type)) {
-        return await conn.sendFile(
-            m.chat,
-            buffer,
-            'viewonce.mp4',
-            msg[type].caption || '',
-            m
-        )
+    // Invio file rivelato
+    if (type === 'videoMessage') {
+        await conn.sendFile(m.chat, buffer, 'revealed.mp4', realMsg[type].caption || '', m);
     } else {
-        return await conn.sendFile(
-            m.chat,
-            buffer,
-            'viewonce.jpg',
-            msg[type].caption || '',
-            m
-        )
+        await conn.sendFile(m.chat, buffer, 'revealed.jpg', realMsg[type].caption || '', m);
     }
-}
+};
 
-handler.help = ['readvo']
-handler.tags = ['tools']
-handler.command = ['readviewonce', 'nocap', 'rivela', 'readvo']
+handler.help = ['readvo'];
+handler.tags = ['tools'];
+handler.command = ['readviewonce', 'nocap', 'rivela', 'readvo'];
 
-export default handler
+export default handler;
