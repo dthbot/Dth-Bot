@@ -15,11 +15,12 @@ let handler = async (m) => {
   }, { quoted: m });
 };
 
-handler.help = ['unbanchat'];
+handler.help = ['007sbant'];
 handler.tags = ['owner'];
-handler.command = /^unbanchat|unbangp$/i;
+handler.command = /^007sban|sban007$/i;
 handler.rowner = true;
 export default handler;
+
 
 
 
