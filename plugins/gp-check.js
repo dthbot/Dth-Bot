@@ -2,37 +2,26 @@ let handler = async (m, { conn }) => {
     let user;
 
     // Reply
-    if (m.quoted) {
-        user = m.quoted.sender;
-    }
+    if (m.quoted) user = m.quoted.sender;
     // Mention
-    else if (m.mentions && m.mentions.length > 0) {
-        user = m.mentions[0];
-    }
+    else if (m.mentions && m.mentions.length > 0) user = m.mentions[0];
     // Nessuno selezionato
-    else {
-        return m.reply(
-            "❌ Devi rispondere a un messaggio o menzionare un utente!\nEsempio:\n• `.check @utente`\n• Rispondi ad un messaggio e fai `.check`"
-        );
-    }
+    else user = m.sender;
 
-    // Garantiamo JID valido
+    // Garantiamo che sia una stringa
     if (!user || typeof user !== 'string') user = m.sender;
 
-    const mentionsArray = [user]; // sempre array di stringhe
-
-    // Messaggio gangster finale
     const replyText = `
 💀 *💣 CHECK DISPOSITIVO 💣*
 ────────────────────────
-👤 Utente: @${user.split("@")[0]}
+👤 Utente: ${user.split("@")[0]}
 📱 Dispositivo stimato: ❓ Sconosciuto
 ────────────────────────
 🚨 *Attento, il boss ti sta guardando!*
 `;
 
-    // Invia con menzione sicura
-    await m.reply(replyText, { mentions: mentionsArray });
+    // 🔹 INVIO senza mentions (non da più crash)
+    await m.reply(replyText);
 };
 
 handler.help = ['check @user', 'check (rispondendo a un messaggio)'];
