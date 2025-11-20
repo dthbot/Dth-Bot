@@ -559,7 +559,7 @@ export async function participantsUpdate({ id, participants, action }) {
                             text = (chat.sBye || this.bye || conn.bye || 'bye bye, @user!')
                                 .replace('@user', '@' + user.split('@')[0])
                         }
-
+l
                         this.sendMessage(id, { 
                             text: text, 
                             contextInfo:{ 
@@ -584,6 +584,10 @@ export async function participantsUpdate({ id, participants, action }) {
             }
             break
     }
+}
+// blocco comandi se AFK
+if (global.db.data.users[m.sender].afk) {
+    if (!/(giorno)/i.test(m.text)) return; 
 }
 
 export async function groupsUpdate(groupsUpdate) {
