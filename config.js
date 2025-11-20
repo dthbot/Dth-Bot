@@ -7,9 +7,9 @@ global.botnumber = '';
 global.confirmCode = '';
 global.nomebot = '𝔻𝕋ℍ-𝔹𝕆𝕋';
 global.packname = '𝔻𝕋ℍ-𝔹𝕆𝕋';
-global.author = '𝐌𝐝';
-global.vs = '8.3';
-global.collab = 'Demon Slayer';
+global.author = '';
+global.vs = '1.0';
+global.collab = '𝔸𝕩𝕥𝕣𝕒𝕝_𝕎𝕚ℤ𝕒ℝ𝕕';
 global.wm = global.nomebot;
 global.wait = 'ⓘ 𝐂𝐚𝐫𝐢𝐜𝐚𝐦𝐞𝐧𝐭𝐨 ...';
 
@@ -23,8 +23,8 @@ global.owner = [
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx']
 ];
-global.mods = ['27763845778'];
-global.prems = ['27763845778', '393512884684'];
+global.mods = ['xxxxxxxxxx'];
+global.prems = ['xxxxxxxxxx'];
 
 
 const pickRandom = arr => arr[Math.floor(Math.random() * arr.length)];
