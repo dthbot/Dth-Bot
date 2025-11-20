@@ -1,6 +1,7 @@
 let handler = async (m) => {
   global.db.data.chats[m.chat].isBanned = false;
-  let message = '───────────────❖───────────────
+  
+  let message = `───────────────❖───────────────
       🌅❤️ 𝑴𝒐𝒅𝒂𝒍𝒊𝒕𝒂̀ 𝑨𝑭𝑲 𝑹𝒊𝒎𝒐𝒔𝒔𝒂 ❤️🌅
 ───────────────❖───────────────
 
@@ -9,28 +10,16 @@ let handler = async (m) => {
 
 ───────────────❖───────────────
       🌞 𝑺𝒐𝒏𝒐 𝒕𝒐𝒓𝒏𝒂𝒕𝒐, 𝒃𝒖𝒐𝒏𝒂 𝒈𝒊𝒐𝒓𝒏𝒂𝒕𝒂! 🌞
-───────────────❖───────────────';
+───────────────❖───────────────`;
+
   await conn.sendMessage(m.chat, { 
-      text: message,
-      contextInfo: {
-          forwardingScore: 99,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-              newsletterJid: '',
-              serverMessageId: '',
-              newsletterName: 'ChatUnity'
-          }
-      }
+    text: message
   }, { quoted: m });
 };
 
 handler.help = ['007sbant'];
 handler.tags = ['owner'];
-handler.command = /^007sban|sban007$/i;
+handler.command = /^(007sban|sban007)$/i;
 handler.rowner = true;
+
 export default handler;
-
-
-
-
-
