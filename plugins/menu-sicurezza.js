@@ -49,26 +49,26 @@ function generateMenuText(chat, userId, groupId) {
     const supportText = global.t('supportLabel', userId, groupId) || '𝐒𝐔𝐏𝐏𝐎𝐑𝐓𝐎';
 
     const functions = {
-        Antilink: !!chat?.antiLink,
-        Antilinkhard: !!chat?.antiLinkHard,
-        Antispam: !!chat?.antispam,
-        Antitrava: !!chat?.antitrava,
         Benvenuto: !!chat?.welcome,
         Detect: !!chat?.detect,
+        Antispam: !!chat?.antispam,
+        Antitrava: !!chat?.antitrava,
         AntiNuke: !!chat?.antinuke,
         Conclave: !!chat?.conclave,
         Antibestemmie: !!chat?.antibestemmie,
         SoloGruppo: !!chat?.sologruppo,
         SoloPrivato: !!chat?.soloprivato,
         soloadmin: !!chat?.soloadmin,
-        Antiinsta: !!chat?.antiinsta,
         AntiCall: !!chat?.antiCall,
         Antivirus: !!chat?.antivirus,
         Antibot: !!chat?.antibot,
         Antivoip: !!chat?.antivoip,
         Antimedia: !!chat?.antimedia,
         Antisondaggi: !!chat?.antisondaggi,
-        AntiTikTok: !!chat?.antitiktok
+        AntiTikTok: !!chat?.antitiktok,
+        Antiinsta: !!chat?.antiinsta,
+        Antilink: !!chat?.antiLink,
+        Antilinkhard: !!chat?.antiLinkHard
     };
 
     const howToUse = `
