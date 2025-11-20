@@ -528,6 +528,20 @@ async function connectSubBots() {
 
 (async () => {
   global.conns = [];
+  try {
+    conn.ev.on('connection.update', connectionUpdate);
+    conn.ev.on('creds.update', saveCreds);
+    console.log(chalk.bold.magenta(`
+╭﹕₊˚ ★ ⁺˳ꕤ₊⁺・꒱
+  ⋆  ︵︵ ★ ChatUnity connesso ★ ︵︵ ⋆
+╰. ꒷꒦ ꒷꒦‧˚₊˚꒷꒦꒷‧˚₊˚꒷꒦꒷‧˚₊꒷꒦‧˚₊`));
+    await connectSubBots();
+  } catch (error) {
+    console.error(chalk.bold.bgRedBright(`🥀 Errore nell'avvio del bot: `, error));
+  }
+})();
+
+let isInit = true;
 let handler = await import('./handler.js');
 global.reloadHandler = async function (restatConn) {
   try {
@@ -581,21 +595,6 @@ global.reloadHandler = async function (restatConn) {
   isInit = false;
   return true;
 };
-  try {
-    conn.ev.on('connection.update', connectionUpdate);
-    conn.ev.on('creds.update', saveCreds);
-    console.log(chalk.bold.magenta(`
-╭﹕₊˚ ★ ⁺˳ꕤ₊⁺・꒱
-  ⋆  ︵︵ ★ ChatUnity connesso ★ ︵︵ ⋆
-╰. ꒷꒦ ꒷꒦‧˚₊˚꒷꒦꒷‧˚₊˚꒷꒦꒷‧˚₊꒷꒦‧˚₊`));
-    await connectSubBots();
-  } catch (error) {
-    console.error(chalk.bold.bgRedBright(`🥀 Errore nell'avvio del bot: `, error));
-  }
-})();
-
-let isInit = true;
-
 
 const pluginFolder = global.__dirname(join(__dirname, './plugins/index'));
 const pluginFilter = (filename) => /\.js$/.test(filename);
