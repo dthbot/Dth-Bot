@@ -13,7 +13,7 @@ const handler = async (m, { conn, isROwner, text }) => {
     }
     handler.help = ['riavvia'] 
     handler.tags = ['owner']
-    handler.command = ['riavvia','reiniciar'] 
+    handler.command = ['restart', 'riavvia'] 
     handler.owner = true
     export default handler
     
