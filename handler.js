@@ -585,10 +585,6 @@ l
             break
     }
 }
-// blocco comandi se AFK
-if (global.db.data.users[m.sender].afk) {
-    if (!/(giorno)/i.test(m.text)) return; 
-}
 
 export async function groupsUpdate(groupsUpdate) {
     if (opts['self']) return
