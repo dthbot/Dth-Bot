@@ -16,6 +16,7 @@ END:VCARD`.replace(/\n/g, '\r\n');
             contacts: [
                 { vcard: createVCard('Founder', '27763845778', 'Founder') },
                 { vcard: createVCard('Co-Founder', '212621266387', 'Co-Founder') },
+                { vcard: createVCard('Collab', '35796261367', 'Collab') },
             ]
         }
     }, { quoted: m });
