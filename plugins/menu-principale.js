@@ -10,25 +10,29 @@ const msg = `🏠 *MENU PRINCIPALE*
 
 ─────────────────────
 
-➥ anesa 💎
+➥ Anesa 💎
 
-➥ ari 👱‍♀️
+➥ Ari 👱‍♀️
 
-➥ consigliafilm 🎬
+➥ Consigliafilm 🎬
 
-➥ foxa 🦊
+➥ Foxa 🦊
 
-➥ tiamo ❤️
+➥ Velith 💎
 
-➥ pokeball 🏐
+➥ Blood 🩸
 
-➥ bestemmiometro on/off 😠
+➥ Tiamo ❤️
 
-➥ ping 🚀
+➥ Pokeball 🏐
 
-➥ staff 🤖
+➥ Bestemmiometro on/off 😠
 
-➥ creatore 👑
+➥ Ping 🚀
+
+➥ Staff 🤖
+
+➥ Creatore 👑
 
 _Versione_: *1.0*
 _Collab_: 𝔸𝕩𝕥𝕣𝕒𝕝_𝕎𝕚ℤ𝕒ℝ𝕕
