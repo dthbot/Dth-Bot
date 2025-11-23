@@ -9,25 +9,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Genera il testo del menu principale.
- * Personalizzalo se vuoi aggiungere altre sezioni/descrizioni.
+ * Menu principale con SOLO utenti registrati
  */
-function generateMenuText(usedPrefix = '.', botName = 'Bot', userCount = 0, userId = '', groupId = null) {
-  const who = userId?.split?.(':')?.[0] || userId || '';
-  const groupLine = groupId ? `Gruppo: ${groupId}` : 'Chat privata';
+function generateMenuText(botName = 'Bot', userCount = 0) {
   return `✨ *${botName} - Menu Principale* ✨
 
 Utenti registrati: *${userCount}*
-${groupLine}
-ID utente: ${who}
-
-Comandi principali:
-${usedPrefix}menu - Mostra questo menu
-${usedPrefix}menuadmin - Menu Admin
-${usedPrefix}menuowner - Menu Owner
-${usedPrefix}menusicurezza - Menu Sicurezza
-${usedPrefix}menugruppo - Menu Gruppo
-${usedPrefix}menuia - Menu IA
 
 ─────────────────────`;
 }
@@ -67,8 +54,7 @@ _Versione_: *1.0*
 _Collab_: 𝔸𝕩𝕥𝕣𝕒𝕝_𝕎𝕚ℤ𝕒ℝ𝕕
 `;
 
-    // ===== MENU PRINCIPALE DEL PRIMO PLUGIN =====
-    const menuText = generateMenuText(usedPrefix, botName, userCount, userId, groupId) + extraMenu;
+    const menuText = generateMenuText(botName, userCount) + extraMenu;
 
     const imagePath = path.join(__dirname, '../media/principale.jpeg');
 
