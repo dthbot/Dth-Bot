@@ -1,36 +1,34 @@
-import fs from "fs"
-import { performance } from "perf_hooks"
+const fs = require('fs');
 
-const handler = async (m, { conn }) => {
+module.exports = {
+    name: 'ping',
+    description: 'Mostra il ping del bot con thumbnail',
+    async execute(sock, msg, args) {
+        const from = msg.key.remoteJid;
 
-    // Calcolo ping
-    const start = performance.now();
-    await conn.sendMessage(m.chat, { text: "⏱️..." });
-    const ping = (performance.now() - start).toFixed(3);
+        // Calcola il ping
+        const start = Date.now();
+        const latency = Date.now() - start;
 
-    // Uptime
-    const uptime = process.uptime();
-    const ore = String(Math.floor(uptime / 3600)).padStart(2, '0');
-    const min = String(Math.floor((uptime % 3600) / 60)).padStart(2, '0');
-    const sec = String(Math.floor(uptime % 60)).padStart(2, '0');
+        // Tempo online del bot
+        const uptimeSeconds = process.uptime();
+        const hours = Math.floor(uptimeSeconds / 3600);
+        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+        const seconds = Math.floor(uptimeSeconds % 60);
+        const uptime = `${hours}h ${minutes}m ${seconds}s`;
 
-    const caption = `
-🕒 *Uptime:* ${ore}:${min}:${sec}
-⚡ *Ping:* ${ping} ms
-`.trim();
+        // Messaggio decorato
+        const messageText = `
+╔═〘 𝐏𝐈𝐍𝐆 〙═
+║🏓 Ping: ${latency}ms
+║⏱️ Online: ${uptime}
+╚════════════
+        `;
 
-    // immagine che non si può salvare (viewOnce)
-    const img = fs.readFileSync("./media/ping.jpeg");
-
-    await conn.sendMessage(m.chat, {
-        image: img,
-        caption: caption,
-        viewOnce: true  // <<< QUESTA OPZIONE NON PERMETTE DI SALVARE L'IMMAGINE
-    });
+        // Invia il messaggio con thumbnail
+        await sock.sendMessage(from, {
+            text: messageText,
+            jpegThumbnail: fs.readFileSync('./media/ping.jpeg')
+        });
+    }
 };
-
-handler.command = /^ping$/i;
-handler.help = ['ping'];
-handler.tags = ['info'];
-
-export default handler;
