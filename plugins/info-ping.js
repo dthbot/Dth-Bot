@@ -2,7 +2,7 @@ const fs = require('fs');
 
 module.exports = {
     name: 'ping',
-    description: 'Mostra il ping del bot con thumbnail invisibile',
+    description: 'Ping del bot con miniatura non cliccabile',
     async execute(sock, msg, args) {
         const from = msg.key.remoteJid;
 
@@ -10,7 +10,7 @@ module.exports = {
         const start = Date.now();
         const latency = Date.now() - start;
 
-        // Tempo online del bot
+        // Tempo online
         const uptimeSeconds = process.uptime();
         const hours = Math.floor(uptimeSeconds / 3600);
         const minutes = Math.floor((uptimeSeconds % 3600) / 60);
@@ -25,14 +25,17 @@ module.exports = {
 ╚════════════
         `;
 
-        // Invia solo testo con thumbnail, nessuna immagine cliccabile
+        // Invia testo con thumbnail non cliccabile
         await sock.sendMessage(from, {
             text: messageText,
             contextInfo: {
                 externalAdReply: {
-                    title: "Ping Bot",
-                    mediaType: 2, // thumbnail
+                    showAdAttribution: true,
+                    title: 'Ping Bot',
+                    body: '',
+                    mediaType: 2,
                     thumbnail: fs.readFileSync('./media/ping.jpeg'),
+                    sourceUrl: 'https://github.com/' // qualsiasi link, serve a WhatsApp per "agganciare" la thumbnail
                 }
             }
         });
