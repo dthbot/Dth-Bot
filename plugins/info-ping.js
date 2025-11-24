@@ -1,33 +1,31 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { performance } from 'perf_hooks';
+import fs from "fs"
+import { performance } from "perf_hooks"
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const handler = async (m, { conn }) => {
 
-const handler = async (message, { conn }) => {
-
-    // Inizio misurazione
+    // Calcolo ping reale
     const start = performance.now();
-
-    // Messaggio "fantasma" per calcolare un ping reale
-    await conn.sendMessage(message.chat, { text: '‎' });
-
+    await conn.sendMessage(m.chat, { text: "⏱️ Calcolo ping..." });
     const ping = Math.round(performance.now() - start);
 
-    const uptimeMs = process.uptime() * 1000;
-    const uptime = formatTime(uptimeMs);
+    // Uptime
+    const uptime = process.uptime();
+    const ore = Math.floor(uptime / 3600);
+    const minuti = Math.floor((uptime % 3600) / 60);
+    const secondi = Math.floor(uptime % 60);
 
-    const imgPath = path.join(__dirname, '../media/ping.jpeg');
-
-    const caption = `
+    const testo = `
 🏓 *Ping:* ${ping}ms
-⏳ *Uptime:* ${uptime}
+⏳ *Uptime:* ${ore}h ${minuti}m ${secondi}s
 `.trim();
 
-    await conn.sendMessage(message.chat, {
-        image: { url: imgPath },
-        caption: caption
+    // Thumb piccola
+    const thumb = fs.readFileSync("./media/ping.jpeg");
+
+    await conn.sendMessage(m.chat, {
+        image: thumb,
+        caption: testo,
+        jpegThumbnail: thumb // rende la foto piccola
     });
 };
 
@@ -36,11 +34,3 @@ handler.tags = ['info'];
 handler.command = /^ping$/i;
 
 export default handler;
-
-
-function formatTime(ms) {
-    let h = Math.floor(ms / 3600000);
-    let m = Math.floor(ms / 60000) % 60;
-    let s = Math.floor(ms / 1000) % 60;
-    return `${h}h ${m}m ${s}s`;
-}
