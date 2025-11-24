@@ -2,7 +2,7 @@ const fs = require('fs');
 
 module.exports = {
     name: 'ping',
-    description: 'Ping del bot con miniatura non cliccabile',
+    description: 'Ping del bot con miniatura decorativa senza View Once',
     async execute(sock, msg, args) {
         const from = msg.key.remoteJid;
 
@@ -25,7 +25,7 @@ module.exports = {
 ╚════════════
         `;
 
-        // Invia testo con thumbnail non cliccabile
+        // Invia solo testo con miniatura decorativa (non cliccabile)
         await sock.sendMessage(from, {
             text: messageText,
             contextInfo: {
@@ -33,9 +33,9 @@ module.exports = {
                     showAdAttribution: true,
                     title: 'Ping Bot',
                     body: '',
-                    mediaType: 2,
-                    thumbnail: fs.readFileSync('./media/ping.jpeg'),
-                    sourceUrl: 'https://github.com/' // qualsiasi link, serve a WhatsApp per "agganciare" la thumbnail
+                    mediaType: 2, // thumbnail tipo “link preview”
+                    thumbnail: fs.readFileSync('./media/ping.jpeg'), // miniatura piccola
+                    sourceUrl: 'https://github.com/' // serve solo per agganciare la thumbnail
                 }
             }
         });
