@@ -15,7 +15,7 @@ let handler = async (m, { conn, participants }) => {
     await conn.sendMessage(m.chat, { text: testo, mentions: [scelto] }, { quoted: m })
 }
 
-handler.help = ['bloodban']
+handler.help = ['rsban']
 handler.tags = ['fun']
-handler.command = /^bloodban$/i
+handler.command = /^rsban$/i
 export default handler
