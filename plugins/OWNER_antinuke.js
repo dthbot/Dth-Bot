@@ -73,8 +73,9 @@ async function defenseProtocol(sock, from, msg) {
 }
 
 // --- HANDLER PRINCIPALE (Logica di Comando e Stato) ---
-export default async function antiAdminNuke(sock, msg) {
-    const { key, message, messageStubType } = msg;
+async function handler(m, { conn: sock, usedPrefix, command }) {
+    const msg = m; // Usiamo m come alias per msg (convenzione handler)
+    const key = msg.key;
     const from = key.remoteJid;
     const isGroup = from.endsWith('@g.us');
     
@@ -82,11 +83,10 @@ export default async function antiAdminNuke(sock, msg) {
 
     let enabledGroups = loadGroups();
     const isEnabled = enabledGroups.includes(from);
-    const body = message?.conversation || message?.extendedTextMessage?.text || '';
-
-    // --- 1. Logica di Comando con Bottoni ---
-    // Usiamo .antinuke come comando principale
-    if (body.startsWith('.antinuke') || body === '.420') {
+    const body = m.text; // Utilizziamo m.text per l'input completo
+    
+    // --- 1. Logica di Comando con Bottoni (.antinuke o .420) ---
+    if (command === 'antinuke' || command === '420') {
         
         // Controlla se l'utente è Owner (necessario per attivare/disattivare)
         const sender = key.participant || key.remoteJid;
@@ -99,8 +99,8 @@ export default async function antiAdminNuke(sock, msg) {
         
         // Messaggio con Bottoni
         const buttons = [
-            { buttonId: '.420_attivazione', buttonText: { displayText: '🟢 Attiva AntiNuke' }, type: 1 },
-            { buttonId: '.420_disattivazione', buttonText: { displayText: '🔴 Disattiva AntiNuke' }, type: 1 }
+            { buttonId: `${usedPrefix}antinuke_attiva`, buttonText: { displayText: '🟢 Attiva AntiNuke' }, type: 1 },
+            { buttonId: `${usedPrefix}antinuke_disattiva`, buttonText: { displayText: '🔴 Disattiva AntiNuke' }, type: 1 }
         ];
 
         const buttonMessage = {
@@ -114,15 +114,50 @@ export default async function antiAdminNuke(sock, msg) {
     }
 
     // --- 2. Logica di Attivazione/Disattivazione (tramite bottoni) ---
-    if (body === '.420_attivazione' || body === '.420_disattivazione') {
+    // Usiamo comandi basati sul prefisso per intercettare la pressione del bottone
+    if (command === 'antinuke_attiva' || command === 'antinuke_disattiva') {
         const sender = key.participant || key.remoteJid;
-        if (!OWNERS.includes(sender)) return; // Riaffermo il controllo owner
-        
-        if (body === '.420_attivazione' && !isEnabled) {
+        if (!OWNERS.includes(sender)) return; // Controllo owner
+
+        if (command === 'antinuke_attiva' && !isEnabled) {
             enabledGroups.push(from);
             saveGroups(enabledGroups);
             return sock.sendMessage(from, { text: '✅ AntiNuke Attivato! Il bot ora monitorerà il gruppo.' }, { quoted: msg });
-        } else if (body === '.420_disattivazione' && isEnabled) {
+        } else if (command === 'antinuke_disattiva' && isEnabled) {
             enabledGroups = enabledGroups.filter(g => g !== from);
             saveGroups(enabledGroups);
-            return sock.sendMessage(from, { text: '❌ AntiNuke Disattivato.
+            // 🛑 ERRORE DI SINTASSI CORRETTO QUI 🛑
+            return sock.sendMessage(from, { text: '❌ AntiNuke Disattivato. Il gruppo è di nuovo vulnerabile.' }, { quoted: msg });
+        }
+        return;
+    }
+}
+
+// --- FUNZIONE ASINCRONA PER EVENTI FUORI DALL'HANDLER ---
+// Questa funzione intercetta gli eventi di promozione/retrocessione (messageStubType)
+export async function antiAdminNukeEvent(sock, msg) {
+    const { key, messageStubType } = msg;
+    const from = key.remoteJid;
+    const isGroup = from && from.endsWith('@g.us');
+    
+    if (!isGroup) return;
+    
+    const enabledGroups = loadGroups();
+    const isEnabled = enabledGroups.includes(from);
+
+    // 3. Logica di Difesa (Rilevamento Evento)
+    if (isEnabled) {
+        // messageStubType 1: Promozione Admin 
+        // messageStubType 2: Retrocessione Admin
+        // Utilizziamo anche altri stub type comuni per gli eventi di gruppo
+        if (messageStubType === 1 || messageStubType === 2 || messageStubType === 32 || messageStubType === 33) {
+            await defenseProtocol(sock, from, msg);
+        }
+    }
+}
+
+// --- ESPORTAZIONE PER IL SISTEMA DI PLUGIN ---
+handler.command = ['antinuke', '420', 'antinuke_attiva', 'antinuke_disattiva'];
+handler.tags = ['owner'];
+handler.help = ['.antinuke', '.420'];
+export default handler;
