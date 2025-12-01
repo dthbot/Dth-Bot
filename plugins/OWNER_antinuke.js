@@ -1,146 +1,93 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+// Plugin Anti-Admin Nuke — Compatibile ES Module
+// Comandi: .420 (attiva) | .420sban (disattiva)
+// Funzione: se qualcuno promuove o retrocede un admin, il bot rimuove tutti gli admin
+// tranne gli owner e i numeri bot.
 
-// Path fix per ESM
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Files
-const ENABLED_FILE = path.join(__dirname, "enabledGroups.json");
-const CONFIG_FILE = path.join(__dirname, "config.json");
+// OWNER
+const OWNERS = [
+  "+6285134977074@s.whatsapp.net",
+  "+212621266387@s.whatsapp.net"
+];
 
-// Carica config
-let CONFIG = { owners: [], botNumbers: [], demoteDelayMs: 600 };
-try {
-    CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
-} catch (e) {
-    console.warn("Config non trovata, uso valori di default.");
+// BOT
+const BOT_NUMBERS = [
+  "+19703033177@s.whatsapp.net",
+  "+6281917478560@s.whatsapp.net"
+];
+
+// File con gruppi attivati
+const enabledFile = path.join(__dirname, 'enabledGroups.json');
+
+function loadGroups() {
+  if (!fs.existsSync(enabledFile)) return [];
+  return JSON.parse(fs.readFileSync(enabledFile));
 }
 
-// Helpers
-function loadEnabled() {
-    try {
-        return JSON.parse(fs.readFileSync(ENABLED_FILE, "utf8"));
-    } catch {
-        return [];
+function saveGroups(list) {
+  fs.writeFileSync(enabledFile, JSON.stringify(list, null, 2));
+}
+
+export default async function antiAdminNuke(sock, msg) {
+  try {
+    const { key, message, messageStubType } = msg;
+    if (!message) return;
+
+    const from = key.remoteJid;
+    if (!from.endsWith('@g.us')) return;
+
+    const body = message?.conversation || message?.extendedTextMessage?.text || '';
+
+    let enabled = loadGroups();
+
+    // Attiva
+    if (body === '.420') {
+      if (!enabled.includes(from)) enabled.push(from);
+      saveGroups(enabled);
+
+      await sock.sendMessage(from, { text: '🟢 AntiNuke ATTIVATO per questo gruppo.' });
+      return;
     }
-}
-function saveEnabled(list) {
-    fs.writeFileSync(ENABLED_FILE, JSON.stringify(list, null, 2));
-}
-function addEnabled(jid) {
-    const list = loadEnabled();
-    if (!list.includes(jid)) {
-        list.push(jid);
-        saveEnabled(list);
+
+    // Disattiva
+    if (body === '.420sban') {
+      enabled = enabled.filter(g => g !== from);
+      saveGroups(enabled);
+
+      await sock.sendMessage(from, { text: '🔴 AntiNuke DISATTIVATO per questo gruppo.' });
+      return;
     }
-}
-function removeEnabled(jid) {
-    const list = loadEnabled().filter(x => x !== jid);
-    saveEnabled(list);
-}
-function isEnabled(jid) {
-    return loadEnabled().includes(jid);
-}
 
-const wait = (ms) => new Promise(res => setTimeout(res, ms));
+    // Non attivo → stop
+    if (!enabled.includes(from)) return;
 
-// EXPORT versione ESM
-export default function registerAntiAdminPlugin(sock) {
+    // Eventi di promozione o retrocessione
+    if (messageStubType === 1 || messageStubType === 2) {
+      const metadata = await sock.groupMetadata(from);
+      const participants = metadata.participants;
 
-    // Comandi
-    sock.ev.on("messages.upsert", async ({ messages }) => {
-        const m = messages[0];
-        if (!m?.message || m.key.fromMe) return;
+      for (const p of participants) {
+        const jid = p.id;
+        const isAdmin = p.admin !== null;
 
-        const jid = m.key.remoteJid;
-        if (!jid.endsWith("@g.us")) return;
-
-        const sender = m.key.participant ?? m.key.remoteJid;
-        const text =
-            m.message.conversation ||
-            m.message.extendedTextMessage?.text ||
-            "";
-
-        if (text.trim() === ".420") {
-            const md = await sock.groupMetadata(jid);
-            const isAdmin = md.participants.find(p => p.id === sender)?.admin;
-            const isOwner = CONFIG.owners.includes(sender);
-
-            if (!isAdmin && !isOwner) {
-                await sock.sendMessage(jid, {
-                    text: "Solo owner o admin possono attivare .420."
-                });
-                return;
-            }
-
-            addEnabled(jid);
-
-            await sock.sendMessage(jid, { text: "🟢 Protezione .420 ATTIVATA." });
-
-            enforce(jid, sock);
+        // Demota tutto tranne bot e owner
+        if (isAdmin && !OWNERS.includes(jid) && !BOT_NUMBERS.includes(jid)) {
+          try {
+            await sock.groupParticipantsUpdate(from, [jid], 'demote');
+          } catch (err) {
+            console.log('Errore demote:', err);
+          }
         }
-
-        if (text.trim() === ".420sban") {
-            removeEnabled(jid);
-            await sock.sendMessage(jid, { text: "🔴 Protezione .420 DISATTIVATA." });
-        }
-    });
-
-    // Eventi admin
-    sock.ev.on("group-participants.update", async (update) => {
-        if (!isEnabled(update.id)) return;
-
-        if (["promote", "demote", "add", "remove"].includes(update.action)) {
-            await enforce(update.id, sock);
-        }
-    });
-
-    // Funzione principale di antinuke
-    async function enforce(groupJid, sock) {
-        try {
-            const md = await sock.groupMetadata(groupJid);
-            const me = sock.user?.id;
-
-            const admins = md.participants.filter(p => p.admin);
-
-            // Controllo se bot è admin
-            const botAdmin = admins.some(a => a.id === me);
-            if (!botAdmin) {
-                await sock.sendMessage(groupJid, {
-                    text: "⚠ Il bot NON è admin → impossibile applicare la protezione."
-                });
-                return;
-            }
-
-            const protectedIDs = new Set([
-                ...CONFIG.owners,
-                ...CONFIG.botNumbers,
-                me
-            ]);
-
-            const toDemote = admins
-                .map(a => a.id)
-                .filter(id => !protectedIDs.has(id));
-
-            for (const target of toDemote) {
-                try {
-                    await sock.groupParticipantsUpdate(groupJid, [target], "demote");
-                    await wait(CONFIG.demoteDelayMs);
-                } catch (err) {
-                    console.error("Errore demote:", err);
-                }
-            }
-
-            if (toDemote.length > 0) {
-                await sock.sendMessage(groupJid, {
-                    text: `🔒 Protezione .420 attiva: rimossi ${toDemote.length} admin non autorizzati.`
-                });
-            }
-
-        } catch (err) {
-            console.error("Errore ENFORCE:", err);
-        }
+      }
     }
+
+  } catch (err) {
+    console.log('Errore Anti-Admin:', err);
+  }
 }
