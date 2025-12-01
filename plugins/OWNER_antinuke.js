@@ -1,16 +1,20 @@
-// antiAdminPlugin.js
-const fs = require('fs');
-const path = require('path');
+// OWNER_antinuke.js (versione ESM)
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ENABLED_FILE = path.join(__dirname, 'enabledGroups.json');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
-// carica config
+// Carica config
 let CONFIG = { owners: [], botNumbers: [], demoteDelayMs: 600 };
 try {
   CONFIG = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 } catch (e) {
-  console.warn('Config non trovata, usare valori di default.');
+  console.warn('Config non trovata, uso valori di default.');
 }
 
 function loadEnabled() {
@@ -37,7 +41,7 @@ function isEnabled(jid) {
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-module.exports = function registerAntiAdminPlugin(sock) {
+export default function registerAntiAdminPlugin(sock) {
 
   // comandi del bot
   sock.ev.on('messages.upsert', async (mup) => {
@@ -49,9 +53,10 @@ module.exports = function registerAntiAdminPlugin(sock) {
       if (!jid.endsWith('@g.us')) continue;
 
       const sender = m.key.participant || m.key.remoteJid;
+
       const text = (m.message.conversation ||
-                   m.message.extendedTextMessage?.text ||
-                   '').trim();
+                    m.message.extendedTextMessage?.text ||
+                    '').trim();
 
       if (text === '.420') {
         const md = await sock.groupMetadata(jid);
@@ -106,7 +111,6 @@ module.exports = function registerAntiAdminPlugin(sock) {
       return;
     }
 
-    // escludi owner, bot e se stesso
     const protectedIDs = new Set([
       ...CONFIG.owners,
       ...CONFIG.botNumbers,
@@ -132,4 +136,4 @@ module.exports = function registerAntiAdminPlugin(sock) {
   }
 
   return { isEnabled, addEnabled, removeEnabled };
-};
+}
