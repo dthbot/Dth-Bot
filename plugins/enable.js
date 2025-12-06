@@ -56,7 +56,7 @@ const MENU_FOOTER = `
 
 const STATUS_HEADER = `<---------𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐄---------->`;
 
-const STATUS_FOOTER = `----------------------------------------
+const STATUS_FOOTER = `<---------------------------------------->
 `;
 
 const BUTTON_TITLE = '📋 Lista Comandi';
