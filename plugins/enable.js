@@ -144,13 +144,13 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
   }
 
   const stateIcon = (selected.key === 'chatbotPrivato'
-    ? (global.privateChatbot?.[m.sender] ? '🟢' : '🔴')
-    : (chatData[selected.key] ? '🟢' : '🔴'));
+    ? (global.privateChatbot?.[m.sender] ? '✅' : '❌')
+    : (chatData[selected.key] ? '✅' : '❌'));
 
   const stateVerb = setTo ? '𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚' : '𝐝𝐢𝐬𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚';
   const statusMsg = `
 ${STATUS_HEADER}
- ${stateIcon} ꒱ ฅ﹕ *${selected.label}* ${stateVerb} 
+ ${stateIcon} ﹕ *${selected.label}* ${stateVerb} 
 ${STATUS_FOOTER}
 `.trim();
 
