@@ -10,6 +10,7 @@ let handler = async (m, { conn, text, participants }) => {
 
     const randomUser = gNoAdmins[Math.floor(Math.random() * gNoAdmins.length)]
     let tag = ''
+
     try {
         const user = await conn.getName(randomUser.id)
         tag = user || randomUser.id.split('@')[0]
@@ -19,19 +20,38 @@ let handler = async (m, { conn, text, participants }) => {
 
     const probability = (100 / gNoAdmins.length).toFixed(2)
 
+    // --- RISPOSTA CON TAG FUNZIONANTI ---
     await conn.reply(
-        m.chat, 
-        `*✧ Selezione Casuale: ${tag}*\n> Era destino che venissi scelto.\n> Probabilità: ${probability}%`, 
-        m
+        m.chat,
+        `*✧ Selezione Casuale:* @${randomUser.id.split('@')[0]}\n` +
+        `> Era destino che venissi scelto.\n` +
+        `> Probabilità: ${probability}%`,
+        m,
+        {
+            mentions: [randomUser.id]   // <<< QUI ATTIVI IL TAG VERO
+        }
     )
 
+    // --- RIMOZIONE ---
     try {
         await conn.groupParticipantsUpdate(m.chat, [randomUser.id], 'remove')
-        await conn.reply(m.chat, `令 *${tag}* è stato eliminato.`, m)
+
+        await conn.reply(
+            m.chat,
+            `令 *@${randomUser.id.split('@')[0]}* è stato eliminato.`,
+            m,
+            { mentions: [randomUser.id] }
+        )
+
         m.react('✅')
     } catch (e) {
         console.error(e)
-        await conn.reply(m.chat, `❌ Non sono riuscito a rimuovere ${tag}. Forse ha già lasciato il gruppo o non ho i permessi.`, m)
+        await conn.reply(
+            m.chat,
+            `❌ Non sono riuscito a rimuovere @${randomUser.id.split('@')[0]}.`,
+            m,
+            { mentions: [randomUser.id] }
+        )
     }
 }
 
