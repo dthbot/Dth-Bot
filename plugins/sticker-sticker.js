@@ -1,39 +1,52 @@
-// sticker.js
-// Comando: .sticker o .s
-// Converte un'immagine o un breve video in sticker
+import { sticker } from '../lib/sticker.js'
+import uploadFile from '../lib/uploadFile.js'
+import uploadImage from '../lib/uploadImage.js'
+import { webp2png } from '../lib/webp2mp4.js'
 
-import { writeFileSync, unlinkSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { toSticker } from '../lib/sticker.js'; // assicurati di avere la funzione per creare sticker
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+let stiker = false
+try {
+let q = m.quoted ? m.quoted : m
+let mime = (q.msg || q).mimetype || q.mediaType || ''
+if (/webp|image|video/g.test(mime)) {
+if (/video/g.test(mime)) if ((q.msg || q).seconds > 9) return
+m.reply('ⓘ 𝐂𝐚𝐫𝐢𝐜𝐚𝐦𝐞𝐧𝐭𝐨 ...')
+let img = await q.download?.()
 
-let handler = async (m, { conn }) => {
-    let q = m.quoted ? m.quoted : m;
-    let mime = (q.msg || q).mimetype || '';
+if (!img) return
 
-    if (!/image|video/.test(mime))
-        throw `📸 Invia o cita un'immagine o un breve video con *.sticker* o *.s*`;
+let out
+try {
+stiker = await sticker(img, false, global.packname, global.author)
+} catch (e) {
+console.error(e)
+} finally {
+if (!stiker) {
+if (/webp/g.test(mime)) out = await webp2png(img)
+else if (/image/g.test(mime)) out = await uploadImage(img)
+else if (/video/g.test(mime)) out = await uploadFile(img)
+if (typeof out !== 'string') out = await uploadImage(img)
+stiker = sticker(false, out, global.packname, global.author)
+}}
+} else if (args[0]) {
+if (isUrl(args[0])) stiker = await sticker(false, args[0], global.packname, global.author)
 
-    let media = await q.download();
-    let filePath = join(tmpdir(), `sticker_${Date.now()}.webp`);
+else return 
+  
+}
+} catch (e) {
+console.error(e)
+if (!stiker) stiker = e
+} finally {
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '', m)
 
-    try {
-        let stickerBuffer = await toSticker(media, { pack: 'DeathBot', author: 'by Death' });
-        writeFileSync(filePath, stickerBuffer);
-        await conn.sendMessage(m.chat, { sticker: { url: filePath } }, { quoted: m });
-    } catch (e) {
-        console.error(e);
-        m.reply('❌ Errore durante la creazione dello sticker.');
-    } finally {
-        try { unlinkSync(filePath); } catch {}
-    }
-};
+else return
 
-// permette entrambi i comandi .sticker e .s
-handler.command = /^s(ticker)?$/i;
-handler.group = true; // solo nei gruppi (puoi togliere se vuoi anche in pv)
-handler.admin = false; // tutti possono usarlo
-handler.help = ['sticker', 's'];
-handler.tags = ['fun'];
+}}
+handler.help = ['stiker (caption|reply media)', 'stiker <url>', 'stikergif (caption|reply media)', 'stikergif <url>']
+handler.tags = ['sticker']
+handler.command = /^s(tic?ker)?(gif)?(wm)?$/i
+export default handler
 
-export default handler;
+const isUrl = (text) => {
+return text.match(new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)(jpe?g|gif|png)/, 'gi'))}
