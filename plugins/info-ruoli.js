@@ -1,4 +1,4 @@
-//Plugin fatto da Axtral_WiZaRd
+// Plugin fatto da Axtral_WiZaRd 
 import fs from 'fs';
 
 const handler = m => m;
@@ -7,24 +7,25 @@ handler.before = async function (message, { conn }) {
     const imageFallback = 'media/fallback.png'; 
 
     const fetchBuffer = async (url) => {
-        // local file
         if (!url) return null;
+
+        // file locale
         if (!/^https?:\/\//i.test(url)) {
             try {
                 return fs.readFileSync(url);
-            } catch (e) {
+            } catch {
                 return null;
             }
         }
-        // remote URL: use global fetch if available, otherwise dynamic import node-fetch
+
+        // URL remoto
         try {
             const fetchFn = globalThis.fetch || (await import('node-fetch').then(m => m.default));
             const res = await fetchFn(url);
-            if (!res || !res.ok) return null;
+            if (!res.ok) return null;
             const ab = await res.arrayBuffer();
             return Buffer.from(ab);
-        } catch (e) {
-            console.error('fetchBuffer error:', e);
+        } catch {
             return null;
         }
     };
@@ -32,22 +33,22 @@ handler.before = async function (message, { conn }) {
     const chat = global.db.data.chats[message.chat] || {};
     const detectEnabled = chat.detect;
 
-  
+    // prende sempre il JID corretto
+    const sender = message.participant || message.sender;
+
+    // PROMOZIONE
     if (message.messageStubType === 29 && detectEnabled) {
+        const promotedUser = message.messageStubParameters[0];
+
         let profilePicture;
         try {
-            profilePicture = await conn.profilePictureUrl(message.messageStubParameters[0], 'image');
-        } catch (e) {
+            profilePicture = await conn.profilePictureUrl(promotedUser, 'image');
+        } catch {
             profilePicture = null;
         }
 
-        const promotedUser = message.messageStubParameters[0];
-        const sender = message.sender;
-        const promotedUsername = promotedUser.split('@')[0];
-        const senderUsername = sender.split('@')[0];
-
         await conn.sendMessage(message.chat, {
-            text: `@${senderUsername} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUsername}`,
+            text: `@${sender.split('@')[0]} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUser.split('@')[0]}`,
             contextInfo: {
                 mentionedJid: [sender, promotedUser],
                 externalAdReply: {
@@ -55,25 +56,22 @@ handler.before = async function (message, { conn }) {
                     thumbnail: await fetchBuffer(profilePicture || imageFallback),
                 },
             },
-        }, { quoted: null });
+        });
     }
 
-  
+    // RETROCESSIONE
     if (message.messageStubType === 30 && detectEnabled) {
+        const demotedUser = message.messageStubParameters[0];
+
         let profilePicture;
         try {
-            profilePicture = await conn.profilePictureUrl(message.messageStubParameters[0], 'image');
-        } catch (e) {
+            profilePicture = await conn.profilePictureUrl(demotedUser, 'image');
+        } catch {
             profilePicture = null;
         }
 
-        const demotedUser = message.messageStubParameters[0];
-        const sender = message.sender;
-        const demotedUsername = demotedUser.split('@')[0];
-        const senderUsername = sender.split('@')[0];
-
         await conn.sendMessage(message.chat, {
-            text: `@${senderUsername} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${demotedUsername}`,
+            text: `@${sender.split('@')[0]} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${demotedUser.split('@')[0]}`,
             contextInfo: {
                 mentionedJid: [sender, demotedUser],
                 externalAdReply: {
@@ -81,7 +79,7 @@ handler.before = async function (message, { conn }) {
                     thumbnail: await fetchBuffer(profilePicture || imageFallback),
                 },
             },
-        }, { quoted: null });
+        });
     }
 };
 
