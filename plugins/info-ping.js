@@ -5,8 +5,7 @@ import Jimp from "jimp"
 let handler = async (m, { conn }) => {
   const start = performance.now()
 
-  await conn.sendMessage(m.chat, { text: "⌛ Test ping..." })
-
+  // Calcolo ping senza inviare un messaggio preliminare
   const ping = performance.now() - start
   const uptime = process.uptime() * 1000
   const status = "🟢 Online"
@@ -24,7 +23,7 @@ let handler = async (m, { conn }) => {
   try {
     if (fs.existsSync(thumbnailPath)) {
       let image = await Jimp.read(thumbnailPath)
-      image.resize(300, Jimp.AUTO).quality(70)         // <<< riduce dimensioni
+      image.resize(300, Jimp.AUTO).quality(70)
       thumbBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
     }
   } catch (e) {
@@ -44,7 +43,7 @@ let handler = async (m, { conn }) => {
         title: "📡 Stato del Bot",
         body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
         mediaType: 1,
-        thumbnail: thumbBuffer ?? undefined, 
+        thumbnail: thumbBuffer ?? undefined,
         renderLargerThumbnail: true
       }
     }
