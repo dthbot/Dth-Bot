@@ -58,21 +58,16 @@ const STATUS_FOOTER = `<---------------------------------------->`;
 const ONLY_OWNER_MSG = '❌ Solo il proprietario può attivare/disattivare questa funzione.';
 const ONLY_PRIVATE_CHATBOT_MSG = '❌ Puoi attivare/disattivare la funzione *ChatbotPrivato* solo in chat privata.';
 
-let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
+let handler = async (m, { conn, usedPrefix, command, args, isOwner, isROwner }) => {
   const name = await conn.getName(m.sender);
-  const chats = (global.db?.data?.chats || {});
+  const chats = global.db?.data?.chats || {};
   const chatData = chats[m.chat] || {};
 
   const listLines = features.map(f => {
-    let current = false;
-
-    if (f.key === 'chatbotPrivato') {
-      current = global.privateChatbot?.[m.sender] || false;
-    } else if (f.key === 'antivoip') {
-      current = chatData.antivoip || false;
-    } else {
-      current = chatData[f.key];
-    }
+    let current =
+      f.key === 'chatbotPrivato'
+        ? global.privateChatbot?.[m.sender] || false
+        : chatData[f.key] || false;
 
     const dot = current ? '🟢' : '🔴';
     const ownerTag = f.ownerOnly ? ' (Owner)' : '';
@@ -83,7 +78,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
   const featureArg = (args[0] || '').toLowerCase();
   const selected = features.find(f => f.label.toLowerCase() === featureArg);
 
-  if (!featureArg || !selected) {
+  if (!selected) {
     const section = {
       title: "🔧 Funzioni",
       rows: features.map(f => ({
@@ -99,8 +94,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
       title: name,
       buttonText: '⚙ Impostazioni',
       sections: [section]
-    }, { quoted: null });
-
+    });
     return;
   }
 
@@ -109,12 +103,17 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
     return;
   }
 
-  const isEnable = /attiva|enable|on|1|true/i.test(command.toLowerCase());
-  const setTo = isEnable;
+  // FIX: rilevazione corretta attiva/disattiva
+  const isEnable = /attiva|enable|on|1|true/i.test(command);
+  const isDisable = /disabilita|disattiva|disable|off|0|false/i.test(command);
+  const setTo = isEnable ? true : isDisable ? false : null;
 
-  if (selected.key === 'antivoip') {
-    chatData.antivoip = setTo;
-  } else if (selected.key === 'chatbotPrivato') {
+  if (setTo === null) {
+    await conn.reply(m.chat, "❌ Comando non valido.", m);
+    return;
+  }
+
+  if (selected.key === 'chatbotPrivato') {
     if (m.isGroup) {
       await conn.reply(m.chat, ONLY_PRIVATE_CHATBOT_MSG, m);
       return;
@@ -153,6 +152,5 @@ handler.help = ['attiva <feature>', 'disabilita <feature>', 'disattiva <feature>
 handler.tags = ['Impostazioni Bot', 'owner'];
 handler.command = /^(attiva|disabilita|disattiva|enable|disable)/i;
 handler.group = true;
-handler.ownerOnly = false;
 
 export default handler;
