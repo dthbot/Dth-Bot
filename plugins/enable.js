@@ -19,7 +19,7 @@ const features = [
   { key: 'soloadmin',          label: 'soloadmin' },
   { key: 'isBanned',           label: 'BanGruppo' },
   { key: 'antinuke',           label: 'AntiNuke' },
-  { key: 'conclave',          label: 'Conclave' },
+  { key: 'conclave',           label: 'Conclave' },
   { key: 'antiCall',           label: 'AntiCall' },
   { key: 'antiinsta',          label: 'Antiinsta' },
   { key: 'antiporno',          label: 'Antiporno' },
@@ -30,7 +30,6 @@ const features = [
   { key: 'antisondaggi',       label: 'Antisondaggi' },
   { key: 'antitiktok',         label: 'AntiTikTok' },
   { key: 'chatbotPrivato',     label: 'ChatbotPrivato', ownerOnly: true },
-
 ];
 
 const MENU_HEADER = `
@@ -55,19 +54,9 @@ const MENU_FOOTER = `
 `;
 
 const STATUS_HEADER = `<---------𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐄---------->`;
-
-const STATUS_FOOTER = `<---------------------------------------->
-`;
-
-const BUTTON_TITLE = '📋 Lista Comandi';
-const BUTTON_SECTION_TITLE = '🔧 Funzioni';
-const BUTTON_TEXT = '⚙ Impostazioni';
+const STATUS_FOOTER = `<---------------------------------------->`;
 const ONLY_OWNER_MSG = '❌ Solo il proprietario può attivare/disattivare questa funzione.';
 const ONLY_PRIVATE_CHATBOT_MSG = '❌ Puoi attivare/disattivare la funzione *ChatbotPrivato* solo in chat privata.';
-const ONLY_CHATUNITY_BASE_MSG = 'Questo comando è disponibile solo con la base di ChatUnity.';
-
-const PLACEHOLDER_THUMB = null;
-const PLACEHOLDER_VCARD = 'BEGIN:VCARD...';
 
 let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
   const name = await conn.getName(m.sender);
@@ -78,9 +67,9 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
     let current = false;
 
     if (f.key === 'chatbotPrivato') {
-      current = (global.privateChatbot?.[m.sender]) || false;
+      current = global.privateChatbot?.[m.sender] || false;
     } else if (f.key === 'antivoip') {
-      current = (global.db?.data?.chats?.[m.chat]?.antivoip) || false;
+      current = chatData.antivoip || false;
     } else {
       current = chatData[f.key];
     }
@@ -91,13 +80,12 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
   }).join('\n');
 
   const menuText = (MENU_HEADER + listLines + MENU_FOOTER).trim();
-
   const featureArg = (args[0] || '').toLowerCase();
   const selected = features.find(f => f.label.toLowerCase() === featureArg);
 
   if (!featureArg || !selected) {
     const section = {
-      title: BUTTON_SECTION_TITLE,
+      title: "🔧 Funzioni",
       rows: features.map(f => ({
         title: f.label,
         description: `Attiva ${f.label}`,
@@ -105,15 +93,14 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
       }))
     };
 
-    const listMessage = {
+    await conn.sendMessage(m.chat, {
       text: menuText,
       footer: 'Seleziona una funzione da attivare/disattivare',
       title: name,
-      buttonText: BUTTON_TEXT,
+      buttonText: '⚙ Impostazioni',
       sections: [section]
-    };
+    }, { quoted: null });
 
-    await conn.sendMessage(m.chat, listMessage, { quoted: null });
     return;
   }
 
@@ -123,8 +110,7 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
   }
 
   const isEnable = /attiva|enable|on|1|true/i.test(command.toLowerCase());
-  const isDisable = /disabilita|disattiva|disable|off|0|false/i.test(command.toLowerCase());
-  let setTo = isEnable && !isDisable;
+  const setTo = isEnable;
 
   if (selected.key === 'antivoip') {
     chatData.antivoip = setTo;
@@ -139,22 +125,28 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
     chatData[selected.key] = setTo;
   }
 
-  if (global.db?.data?.chats) {
-    global.db.data.chats[m.chat] = chatData;
-  }
+  global.db.data.chats[m.chat] = chatData;
 
-  const stateIcon = (selected.key === 'chatbotPrivato'
-    ? (global.privateChatbot?.[m.sender] ? '✅' : '❌')
-    : (chatData[selected.key] ? '✅' : '❌'));
-
+  const stateIcon = setTo ? '✅' : '❌';
   const stateVerb = setTo ? '𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚' : '𝐝𝐢𝐬𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚';
+
   const statusMsg = `
 ${STATUS_HEADER}
  ${stateIcon} ﹕ *${selected.label}* ${stateVerb} 
 ${STATUS_FOOTER}
 `.trim();
 
-  await conn.reply(m.chat, statusMsg, m);
+  await conn.sendMessage(m.chat, {
+    text: statusMsg,
+    buttons: [
+      {
+        buttonId: usedPrefix + "menusicurezza",
+        buttonText: { displayText: "🗿 Menu Funzioni" },
+        type: 1
+      }
+    ],
+    headerType: 1
+  }, { quoted: m });
 };
 
 handler.help = ['attiva <feature>', 'disabilita <feature>', 'disattiva <feature>'];
