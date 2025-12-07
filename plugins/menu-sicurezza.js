@@ -17,8 +17,8 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 ⚡𝑴𝑬𝑵𝑼 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈⚡
 ╔═══════════════════╗
 *COME SI USA?*
-.attiva (funzione)
-.disattiva (funzione)
+.(funzione) on
+.(funzione) off
 
 ➥ Benvenuto ⛓️
 ➥ AntiSpam 💬
