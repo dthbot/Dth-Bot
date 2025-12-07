@@ -1,4 +1,4 @@
-// Plugin fatto da Axtral_WiZaRd 
+// Plugin fatto da Axtral_WiZaRd
 import fs from 'fs';
 
 const handler = m => m;
@@ -48,9 +48,9 @@ handler.before = async function (message, { conn }) {
         }
 
         await conn.sendMessage(message.chat, {
-            text: `@${sender.split('@')[0]} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUser.split('@')[0]}`,
+            text: `𝐇𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUser.split('@')[0]}`,
             contextInfo: {
-                mentionedJid: [sender, promotedUser],
+                mentionedJid: [promotedUser],
                 externalAdReply: {
                     title: '𝐌𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨 𝐝𝐢 𝐩𝐫𝐨𝐦𝐨𝐳𝐢𝐨𝐧𝐞 👑',
                     thumbnail: await fetchBuffer(profilePicture || imageFallback),
@@ -71,9 +71,9 @@ handler.before = async function (message, { conn }) {
         }
 
         await conn.sendMessage(message.chat, {
-            text: `@${sender.split('@')[0]} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${demotedUser.split('@')[0]}`,
+            text: `𝐇𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${demotedUser.split('@')[0]}`,
             contextInfo: {
-                mentionedJid: [sender, demotedUser],
+                mentionedJid: [demotedUser],
                 externalAdReply: {
                     title: '𝐌𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨 𝐝𝐢 𝐫𝐞𝐭𝐫𝐨𝐜𝐞𝐬𝐬𝐢𝐨𝐧𝐞 🙇🏻‍♂',
                     thumbnail: await fetchBuffer(profilePicture || imageFallback),
