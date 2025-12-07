@@ -2,7 +2,7 @@ import fs from "fs"
 import { performance } from "perf_hooks"
 import Jimp from "jimp"
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { conn, usedPrefix }) => {
   const start = performance.now()
 
   // Messaggio iniziale richiesto
@@ -38,22 +38,32 @@ let handler = async (m, { conn }) => {
 │ 📶 *Stato:* ${status}
 ╰────────────────────⬣`
 
-  await conn.sendMessage(m.chat, {
-    text: textMsg,
-    contextInfo: {
-      externalAdReply: {
-        title: "📡 Stato del Bot",
-        body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
-        mediaType: 1,
-        thumbnail: thumbBuffer ?? undefined,
-        renderLargerThumbnail: true
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: textMsg,
+      footer: "📡 Ping & Stato del Bot",
+      buttons: [
+        { buttonId: `${usedPrefix}ping`, buttonText: { displayText: "⏳ 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
+        { buttonId: `${usedPrefix}ds`, buttonText: { displayText: "🗑️ 𝐃𝐬" }, type: 1 }
+      ],
+      headerType: 1,
+      contextInfo: {
+        externalAdReply: {
+          title: "📡 Stato del Bot",
+          body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
+          mediaType: 1,
+          thumbnail: thumbBuffer ?? undefined,
+          renderLargerThumbnail: true
+        }
       }
-    }
-  }, { quoted: m })
+    },
+    { quoted: m }
+  )
 }
 
-handler.help = ["status", "uptime"]
+handler.help = ["ping", "status", "uptime"]
 handler.tags = ["info"]
-handler.command = /^status|uptime|ping$/i
+handler.command = /^(status|uptime|ping)$/i
 
 export default handler
