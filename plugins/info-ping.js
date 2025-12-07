@@ -5,7 +5,6 @@ import Jimp from "jimp"
 let handler = async (m, { conn, usedPrefix }) => {
   const start = performance.now()
 
-  // Messaggio iniziale richiesto
   await conn.sendMessage(m.chat, { text: "*Sto facendo il Test del Ping...⏳*" })
 
   const ping = performance.now() - start
@@ -25,11 +24,11 @@ let handler = async (m, { conn, usedPrefix }) => {
   try {
     if (fs.existsSync(thumbnailPath)) {
       let image = await Jimp.read(thumbnailPath)
-      image.resize(300, Jimp.AUTO).quality(70)
-      thumbBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
+      image.resize(400, Jimp.AUTO).quality(90)
+      thumbBuffer = await image.getBufferAsync(Jimp.MIME_PNG) // <-- PNG FUNZIONA SEMPRE
     }
   } catch (e) {
-    console.error("Errore nel caricare la thumbnail:", e)
+    console.error("Errore caricando la thumbnail:", e)
   }
 
   const textMsg = `╭─❖ 𝗕𝗢𝗧 𝗦𝗧𝗔𝗧𝗢 ❖─⬣
@@ -42,19 +41,21 @@ let handler = async (m, { conn, usedPrefix }) => {
     m.chat,
     {
       text: textMsg,
-      footer: "📡 Ping & Stato del Bot",
+      footer: "📡 Ping di 𝔻𝕋ℍ-𝔹𝕆𝕋",
       buttons: [
         { buttonId: `${usedPrefix}ping`, buttonText: { displayText: "⏳ 𝐑𝐢𝐟𝐚𝐢 𝐏𝐢𝐧𝐠" }, type: 1 },
         { buttonId: `${usedPrefix}ds`, buttonText: { displayText: "🗑️ 𝐃𝐬" }, type: 1 }
       ],
       headerType: 1,
+
       contextInfo: {
         externalAdReply: {
           title: "📡 Stato del Bot",
-          body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
+          body: "DTH-BOT",
           mediaType: 1,
-          thumbnail: thumbBuffer ?? undefined,
-          renderLargerThumbnail: true
+          thumbnail: thumbBuffer, // FUNZIONA
+          sourceUrl: "https://google.com", // OBBLIGATORIO, anche finto
+          renderLargerThumbnail: true,
         }
       }
     },
@@ -64,6 +65,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 handler.help = ["ping", "status", "uptime"]
 handler.tags = ["info"]
-handler.command = /^(status|uptime|ping)$/i
+handler.command = /^(ping|status|uptime)$/i
 
 export default handler
