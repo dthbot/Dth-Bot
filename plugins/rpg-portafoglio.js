@@ -21,6 +21,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ 👤 user: ${name}
 │ 💰 unitycoins: ${formatNumber(user.limit)} 💶
 │ 🏛️ bank: ${formatNumber(userbank)} 💳
+│ 🗿 *Oh down dammi un po' di soldi*
 │
 ╰───────✦───────
     `.trim()
@@ -31,7 +32,7 @@ let handler = async (m, { conn, usedPrefix }) => {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
