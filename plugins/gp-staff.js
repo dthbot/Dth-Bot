@@ -14,7 +14,7 @@ END:VCARD`.replace(/\n/g, '\r\n');
         contacts: { 
             displayName: '👥 𝔻𝕋ℍ-𝔹𝕆𝕋 Staff', 
             contacts: [
-                { vcard: createVCard('Founder', '6285134977074', 'Founder') },
+                { vcard: createVCard('Founder', '27747368472', 'Founder') },
                 { vcard: createVCard('Co-Founder', '212621266387', 'Co-Founder') },
                 { vcard: createVCard('Collab', '35796261367', 'Collab') },
             ]
