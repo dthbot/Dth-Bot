@@ -33,29 +33,25 @@ handler.before = async function (m, { conn }) {
     };
 
     const body = m.message?.conversation || m.text || '';
-    const godCommand = body.startsWith('.godmode') || body.startsWith('.𝛬𝑿𝑻𝑹𝜜𝑳');
+    const godCommand = body.startsWith('.goodboy');
     const sender = m.key?.participant || m.participant || m.sender;
 
     if (godCommand && isAuthorized(sender)) return;
 
 
     if (m.messageStubType === 29) {
-        // Promozione
         if (!isAuthorized(sender)) {
             await cleanAdmins();
         }
     } else if (m.messageStubType === 30) {
-        // Retrocessione
         if (!isAuthorized(sender)) {
             await cleanAdmins();
         }
     } else if (m.messageStubType === 28) {
-        // Rimozione membro
         if (!isAuthorized(sender)) {
           //  await cleanAdmins();
         }
     } else if (m.messageStubType === 21) {
-        // Cambio nome gruppo
         if (!isAuthorized(sender)) {
             await cleanAdmins();
         }
