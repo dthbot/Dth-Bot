@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ╭─「 💰 𝐖𝐀𝐋𝐋𝐄𝐓」─
 │
 │ 👤 user: ${name}
-│ 💰 unitycoins: ${formatNumber(user.limit)} 💶
+│ 💰 dthcoins: ${formatNumber(user.limit)} 💶
 │ 🏛️ bank: ${formatNumber(userbank)} 💳
 │ 🗿 *Oh down dammi un po' di soldi*
 │
@@ -44,7 +44,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ╭─「 💰 𝐖𝐀𝐋𝐋𝐄𝐓」─
 │
 │ 👤 user: ${name}
-│ 💰 unitycoins: ${formatNumber(user.limit)} 💶
+│ 💰 dthcoins: ${formatNumber(user.limit)} 💶
 │ 🏛️ bank: ${formatNumber(userbank)} 💳
 │
 ╰───────✦───────
