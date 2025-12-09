@@ -1,11 +1,9 @@
 import { writeFile, unlink } from 'fs/promises';
 import { sticker } from '../lib/sticker.js';
-import uploadFile from '../lib/uploadFile.js';
-import uploadImage from '../lib/uploadImage.js';
 import path from 'path';
 import os from 'os';
 
-const isUrl = (text) => /(https?:\/\/.*\.(?:png|jpe?g|gif|webp))/i.test(text);
+const isUrl = (text) => /(https?:\/\/.*\.(?:png|jpe?g))/i.test(text);
 
 let handler = async (m, { conn, args }) => {
   let stiker = false;
@@ -14,44 +12,30 @@ let handler = async (m, { conn, args }) => {
     let q = m.quoted ? m.quoted : m;
     let mime = (q.msg || q).mimetype || q.mediaType || '';
 
-    if (/image|video|webp/.test(mime)) {
-      if (/video/.test(mime) && (q.msg || q).seconds > 10) {
-        return m.reply('『 ⏰ 』- Il video deve durare meno di 10 secondi per creare uno sticker.');
-      }
-
+    // Supporta solo immagini
+    if (/image/.test(mime)) {
       let buffer = await q.download?.();
-      if (!buffer) return m.reply('『 📸 』- Invia un\'immagine, video o GIF per creare uno sticker.', m);
+      if (!buffer) return m.reply('『 📸 』- Invia un\'immagine per creare uno sticker.', m);
 
-      // Salva il buffer su file temporaneo
-      const tempFile = path.join(os.tmpdir(), +new Date() + '.' + (mime.includes('video') ? 'mp4' : 'png'));
+      // Salva buffer su file temporaneo
+      const tempFile = path.join(os.tmpdir(), +new Date() + '.png');
       await writeFile(tempFile, buffer);
 
       try {
-        const packName = global.authsticker || '✧˚🩸 varebot 🕊️˚✧';
-        const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
+        const packName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+        const authorName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
         stiker = await sticker(tempFile, false, packName, authorName);
       } catch (e) {
-        console.error('Errore creazione sticker diretta:', e);
-        try {
-          let out = /image/.test(mime) ? await uploadImage(buffer) : await uploadFile(buffer);
-          if (out) {
-            const packName = global.authsticker || '✧˚🩸 varebot 🕊️˚✧';
-            const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
-            stiker = await sticker(false, out, packName, authorName);
-          }
-        } catch (err) {
-          console.error('Errore fallback sticker:', err);
-        }
+        console.error('Errore creazione sticker:', e);
       } finally {
-        // elimina il file temporaneo
         await unlink(tempFile).catch(() => {});
       }
     } else if (args[0] && isUrl(args[0])) {
-      const packName = global.authsticker || '✧˚🩸 varebot 🕊️˚✧';
-      const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
+      const packName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+      const authorName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
       stiker = await sticker(false, args[0], packName, authorName);
-    } else if (args[0]) {
-      return m.reply('『 🔗 』- L\'URL fornito non è valido. Deve essere un link diretto a un\'immagine.');
+    } else {
+      return m.reply('『 📱 』- Rispondi a un\'immagine o invia un URL diretto a un\'immagine per creare uno sticker.', m);
     }
   } catch (e) {
     console.error('Errore gestore sticker:', e);
@@ -60,7 +44,7 @@ let handler = async (m, { conn, args }) => {
   if (stiker) {
     await conn.sendFile(m.chat, stiker, 'sticker.webp', '『 ✅ 』- Sticker creato con successo!', m, true, { quoted: m });
   } else {
-    return m.reply('『 📱 』- Rispondi a un\'immagine, video o GIF per creare uno sticker, oppure invia un URL di un\'immagine.', m);
+    return m.reply('『 📱 』- Impossibile creare lo sticker. Assicurati che sia un\'immagine valida.', m);
   }
 };
 
@@ -68,4 +52,5 @@ handler.help = ['s', 'sticker', 'stiker'];
 handler.tags = ['sticker', 'strumenti'];
 handler.command = ['s', 'sticker', 'stiker'];
 handler.register = true;
+
 export default handler;
