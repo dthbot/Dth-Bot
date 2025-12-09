@@ -3,6 +3,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { writeFile, unlink } from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import fs from 'fs';
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) return m.reply('『 ❌ 』- Inserisci il nome della canzone o link YouTube.');
@@ -45,24 +46,34 @@ let buttonHandler = async (m, { conn }) => {
     try {
       const info = await ytdl.getInfo(url);
       const title = info.videoDetails.title;
-      const tempFile = path.join(os.tmpdir(), Date.now() + '.mp3');
+      const tempFile = path.join(os.tmpdir(), Date.now() + '.m4a');
 
+      // Scarica e converte in AAC / m4a compatibile iPhone
       await new Promise((resolve, reject) => {
         ffmpeg(ytdl(url, { filter: 'audioonly' }))
-          .audioCodec('libmp3lame')
+          .audioCodec('aac')
           .audioBitrate(128)
-          .format('mp3')
+          .format('ipod') // crea .m4a
           .save(tempFile)
           .on('end', resolve)
           .on('error', reject);
       });
 
-      await conn.sendFile(m.chat, tempFile, `${title}.mp3`, `🎵 Ecco la tua canzone: ${title}`, m);
+      // Invia l'audio compatibile iPhone
+      await conn.sendMessage(m.chat, {
+        audio: fs.readFileSync(tempFile),
+        mimetype: 'audio/mp4',
+        fileName: `${title}.m4a`
+      }, { quoted: m });
+
+      // Rimuovi file temporaneo
       await unlink(tempFile);
+
     } catch (e) {
       console.error(e);
       m.reply('『 ❌ 』- Impossibile riprodurre la canzone.');
     }
+
   } else if (id === 'cancelbtn') {
     m.reply('❌ Richiesta annullata.');
   }
@@ -72,6 +83,6 @@ handler.help = ['play <link o nome>'];
 handler.tags = ['musica'];
 handler.command = ['play'];
 handler.register = true;
-handler.buttonHandler = buttonHandler; // associa il listener dei bottoni
+handler.buttonHandler = buttonHandler;
 
 export default handler;
