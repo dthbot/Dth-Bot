@@ -1,7 +1,4 @@
-import { writeFile, unlink } from 'fs/promises';
 import { sticker } from '../lib/sticker.js';
-import path from 'path';
-import os from 'os';
 
 const isUrl = (text) => /(https?:\/\/.*\.(?:png|jpe?g))/i.test(text);
 
@@ -17,20 +14,12 @@ let handler = async (m, { conn, args }) => {
       let buffer = await q.download?.();
       if (!buffer) return m.reply('『 📸 』- Invia un\'immagine per creare uno sticker.', m);
 
-      // Salva buffer su file temporaneo
-      const tempFile = path.join(os.tmpdir(), +new Date() + '.png');
-      await writeFile(tempFile, buffer);
-
-      try {
-        const packName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
-        const authorName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
-        stiker = await sticker(tempFile, false, packName, authorName);
-      } catch (e) {
-        console.error('Errore creazione sticker:', e);
-      } finally {
-        await unlink(tempFile).catch(() => {});
-      }
-    } else if (args[0] && isUrl(args[0])) {
+      const packName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+      const authorName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+      stiker = await sticker(buffer, false, packName, authorName);
+    } 
+    // URL diretto
+    else if (args[0] && isUrl(args[0])) {
       const packName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
       const authorName = '𝔻𝕋ℍ-𝔹𝕆𝕋';
       stiker = await sticker(false, args[0], packName, authorName);
