@@ -11,33 +11,33 @@ let handler = async (m, { conn, args }) => {
     let q = m.quoted ? m.quoted : m;
     let mime = (q.msg || q).mimetype || q.mediaType || '';
 
-    if (/webp|image|video/g.test(mime)) {
-      if (/video/g.test(mime) && (q.msg || q).seconds > 10) {
+    // Se è immagine, video o webp
+    if (/image|video|webp/.test(mime)) {
+      // Controllo durata video
+      if (/video/.test(mime) && (q.msg || q).seconds > 10) {
         return m.reply('『 ⏰ 』- Il video deve durare meno di 10 secondi per creare uno sticker.');
       }
 
-      let img = await q.download?.();
-      if (!img) return m.reply('『 📸 』- Per favore, invia un\'immagine, video o GIF per creare uno sticker.', m);
+      let img;
+      if (q.download) img = await q.download(); // scarica il buffer
+      if (!img) return m.reply('『 📸 』- Invia un\'immagine, video o GIF per creare uno sticker.', m);
 
       try {
-        const packName = global.authsticker || '𝔻𝕋ℍ-𝔹𝕆𝕋';
-        const authorName = global.nomepack || '𝔻𝕋ℍ-𝔹𝕆𝕋';
+        const packName = global.authsticker || '✧˚🩸 varebot 🕊️˚✧';
+        const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
         stiker = await sticker(img, false, packName, authorName);
       } catch (e) {
-        console.error('Creazione sticker diretta fallita:', e);
+        console.error('Errore creazione sticker diretta:', e);
         try {
-          let out;
-          if (/image/g.test(mime)) out = await uploadImage(img);
-          else if (/video/g.test(mime)) out = await uploadFile(img);
-          else out = await uploadImage(img);
-
+          // fallback upload
+          let out = /image/.test(mime) ? await uploadImage(img) : await uploadFile(img);
           if (out) {
-            const packName = global.authsticker || '𝔻𝕋ℍ-𝔹𝕆𝕋';
-            const authorName = global.nomepack || '𝔻𝕋ℍ-𝔹𝕆𝕋';
+            const packName = global.authsticker || '✧˚🩸 varebot 🕊️˚✧';
+            const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
             stiker = await sticker(false, out, packName, authorName);
           }
         } catch (err) {
-          console.error('Caricamento e creazione sticker falliti:', err);
+          console.error('Errore fallback sticker:', err);
         }
       }
     } else if (args[0] && isUrl(args[0])) {
@@ -45,10 +45,10 @@ let handler = async (m, { conn, args }) => {
       const authorName = global.nomepack || '✧˚🩸 varebot 🕊️˚✧';
       stiker = await sticker(false, args[0], packName, authorName);
     } else if (args[0]) {
-      return m.reply('『 🔗 』- L\'URL fornito non è valido. Assicurati che sia un link diretto a un\'immagine.');
+      return m.reply('『 🔗 』- L\'URL fornito non è valido. Deve essere un link diretto a un\'immagine.');
     }
   } catch (e) {
-    console.error('Errore nel gestore:', e);
+    console.error('Errore gestore sticker:', e);
   }
 
   if (stiker) {
