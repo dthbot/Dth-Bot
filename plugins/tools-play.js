@@ -1,96 +1,77 @@
-import yts from "yt-search";
-import { spawn } from "child_process";
+import ytdl from 'ytdl-core';
+import ffmpeg from 'fluent-ffmpeg';
+import { writeFile, unlink } from 'fs/promises';
+import path from 'path';
+import os from 'os';
 
-function downloadYTDLP(url, format = "best") {
-  return new Promise((resolve, reject) => {
-    const ytdlp = spawn("yt-dlp", [
-      "-f", format,
-      "-o", "-",
-      url
-    ]);
+let handler = async (m, { conn, args }) => {
+  if (!args[0]) return m.reply('『 ❌ 』- Inserisci il nome della canzone o link YouTube.');
 
-    let data = [];
-    let error = [];
+  try {
+    // Ottieni info del video
+    let info = await ytdl.getInfo(args.join(' '));
+    let title = info.videoDetails.title;
 
-    ytdlp.stdout.on("data", chunk => data.push(chunk));
-    ytdlp.stderr.on("data", chunk => error.push(chunk));
+    // Crea bottoni
+    const buttons = [
+      { buttonId: `playbtn_${info.videoDetails.videoId}`, buttonText: { displayText: '🎵 Ascolta' }, type: 1 },
+      { buttonId: 'cancelbtn', buttonText: { displayText: '❌ Annulla' }, type: 1 }
+    ];
 
-    ytdlp.on("close", code => {
-      if (code !== 0) return reject(Buffer.concat(error).toString());
-      resolve(Buffer.concat(data));
-    });
-  });
-}
+    const buttonMessage = {
+      text: `🎶 Trovata: *${title}*`,
+      footer: 'Drak-Bot Music',
+      buttons: buttons,
+      headerType: 1
+    };
 
-const handler = async (m, { conn, text, command }) => {
-  if (!text) return conn.reply(m.chat, "Inserisci un titolo o link YouTube", m);
+    await conn.sendMessage(m.chat, buttonMessage, { quoted: m });
 
-  let search = await yts(text);
-  let vid = search.videos[0];
-  if (!vid) return conn.reply(m.chat, "Nessun risultato trovato", m);
-
-  let url = vid.url;
-  let thumb = vid.thumbnail;
-
-  if (command === "playaudio-dl") {
-    try {
-      await conn.reply(m.chat, "🎵 Scarico l’audio…", m);
-
-      let audio = await downloadYTDLP(url, "bestaudio");
-
-      return conn.sendMessage(
-        m.chat,
-        { audio, mimetype: "audio/mpeg" },
-        { quoted: m }
-      );
-
-    } catch (e) {
-      console.error(e);
-      return conn.reply(m.chat, "❗ Errore durante il download audio", m);
-    }
+  } catch (e) {
+    console.error(e);
+    m.reply('『 ❌ 』- Impossibile trovare la canzone.');
   }
-
-  if (command === "playvideo-dl") {
-    try {
-      await conn.reply(m.chat, "🎬 Scarico il video…", m);
-
-      let video = await downloadYTDLP(url, "best[ext=mp4]");
-
-      return conn.sendMessage(
-        m.chat,
-        { video, mimetype: "video/mp4" },
-        { quoted: m }
-      );
-
-    } catch (e) {
-      console.error(e);
-      return conn.reply(m.chat, "❗ Errore durante il download video", m);
-    }
-  }
-
-  // 🔥 QUI MOSTRA I BOTTONI DIRETTI
-  await conn.sendMessage(
-    m.chat,
-    {
-      image: { url: thumb },
-      caption: `🎶 *${vid.title}*\n\n⏱ Durata: ${vid.timestamp}\n👁️ Visualizzazioni: ${vid.views}\n\nScegli cosa scaricare:`,
-      buttons: [
-        {
-          buttonId: `.playaudio-dl ${url}`,
-          buttonText: { displayText: "🎵 Scarica Audio" },
-          type: 1
-        },
-        {
-          buttonId: `.playvideo-dl ${url}`,
-          buttonText: { displayText: "🎬 Scarica Video" },
-          type: 1
-        }
-      ],
-      headerType: 4
-    },
-    { quoted: m }
-  );
 };
 
-handler.command = ["play", "playaudio-dl", "playvideo-dl"];
+// Handler per i bottoni
+let buttonHandler = async (m, { conn }) => {
+  if (!m.selectedButtonId) return;
+  const id = m.selectedButtonId;
+
+  if (id.startsWith('playbtn_')) {
+    const videoId = id.replace('playbtn_', '');
+    const url = `https://www.youtube.com/watch?v=${videoId}`;
+
+    try {
+      const info = await ytdl.getInfo(url);
+      const title = info.videoDetails.title;
+      const tempFile = path.join(os.tmpdir(), Date.now() + '.mp3');
+
+      await new Promise((resolve, reject) => {
+        ffmpeg(ytdl(url, { filter: 'audioonly' }))
+          .audioCodec('libmp3lame')
+          .audioBitrate(128)
+          .format('mp3')
+          .save(tempFile)
+          .on('end', resolve)
+          .on('error', reject);
+      });
+
+      await conn.sendFile(m.chat, tempFile, `${title}.mp3`, `🎵 Ecco la tua canzone: ${title}`, m);
+      await unlink(tempFile);
+    } catch (e) {
+      console.error(e);
+      m.reply('『 ❌ 』- Impossibile riprodurre la canzone.');
+    }
+  } else if (id === 'cancelbtn') {
+    m.reply('❌ Richiesta annullata.');
+  }
+};
+
+handler.help = ['play <link o nome>'];
+handler.tags = ['musica'];
+handler.command = ['play'];
+handler.register = true;
+handler.buttonHandler = buttonHandler; // associa il listener dei bottoni
+
 export default handler;
