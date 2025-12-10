@@ -88,7 +88,7 @@ if (
     groupData.suspendedUntil = now + 45000;
 
     await conn.sendMessage(chatId, { 
-      text: `『 ⚠ 』 Anti-spam comandi\n\nTroppi comandi in poco tempo!\nAttendi *45 secondi* prima di usare altri comandi.\n\n> sviluppato da sam aka vare`, // github.com/realvare
+      text: `『 ⚠ 』 Anti-spam comandi\n\nTroppi comandi in poco tempo!\nAttendi *10 secondi* prima di usare altri comandi.\n\n>`, // github.com/realvare
       mentions: [m.sender]
     });
     return;
@@ -637,24 +637,22 @@ global.dfail = (type, m, conn) => {
         botAdmin: '𝐃𝐞𝐯𝐢 𝐝𝐚𝐫𝐞 𝐚𝐝𝐦𝐢𝐧 𝐚𝐥 𝐛𝐨𝐭 👑',
         restrict: '🔐 𝐑𝐞𝐬𝐭𝐫𝐢𝐜𝐭 𝐞 𝐝𝐢𝐬𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐨 🔐'
     }[type]
-    if (msg) return conn.sendMessage(m.chat, { 
-        text: ' ', 
-        contextInfo: {
-            "externalAdReply": {
-                "title": `${msg}`, 
-                "body": ``, 
-                "previewType": "PHOTO",
-                "thumbnail": fs.readFileSync('./icone/principale.jpeg'),
-                "mediaType": 1,
-                "renderLargerThumbnail": true
-            }
-        }
-    }, {quoted: m})
-}
 
-const file = global.__filename(import.meta.url, true)
-watchFile(file, async () => {
-    unwatchFile(file)
-    console.log(chalk.redBright("Update 'handler.js'"))
-    if (global.reloadHandler) console.log(await global.reloadHandler())
-})
+    if (msg) return conn.sendMessage(
+        m.chat, 
+        { 
+            text: ' ',
+            contextInfo: {
+                externalAdReply: {
+                    title: msg,
+                    body: '',
+                    previewType: 'PHOTO',
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                    thumbnail: fs.readFileSync('./media/accessovietato.jpeg')
+                }
+            }
+        },
+        { quoted: m }
+    )
+        }
