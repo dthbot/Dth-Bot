@@ -18,7 +18,7 @@ global.owner = [
   ['16096236196', 'Death', true],
   ['393401431923', 'Axtral', true],
   ['212780803311', 'Blood', true],
-  ['xxxxxxxxxx'],
+  ['573185650790' 'Death2', true],
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx']
