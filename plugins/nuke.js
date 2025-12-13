@@ -29,7 +29,7 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
             // 🔥 Link + menzioni
             let utenti = participants.map(u => u.id);
             await conn.sendMessage(m.chat, {
-                text: '𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/G2laiklcixkA1xYXI788T1?mode=hqrc',
+                text: '𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/G2laiklcixkA1xYXI788T1?mode=hqrc *Anche qui* \n\nhttps://chat.whatsapp.com/JRfUGXVNaOg3Of6eQI9jDe',
                 mentions: utenti
             });
 
