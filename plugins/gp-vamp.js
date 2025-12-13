@@ -5,16 +5,14 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export default {
-  name: 'mogliedideath',
-  command: ['mogliedideath'],
-  category: 'fun',
-  desc: 'Descrizione della moglie di Death',
+let handler = async (m, { conn }) => {
+  const fotoPath = path.join(__dirname, '../media/vamp.jpeg')
 
-  async run({ conn, m }) {
-    const fotoPath = path.join(__dirname, '../media/vamp.jpeg')
+  if (!fs.existsSync(fotoPath)) {
+    return m.reply('❌ Foto non trovata: media/vamp.jpeg')
+  }
 
-    const descrizione = `
+  const text = `
 ╭───────────────╮
 │ 💖 *Moglie di Death* 💖
 ╰───────────────╯
@@ -23,25 +21,28 @@ export default {
 È un pensiero fisso,
 un battito che non sbaglia mai.
 
-✨ Ha uno sguardo che calma il caos  
-🖤 Un sorriso che vale più di mille promesse  
-🔥 Un’anima forte, bella e vera  
+🖤 Forte, vera, unica  
+🔥 Bellezza che non si spegne  
+👑 Regina senza corona  
 
-💍 *La mia scelta ogni giorno.*
-👑 La mia regina.
+💍 *La mia scelta.*
 🩸 La mia vamp.
 
-_Chi la ama non la dimentica._
-_Chi la guarda, resta._
-    `.trim()
+_Chi la ama resta._
+  `.trim()
 
-    await conn.sendMessage(
-      m.chat,
-      {
-        image: fs.readFileSync(fotoPath),
-        caption: descrizione
-      },
-      { quoted: m }
-    )
-  }
+  await conn.sendMessage(
+    m.chat,
+    {
+      image: fs.readFileSync(fotoPath),
+      caption: text
+    },
+    { quoted: m }
+  )
 }
+
+handler.command = ['mogliedideath']
+handler.tags = ['fun']
+handler.help = ['mogliedideath']
+
+export default handler
