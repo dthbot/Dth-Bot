@@ -1,7 +1,11 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export default {
   name: 'mogliedideath',
   command: ['mogliedideath'],
   category: 'fun',
@@ -31,7 +35,6 @@ _Chi la ama non la dimentica._
 _Chi la guarda, resta._
     `.trim()
 
-    // invia foto + caption
     await conn.sendMessage(
       m.chat,
       {
