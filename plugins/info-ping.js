@@ -5,7 +5,7 @@ import Jimp from "jimp"
 let handler = async (m, { conn }) => {
   const start = performance.now()
 
-  await conn.sendMessage(m.chat, { text: "" })
+  await conn.sendMessage(m.chat, { text: "𝐒𝐭𝐨 𝐟𝐚𝐜𝐞𝐧𝐝𝐨 𝐢𝐥 𝐭𝐞𝐬𝐭 𝐝𝐞𝐥 𝐏𝐢𝐧𝐠...⏳" })
 
   const ping = performance.now() - start
   const uptime = process.uptime() * 1000
@@ -60,4 +60,3 @@ handler.tags = ["info"]
 handler.command = /^status|uptime|ping$/i
 
 export default handler
-  
