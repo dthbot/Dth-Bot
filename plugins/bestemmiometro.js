@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 const bestemmiaGradi = [
   { min: 1, max: 24, nome: "Peccatore Occasionale", emoji: "😐" },
   { min: 25, max: 49, nome: "Empio Recidivo", emoji: "😶‍🌫️" },
@@ -15,6 +13,8 @@ const bestemmieRegex =
 
 export default function (sock) {
 
+  console.log('✅ Bestemmiometro caricato');
+
   const db = {
     users: {},
     chats: {}
@@ -22,7 +22,7 @@ export default function (sock) {
 
   sock.ev.on('messages.upsert', async ({ messages }) => {
     const m = messages[0];
-    if (!m.message || !m.key.remoteJid) return;
+    if (!m?.message || !m.key?.remoteJid) return;
 
     const chatId = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
@@ -39,14 +39,14 @@ export default function (sock) {
     if (text === ".bestemmiometro on") {
       db.chats[chatId].bestemmiometro = true;
       return sock.sendMessage(chatId, {
-        text: "☠️ *Bestemmiometro attivato*\nChe Dio abbia pietà di voi."
+        text: "☠️ *Bestemmiometro attivato*"
       });
     }
 
     if (text === ".bestemmiometro off") {
       db.chats[chatId].bestemmiometro = false;
       return sock.sendMessage(chatId, {
-        text: "🙏 *Bestemmiometro disattivato*\nRedenzione temporanea concessa."
+        text: "🙏 *Bestemmiometro disattivato*"
       });
     }
 
@@ -69,27 +69,16 @@ export default function (sock) {
         g => user.blasphemy >= g.min && user.blasphemy <= g.max
       ) || { nome: "Eresiarca Anonimo", emoji: "❓" };
 
-    const thumb = fs.readFileSync('./media/bestemmie.jpeg');
-
     const testo = `ೋೋ═══•═══ೋೋ
-📛 𝑼𝒕𝒆𝒏𝒕𝒆: @${sender.split('@')[0]}
-📊 𝑪𝒐𝒏𝒕𝒆𝒈𝒈𝒊𝒐: *${user.blasphemy}*
+📛 Utente: @${sender.split('@')[0]}
+📊 Conteggio: *${user.blasphemy}*
 
-🎖️ 𝑮𝒓𝒂𝒅𝒐: *${grado.nome}* ${grado.emoji}
+🎖️ Grado: *${grado.nome}* ${grado.emoji}
 ೋೋ═══•═══ೋೋ`;
 
     await sock.sendMessage(chatId, {
       text: testo,
-      mentions: [sender],
-      contextInfo: {
-        externalAdReply: {
-          title: "☠️ Bestemmiometro",
-          body: "Contatore ufficiale delle eresie",
-          mediaType: 1,
-          thumbnail: thumb,
-          sourceUrl: ""
-        }
-      }
+      mentions: [sender]
     });
   });
-}
+                           }
