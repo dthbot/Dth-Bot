@@ -14,7 +14,7 @@ let handler = async (m, { conn }) => {
 
   const text = `
 ╭───────────────╮
-│ 💖 *Moglie di Death* 💖
+│ 💖 *Moglie di 𝕯𝖊𝖉𝖑𝐲* 💖
 ╰───────────────╯
 
 🌹 *Lei non è solo una ragazza.*
@@ -41,8 +41,8 @@ _Chi la ama resta._
   )
 }
 
-handler.command = ['mogliedideath']
+handler.command = ['mogliedidedly']
 handler.tags = ['fun']
-handler.help = ['mogliedideath']
+handler.help = ['mogliedidedly']
 
 export default handler
