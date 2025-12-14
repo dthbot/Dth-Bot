@@ -7,7 +7,7 @@ global.botnumber = '';
 global.confirmCode = '';
 global.nomebot = '𝔻𝕋ℍ-𝔹𝕆𝕋';
 global.packname = '𝔻𝕋ℍ-𝔹𝕆𝕋';
-global.author = '𝐌𝐝';
+global.author = '𝕯𝖊𝖉𝖑𝖞';
 global.vs = '2.0';
 global.collab = 'Demon Slayer';
 global.wm = global.nomebot;
@@ -15,7 +15,7 @@ global.wait = 'ⓘ 𝐂𝐚𝐫𝐢𝐜𝐚𝐦𝐞𝐧𝐭𝐨 ...';
 
 
 global.owner = [
-  ['573185650790', '𝕯𝖊ⱥ𝖙𝖍', true],
+  ['573185650790', '𝕯𝖊𝖉𝖑𝖞', true],
   ['xxxxxxxxxx'], 
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx'],
