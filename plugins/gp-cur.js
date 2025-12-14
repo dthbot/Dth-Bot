@@ -1,4 +1,4 @@
-// cur.js — Last.fm .cur PREMIUM
+// cur.js — Last.fm CUR + SETUSER
 import fetch from 'node-fetch'
 import fs from 'fs'
 import path from 'path'
@@ -15,7 +15,14 @@ if (!fs.existsSync(USERS_FILE)) {
 const LASTFM_API_KEY = '36f859a1fc4121e7f0e931806507d5f9'
 
 const loadUsers = () => JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'))
+const saveUsers = (u) => fs.writeFileSync(USERS_FILE, JSON.stringify(u, null, 2))
+
 const getUser = (id) => loadUsers()[id] || null
+const setUser = (id, name) => {
+  const users = loadUsers()
+  users[id] = name
+  saveUsers(users)
+}
 
 async function fetchNoCache(url) {
   const res = await fetch(url)
@@ -47,40 +54,55 @@ function popularityLabel(listeners) {
   return '🌍 HIT'
 }
 
-const handler = async (m, { conn, usedPrefix }) => {
-  const user = getUser(m.sender)
-  if (!user) {
+const handler = async (m, { conn, usedPrefix, command, text }) => {
+
+  // 🔹 SETUSER
+  if (command === 'setuser') {
+    const username = text.trim()
+    if (!username) {
+      return conn.sendMessage(m.chat, {
+        text: `❌ Usa: ${usedPrefix}setuser <username>`
+      })
+    }
+    setUser(m.sender, username)
     return conn.sendMessage(m.chat, {
-      text: `❌ Devi registrarti.\nUsa: ${usedPrefix}setuser <username>`
+      text: `✅ Username Last.fm *${username}* salvato!`
     })
   }
 
-  const track = await getRecentTrack(user)
-  if (!track) return m.reply('❌ Nessuna traccia trovata')
+  // 🔹 CUR
+  if (command === 'cur') {
+    const user = getUser(m.sender)
+    if (!user) {
+      return conn.sendMessage(m.chat, {
+        text: `❌ Devi prima registrarti.\nUsa: ${usedPrefix}setuser <username>`
+      })
+    }
 
-  const artist = track.artist['#text']
-  const title = track.name
-  const album = track.album?.['#text'] || '—'
-  const image = track.image?.find(i => i.size === 'extralarge')?.['#text']
+    const track = await getRecentTrack(user)
+    if (!track) return m.reply('❌ Nessuna traccia trovata')
 
-  const info = await getTrackInfo(user, artist, title)
+    const artist = track.artist['#text']
+    const title = track.name
+    const album = track.album?.['#text'] || '—'
+    const image = track.image?.find(i => i.size === 'extralarge')?.['#text']
 
-  // ⏱️ minuti ascoltati
-  const playcount = Number(info?.userplaycount || 0)
-  const durationMs = Number(info?.duration || 0)
-  const minutes = durationMs
-    ? Math.round((playcount * durationMs) / 60000)
-    : 0
+    const info = await getTrackInfo(user, artist, title)
 
-  // 🎨 generi / mood
-  const tags = info?.toptags?.tag
-    ?.slice(0, 4)
-    .map(t => `#${t.name}`)
-    .join(' ') || '—'
+    const playcount = Number(info?.userplaycount || 0)
+    const durationMs = Number(info?.duration || 0)
+    const minutes = durationMs
+      ? Math.round((playcount * durationMs) / 60000)
+      : 0
 
-  const listeners = Number(info?.listeners || 0)
+    const tags = info?.toptags?.tag
+      ?.slice(0, 4)
+      .map(t => `#${t.name}`)
+      .join(' ') || '—'
 
-  const caption = `
+    const listeners = Number(info?.listeners || 0)
+
+    const caption = `
 🎧 *In riproduzione*
 
 🎵 *${title}*
@@ -88,21 +110,22 @@ const handler = async (m, { conn, usedPrefix }) => {
 💿 ${album}
 
 ⏱️ Minuti ascoltati da te: *${minutes}*
-🎨 Mood / generi: ${tags}
+🎨 Mood: ${tags}
 
 🔥 Popolarità: ${popularityBar(listeners)}
 📊 Listener: *${listeners}*
 🏷️ Stato: *${popularityLabel(listeners)}*
 `.trim()
 
-  await conn.sendMessage(m.chat, {
-    image: image ? { url: image } : undefined,
-    caption,
-    mentions: [m.sender]
-  }, { quoted: m })
+    return conn.sendMessage(m.chat, {
+      image: image ? { url: image } : undefined,
+      caption,
+      mentions: [m.sender]
+    }, { quoted: m })
+  }
 }
 
-handler.command = ['cur']
+handler.command = ['cur', 'setuser']
 handler.group = true
 
 export default handler
