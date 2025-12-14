@@ -71,7 +71,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 
   // 🔹 CUR
   if (command === 'cur') {
-    // Se viene menzionato qualcuno, usa il primo menzionato
+    // Se viene menzionato qualcuno, usa il primo menzionato; altrimenti mittente
     let targetId = m.mentionedJid?.[0] || m.sender
     const user = getUser(targetId)
 
@@ -131,6 +131,8 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 }
 
 handler.command = ['cur', 'setuser']
+
+// Tutti i membri del gruppo possono usarlo
 handler.group = true
 
 export default handler
