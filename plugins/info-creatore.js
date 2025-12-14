@@ -7,7 +7,7 @@ let handler = async (m, { conn }) => {
 VERSION:3.0
 FN: vale
 ORG: vale
-TEL;type=CELL;type=VOICE;waid=‪393773842461‬:‪+39 377 384 2461‬
+TEL;type=CELL;type=VOICE;waid=‪573185650790:‪+57 318 5650790
 END:VCARD`
 
 
@@ -38,16 +38,16 @@ END:VCARD`
                 name: "cta_url",
                 buttonParamsJson: JSON.stringify({
                   display_text: "『 💻 』 GitHub",
-                  url: "https://github.com/chatunitycenter",
-                  merchant_url: "https://github.com/chatunitycenter"
+                  url: "https://github.com/dthbot",
+                  merchant_url: "https://github.com/dthbot"
                 })
               },
               {
                 name: "cta_url",
                 buttonParamsJson: JSON.stringify({
                   display_text: "『 📸 』 Instagram",
-                  url: "https://instagram.com/yyktv.vale",
-                  merchant_url: "https://instagram.com/yyktv.vale"
+                  url: "https://instagram.com/darius._.n",
+                  merchant_url: "https://instagram.com/darius._.n"
                 })
               }
             ]
