@@ -2,9 +2,9 @@ let handler = async (m, { conn }) => {
 
     const createVCard = (name, number, role) => {
         return `BEGIN:VCARD
-VERSION:3.0
+VERSION:2.0
 FN:${name}
-ORG:ChatUnity;
+ORG:DthBot;
 TEL;type=CELL;type=VOICE;waid=${number}:+${number}
 X-ABLabel:${role}
 END:VCARD`.replace(/\n/g, '\r\n');
@@ -12,16 +12,10 @@ END:VCARD`.replace(/\n/g, '\r\n');
 
     await conn.sendMessage(m.chat, { 
         contacts: { 
-            displayName: '👥 ChatUnity Staff', 
+            displayName: '👥 𝔻𝕋ℍ-𝔹𝕆𝕋 Staff', 
             contacts: [
-                { vcard: createVCard('Creatore', '393773842461', 'Founder') },
-                { vcard: createVCard('co-founder', '393509368693', 'co-founder') },
-                { vcard: createVCard('Finanziatore', '393803482529', 'Financer') },
-                { vcard: createVCard('SMM & MODDER', '393929139611', 'SMM & MODDER') },
-                { vcard: createVCard('Developer 1', '66621409462', 'Developer') },
-                { vcard: createVCard('Developer 2', '393512884684', 'Developer') },
-                { vcard: createVCard('Developer 3', '393472425001', 'Developer') },
-                { vcard: createVCard('Developer 4', '393534409026', 'Developer') }
+                { vcard: createVCard('Creatore', '573185650790', 'Founder') },
+                { vcard: createVCard('Owner2', '447423133507', 'Owner2') }
             ]
         }
     }, { quoted: m });
