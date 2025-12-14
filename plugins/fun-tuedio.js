@@ -1,24 +1,23 @@
-// Plugin fatto da Axtral_WiZaRd
-import fs from 'fs'
-
+//Plugin fatto da Axtral_WiZaRd
 let handler = async (m, { conn }) => {
   try {
-    let audioPath = './audio/videoplayback.m4a'
+    // Percorso del file musicale
+    let audioPath = './audio/videoplayback.mp3';
 
-    await conn.sendMessage(m.chat, {
-      audio: fs.readFileSync(audioPath),
-      mimetype: 'audio/mp4', // ✅ CORRETTO per .m4a
-      ptt: false
-    })
+    // Invia il file audio come messaggio nel gruppo
+    await conn.sendMessage(m.chat, { 
+  audio: { url: audioPath }, 
+  mimetype: 'audio/mpeg' 
+});
   } catch (err) {
-    console.error('Errore nel comando:', err)
-    await m.reply('⚠️ Errore')
+    console.error('𝐄𝐫𝐫𝐨𝐫𝐞 𝐧𝐞𝐥 𝐜𝐨𝐦𝐚𝐧𝐝𝐨❗', err);
+    await m.reply('⚠️ 𝐄𝐫𝐫𝐨𝐫𝐞');
   }
-}
+};
 
-handler.command = /^(tuedio)$/i
-handler.group = true
-handler.admin = true
-handler.botAdmin = true
+handler.command = /^(tuedio)$/i;  
+handler.group = true;  
+handler.admin = true;  
+handler.botAdmin = true;  
 
-export default handler
+export default handler;
