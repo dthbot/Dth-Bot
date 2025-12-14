@@ -1,129 +1,63 @@
-import { cpus as _cpus, totalmem, freemem } from 'os'
-import { performance } from 'perf_hooks'
-import { sizeFormatter } from 'human-readable'
+import fs from "fs"
+import { performance } from "perf_hooks"
+import Jimp from "jimp"
 
-let format = sizeFormatter({
-  std: 'JEDEC',
-  decimalPlaces: 2,
-  keepTrailingZeroes: false,
-  render: (literal, symbol) => `${literal} ${symbol}B`,
-})
+let handler = async (m, { conn }) => {
+  const start = performance.now()
 
-let handler = async (m, { conn, usedPrefix, command }) => {
-  let nomeDelBot = global.db.data.nomedelbot || `𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲`
-  let versioneBot = `${vs}`
-  let old = performance.now()
-  let neww = performance.now()
-  let speed = (neww - old).toFixed(2)
-  let uptime = process.uptime() * 1000
+  await conn.sendMessage(m.chat, { text: "" })
 
-  const cpus = _cpus().map(cpu => {
-    cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0)
-    return cpu
-  })
+  const ping = performance.now() - start
+  const uptime = process.uptime() * 1000
+  const status = "🟢 𝐎𝐧𝐥𝐢𝐧𝐞"
 
-  const cpu = cpus.reduce((last, cpu, _, { length }) => {
-    last.total += cpu.total
-    last.speed += cpu.speed / length
-    last.times.user += cpu.times.user
-    last.times.nice += cpu.times.nice
-    last.times.sys += cpu.times.sys
-    last.times.idle += cpu.times.idle
-    last.times.irq += cpu.times.irq
-    return last
-  }, {
-    speed: 0,
-    total: 0,
-    times: {
-      user: 0,
-      nice: 0,
-      sys: 0,
-      idle: 0,
-      irq: 0
+  const formatTime = (ms) => {
+    let h = Math.floor(ms / 3600000)
+    let m = Math.floor((ms % 3600000) / 60000)
+    let s = Math.floor((ms % 60000) / 1000)
+    return `${h}h ${m}m ${s}s`
+  }
+
+  const thumbnailPath = "media/ping.jpeg"
+  let thumbBuffer = null
+
+  try {
+    if (fs.existsSync(thumbnailPath)) {
+      let image = await Jimp.read(thumbnailPath)
+      image.resize(150, Jimp.AUTO).quality(70) // 🟡 THUMBNAIL PICCOLA
+      thumbBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
     }
-  })
-
-  let cpuModel = cpus[0]?.model || 'Unknown Model'
-  let cpuSpeed = cpu.speed.toFixed(2)
-
-  let caption = `⋆ ★ 🚀 𝑺𝑻𝑨𝑻𝑶 𝑺𝑰𝑺𝑻𝑬𝑴𝑨 🚀 ★ ⋆
-╭♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩
-୧ ⌛ *Uptime:* ${clockString(uptime)}
-୧ ⚡ *Ping:* ${speed} ms
-  💻 *CPU:* ${cpuModel}
-  🔋 *Usage:* ${cpuSpeed} MHz
-  💾 *RAM:* ${format(totalmem() - freemem())} / ${format(totalmem())}
-  🟢 *Free:* ${format(freemem())}
-╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩
-`
-
-  const profilePictureUrl = await fetchProfilePictureUrl(conn, m.sender)
-
-  let messageOptions = {
-    contextInfo: {
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '120363259442839354@newsletter',
-        serverMessageId: '',
-        newsletterName: `${nomeDelBot}`
-      }
-    }
+  } catch (e) {
+    console.error("Errore nel caricare la thumbnail:", e)
   }
 
-  if (profilePictureUrl !== 'default-profile-picture-url') {
-    try {
-      messageOptions.contextInfo.externalAdReply = {
-        title: nomeDelBot,
-        body: `Versione: ${versioneBot}`,
-        mediaType: 1,
-        renderLargerThumbnail: false,
-        previewType: 'thumbnail',
-        thumbnail: await fetchThumbnail('https://i.ibb.co/k22STymH/Immagine-Whats-App-2025-10-23-ore-19-58-44-580b7b7d.jpg-App-2025-10-23-ore-19-58-44-580b7b7d'),
-      }
-    } catch (error) {
-      console.error('Error fetching thumbnail:', error)
-    } 
-  }
+  const textMsg = `╭─❖ 𝗕𝗢𝗧 𝗦𝗧𝗔𝗧𝗢 ❖─⬣
+│ 🕐 𝐔𝐩𝐭𝐢𝐦𝐞: ${formatTime(uptime)}
+│ ⚡ 𝐏𝐢𝐧𝐠: ${ping.toFixed(0)} ms
+│ 📶 𝐒𝐭𝐚𝐭𝐨: ${status}
+╰────────────────────⬣`
 
-  try {
-    await conn.sendMessage(m.chat, {
-      text: caption,
-      ...messageOptions
-    })
-  } catch (error) {
-    console.error('Error sending message:', error)
-  }
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: textMsg,
+      contextInfo: {
+        externalAdReply: {
+          title: "📡 Stato del Bot",
+          body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
+          mediaType: 1,
+          thumbnail: thumbBuffer ?? undefined, // 🟡 MINIATURA
+          // rimosso renderLargerThumbnail → ora è piccola
+        },
+      },
+    },
+    { quoted: m }
+  )
 }
 
-async function fetchProfilePictureUrl(conn, sender) {
-  try {
-    return await conn.profilePictureUrl(sender)
-  } catch (error) {
-    console.error('Error fetching profile picture URL:', error)
-    return 'default-profile-picture-url'
-  }
-}
-
-async function fetchThumbnail(url) {
-  if (!url) return null;
-  try {
-      return await global.fetchThumbnail(url);
-  } catch {
-      return null;
-  }
-}
-
-handler.help = ['ping', 'speed']
-handler.tags = ['info', 'tools']
-handler.command = /^(ping)$/i
+handler.help = ["status", "uptime"]
+handler.tags = ["info"]
+handler.command = /^status|uptime|ping$/i
 
 export default handler
-
-function clockString(ms) {
-  let d = Math.floor(ms / 86400000)
-  let h = Math.floor(ms / 3600000) % 24
-  let m = Math.floor(ms / 60000) % 60
-  let s = Math.floor(ms / 1000) % 60
-  return [d, h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
+  
