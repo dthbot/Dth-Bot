@@ -1,70 +1,76 @@
-// Plugin fatto da Axtral_WiZaRd 
-import { existsSync, promises as fsPromises } from 'fs'
-import path from 'path'
+//Plugin fatto da Axtral_WiZaRd
+import { existsSync, promises as fsPromises } from 'fs';
+import path from 'path';
 
-let handler = async (m, { conn }) => {
-
-  // 🔥 DEBUG: se vedi questo, il plugin FUNZIONA
-  await conn.sendMessage(m.chat, { text: "🧪 Plugin DS avviato" }, { quoted: m })
+const handler = async (m, { conn }) => {
 
   try {
-    const sessionFolder = "./sessioni/"
+    const sessionFolder = "./sessioni/";
 
     if (!existsSync(sessionFolder)) {
-      return await conn.sendMessage(
+      return conn.sendMessage(
         m.chat,
-        { text: "❌ Cartella sessioni non trovata" },
+        {
+          text: "❗ *Non c’erano sessioni da eliminare.*",
+          buttons: [
+            { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+            { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+          ],
+          headerType: 1,
+        },
         { quoted: m }
-      )
+      );
     }
 
-    const files = await fsPromises.readdir(sessionFolder)
-    let deleted = 0
+    const sessionFiles = await fsPromises.readdir(sessionFolder);
+    let deleted = 0;
 
-    for (const file of files) {
+    for (const file of sessionFiles) {
       if (file !== "creds.json") {
-        await fsPromises.unlink(path.join(sessionFolder, file))
-        deleted++
+        await fsPromises.unlink(path.join(sessionFolder, file));
+        deleted++;
       }
     }
 
-    const text = deleted === 0
-      ? "❗ Nessuna sessione da eliminare"
-      : `🔥 Eliminate ${deleted} sessioni`
+    const msg =
+      deleted === 0
+        ? "❗ *Non c’erano sessioni da eliminare.*"
+        : `🔥 *Sono stati eliminati ${deleted} spermatozoi 💦! Grazie per avermi svuotato le palle 🪽*`;
 
-    // ✅ LIST MESSAGE (FUNZIONANTE)
     await conn.sendMessage(
       m.chat,
       {
-        text,
-        footer: "𝔻𝕋ℍ-𝔹𝕆𝕋",
-        title: "🗂️ Gestione Sessioni",
-        buttonText: "Scegli azione",
-        sections: [
-          {
-            title: "Comandi",
-            rows: [
-              { title: "🔄 Svuota di nuovo", rowId: ".ds" },
-              { title: "📊 Ping", rowId: ".ping" }
-            ]
-          }
-        ]
+        text: msg,
+        buttons: [
+          { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+          { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+        ],
+        headerType: 1,
       },
       { quoted: m }
-    )
+    );
 
   } catch (e) {
-    console.error(e)
     await conn.sendMessage(
       m.chat,
-      { text: "❌ Errore durante l’operazione" },
+      {
+        text: "❌ *Errore durante l’eliminazione delle sessioni!*",
+        buttons: [
+          { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+          { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+        ],
+        headerType: 1,
+      },
       { quoted: m }
-    )
+    );
   }
-}
 
-handler.help = ['ds']
-handler.tags = ['owner']
-handler.command = ['ds', 'deletesession', 'svuotasessioni']
+};
 
-export default handler
+handler.help = ['clearallsession'];
+handler.tags = ["owner"];
+handler.command = /^(deletession|ds|clearallsession)$/i;
+handler.admin = true;
+
+export default handler;
+           
