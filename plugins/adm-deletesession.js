@@ -1,87 +1,70 @@
-// Plugin fatto da Axtral_WiZaRd e modificato da dieh! (fix bottoni)
+// Plugin fatto da Axtral_WiZaRd 
 import { existsSync, promises as fsPromises } from 'fs'
 import path from 'path'
 
-const handler = async (message, { conn }) => {
+let handler = async (m, { conn }) => {
 
-  if (global.conn.user.jid !== conn.user.jid) {
-    return conn.sendMessage(
-      message.chat,
-      { text: "*🚨 Usa questo comando SOLO nel numero del bot.*" },
-      { quoted: message }
-    )
-  }
+  // 🔥 DEBUG: se vedi questo, il plugin FUNZIONA
+  await conn.sendMessage(m.chat, { text: "🧪 Plugin DS avviato" }, { quoted: m })
 
   try {
     const sessionFolder = "./sessioni/"
 
     if (!existsSync(sessionFolder)) {
       return await conn.sendMessage(
-        message.chat,
-        { text: "*❌ Cartella sessioni vuota o inesistente.*" },
-        { quoted: message }
+        m.chat,
+        { text: "❌ Cartella sessioni non trovata" },
+        { quoted: m }
       )
     }
 
-    const sessionFiles = await fsPromises.readdir(sessionFolder)
-    let deletedCount = 0
+    const files = await fsPromises.readdir(sessionFolder)
+    let deleted = 0
 
-    for (const file of sessionFiles) {
+    for (const file of files) {
       if (file !== "creds.json") {
         await fsPromises.unlink(path.join(sessionFolder, file))
-        deletedCount++
+        deleted++
       }
     }
 
-    const responseText = deletedCount === 0
-      ? "❗ Le sessioni sono già vuote"
-      : `🔥 Eliminati *${deletedCount}* file dalle sessioni`
+    const text = deleted === 0
+      ? "❗ Nessuna sessione da eliminare"
+      : `🔥 Eliminate ${deleted} sessioni`
 
-    // ✅ LIST MESSAGE (al posto dei bottoni rotti)
-    const listMessage = {
-      text: responseText,
-      footer: "𝔻𝕋ℍ-𝔹𝕆𝕋 • Session Manager",
-      title: "🗂️ Gestione Sessioni",
-      buttonText: "📌 Scegli azione",
-      sections: [
-        {
-          title: "⚙️ Comandi disponibili",
-          rows: [
-            {
-              title: "🔄 Svuota di nuovo",
-              description: "Ripeti la pulizia sessioni",
-              rowId: ".ds"
-            },
-            {
-              title: "📊 Ping",
-              description: "Controlla lo stato del bot",
-              rowId: ".ping"
-            },
-            {
-              title: "⚡ Pong",
-              description: "Test risposta rapida",
-              rowId: ".pong"
-            }
-          ]
-        }
-      ]
-    }
-
-    await conn.sendMessage(message.chat, listMessage, { quoted: message })
-
-  } catch (error) {
-    console.error("Errore:", error)
+    // ✅ LIST MESSAGE (FUNZIONANTE)
     await conn.sendMessage(
-      message.chat,
-      { text: "❌ Errore durante l'eliminazione delle sessioni" },
-      { quoted: message }
+      m.chat,
+      {
+        text,
+        footer: "𝔻𝕋ℍ-𝔹𝕆𝕋",
+        title: "🗂️ Gestione Sessioni",
+        buttonText: "Scegli azione",
+        sections: [
+          {
+            title: "Comandi",
+            rows: [
+              { title: "🔄 Svuota di nuovo", rowId: ".ds" },
+              { title: "📊 Ping", rowId: ".ping" }
+            ]
+          }
+        ]
+      },
+      { quoted: m }
+    )
+
+  } catch (e) {
+    console.error(e)
+    await conn.sendMessage(
+      m.chat,
+      { text: "❌ Errore durante l’operazione" },
+      { quoted: m }
     )
   }
 }
 
-handler.help = ['ds', 'deletesession', 'svuotasessioni']
+handler.help = ['ds']
 handler.tags = ['owner']
 handler.command = ['ds', 'deletesession', 'svuotasessioni']
-handler.admin = true
 
 export default handler
