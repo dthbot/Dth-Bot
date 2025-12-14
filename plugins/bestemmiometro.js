@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 const bestemmiaGradi = [
   { min: 1, max: 24, nome: "Peccatore Occasionale", emoji: "😐" },
@@ -10,9 +10,10 @@ const bestemmiaGradi = [
   { min: 300, max: Infinity, nome: "Avatar della Bestemmia", emoji: "⛧" }
 ];
 
-const bestemmieRegex = /porco dio|porcodio|dio bastardo|dio cane|porcamadonna|madonnaporca|dio cristo|diocristo|dio maiale|diomaiale|cristo madonna|madonna impanata|dio frocio|dio gay|dio infuocato|dio crocifissato|madonna puttana|madonna vacca|madonna inculata|maremma maiala|jesu porco|diocane|padre pio|madonna troia|zoccola madonna|dio pentito/i;
+const bestemmieRegex =
+  /porco dio|porcodio|dio bastardo|dio cane|porcamadonna|madonnaporca|dio cristo|diocristo|dio maiale|diomaiale|cristo madonna|madonna impanata|dio frocio|dio gay|dio infuocato|dio crocifissato|madonna puttana|madonna vacca|madonna inculata|maremma maiala|jesu porco|diocane|padre pio|madonna troia|zoccola madonna|dio pentito/i;
 
-module.exports = function (sock) {
+export default function (sock) {
 
   const db = {
     users: {},
@@ -25,12 +26,16 @@ module.exports = function (sock) {
 
     const chatId = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
-    const text = (m.message.conversation || m.message.extendedTextMessage?.text || "").toLowerCase();
+    const text =
+      (m.message.conversation || m.message.extendedTextMessage?.text || "")
+        .toLowerCase();
 
-    // Inizializza chat
-    if (!db.chats[chatId]) db.chats[chatId] = { bestemmiometro: false };
+    // Init chat
+    if (!db.chats[chatId]) {
+      db.chats[chatId] = { bestemmiometro: false };
+    }
 
-    /* ===== COMANDO ON/OFF ===== */
+    /* ===== COMANDI ===== */
     if (text === ".bestemmiometro on") {
       db.chats[chatId].bestemmiometro = true;
       return sock.sendMessage(chatId, {
@@ -45,20 +50,24 @@ module.exports = function (sock) {
       });
     }
 
-    // Se disattivo, ignora tutto
+    // Se disattivo → stop
     if (!db.chats[chatId].bestemmiometro) return;
 
-    // Se non è bestemmia, ignora
+    // Se non bestemmia → stop
     if (!bestemmieRegex.test(text)) return;
 
-    // Inizializza utente
-    if (!db.users[sender]) db.users[sender] = { blasphemy: 0 };
+    // Init user
+    if (!db.users[sender]) {
+      db.users[sender] = { blasphemy: 0 };
+    }
+
     const user = db.users[sender];
     user.blasphemy++;
 
     const grado =
-      bestemmiaGradi.find(g => user.blasphemy >= g.min && user.blasphemy <= g.max)
-      || { nome: "Eresiarca Anonimo", emoji: "❓" };
+      bestemmiaGradi.find(
+        g => user.blasphemy >= g.min && user.blasphemy <= g.max
+      ) || { nome: "Eresiarca Anonimo", emoji: "❓" };
 
     const thumb = fs.readFileSync('./media/bestemmie.jpeg');
 
@@ -83,4 +92,4 @@ module.exports = function (sock) {
       }
     });
   });
-};
+}
