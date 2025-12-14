@@ -19,7 +19,7 @@ const features = [
   { key: 'soloadmin',          label: 'soloadmin' },
   { key: 'isBanned',           label: 'BanGruppo' },
   { key: 'antinuke',           label: 'AntiNuke' },
-  { key: 'conclave',          label: 'Conclave' },
+  { key: 'conclave',           label: 'Conclave' },
   { key: 'antiCall',           label: 'AntiCall' },
   { key: 'antiinsta',          label: 'Antiinsta' },
   { key: 'antiporno',          label: 'Antiporno' },
@@ -30,7 +30,6 @@ const features = [
   { key: 'antisondaggi',       label: 'Antisondaggi' },
   { key: 'antitiktok',         label: 'AntiTikTok' },
   { key: 'chatbotPrivato',     label: 'ChatbotPrivato', ownerOnly: true },
-
 ];
 
 const MENU_HEADER = `
@@ -49,49 +48,28 @@ const MENU_FOOTER = `
 ꒷꒦ ✦ ୧・︶ : ︶ ꒷꒦ ‧₊ ୧
 
 ╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩
-  ୧・𝐂𝐎𝐋𝐋𝐀𝐁: 𝐎𝐍𝐄 𝐏𝐈𝐄𝐂𝐄
-  ୧・*𝐒𝐔𝐏𝐏𝐎𝐑𝐓𝐎:* (.supporto)
+  ୧・ *𝐂𝐎𝐋𝐋𝐀𝐁:* 𝔸𝕩𝕥𝕣𝕒𝕝_𝕎𝕚ℤ𝕒ℝ𝕕
+  ୧・ *𝐒𝐔𝐏𝐏𝐎𝐑𝐓𝐎:* (.supporto)
 ╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩
 `;
 
-const STATUS_HEADER = `
-╭★────★────★
-|ㅤㅤㅤ꒰¡𝐒𝐓𝐀𝐓𝐎 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐄!꒱
-`;
-
-const STATUS_FOOTER = `
-╰★────★────★
-`;
-
-const BUTTON_TITLE = '📋 Lista Comandi';
-const BUTTON_SECTION_TITLE = '🔧 Funzioni';
-const BUTTON_TEXT = '⚙ Impostazioni';
+const STATUS_HEADER = `<---------𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐄---------->`;
+const STATUS_FOOTER = `<---------------------------------------->`;
 const ONLY_OWNER_MSG = '❌ Solo il proprietario può attivare/disattivare questa funzione.';
 const ONLY_PRIVATE_CHATBOT_MSG = '❌ Puoi attivare/disattivare la funzione *ChatbotPrivato* solo in chat privata.';
-const ONLY_CHATUNITY_BASE_MSG = 'Questo comando è disponibile solo con la base di ChatUnity.';
 
-const PLACEHOLDER_THUMB = null;
-const PLACEHOLDER_VCARD = 'BEGIN:VCARD...';
+let handler = async (m, { conn, usedPrefix, args, isOwner, isROwner }) => {
 
-let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
   const name = await conn.getName(m.sender);
-  const chats = (global.db?.data?.chats || {});
-  const chatData = chats[m.chat] || {};
+  const chatData = global.db.data.chats[m.chat] || {};
 
   const listLines = features.map(f => {
-    let current = false;
+    let current =
+      f.key === 'chatbotPrivato'
+        ? global.privateChatbot?.[m.sender] || false
+        : chatData[f.key] || false;
 
-    if (f.key === 'chatbotPrivato') {
-      current = (global.privateChatbot?.[m.sender]) || false;
-    } else if (f.key === 'antivoip') {
-      current = (global.db?.data?.chats?.[m.chat]?.antivoip) || false;
-    } else {
-      current = chatData[f.key];
-    }
-
-    const dot = current ? '🟢' : '🔴';
-    const ownerTag = f.ownerOnly ? ' (Owner)' : '';
-    return `୧ ${dot} *${f.label}*${ownerTag}`;
+    return `୧ ${current ? '🟢' : '🔴'} *${f.label}*${f.ownerOnly ? ' (Owner)' : ''}`;
   }).join('\n');
 
   const menuText = (MENU_HEADER + listLines + MENU_FOOTER).trim();
@@ -99,72 +77,71 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
   const featureArg = (args[0] || '').toLowerCase();
   const selected = features.find(f => f.label.toLowerCase() === featureArg);
 
-  if (!featureArg || !selected) {
-    const section = {
-      title: BUTTON_SECTION_TITLE,
-      rows: features.map(f => ({
-        title: f.label,
-        description: `Attiva ${f.label}`,
-        rowId: usedPrefix + 'attiva ' + f.label.toLowerCase()
-      }))
-    };
-
-    const listMessage = {
+  if (!selected) {
+    await conn.sendMessage(m.chat, {
       text: menuText,
-      footer: 'Seleziona una funzione da attivare/disattivare',
+      buttonText: "⚙ Impostazioni",
+      footer: "Seleziona una funzione",
       title: name,
-      buttonText: BUTTON_TEXT,
-      sections: [section]
-    };
-
-    await conn.sendMessage(m.chat, listMessage, { quoted: null });
+      sections: [
+        {
+          title: "🔧 Funzioni",
+          rows: features.map(f => ({
+            title: f.label,
+            description: `Attiva ${f.label}`,
+            rowId: usedPrefix + 'attiva ' + f.label.toLowerCase()
+          }))
+        }
+      ]
+    });
     return;
   }
 
-  if (selected.ownerOnly && !(isOwner || isROwner)) {
-    await conn.reply(m.chat, ONLY_OWNER_MSG, m);
-    return;
-  }
+  if (selected.ownerOnly && !(isOwner || isROwner))
+    return conn.reply(m.chat, ONLY_OWNER_MSG, m);
 
-  const isEnable = /attiva|enable|on|1|true/i.test(command.toLowerCase());
-  const isDisable = /disabilita|disattiva|disable|off|0|false/i.test(command.toLowerCase());
-  let setTo = isEnable && !isDisable;
+  // FIX ASSOLUTO – RISOLVE TUTTO
+  const text = m.text.toLowerCase();
+  const isEnable = text.startsWith(`${usedPrefix}attiva`);
+  const isDisable = text.startsWith(`${usedPrefix}disattiva`) || text.startsWith(`${usedPrefix}disabilita`);
+  const setTo = isEnable ? true : isDisable ? false : null;
 
-  if (selected.key === 'antivoip') {
-    chatData.antivoip = setTo;
-  } else if (selected.key === 'chatbotPrivato') {
-    if (m.isGroup) {
-      await conn.reply(m.chat, ONLY_PRIVATE_CHATBOT_MSG, m);
-      return;
-    }
+  if (setTo === null)
+    return conn.reply(m.chat, "❌ Comando non valido.", m);
+
+  if (selected.key === 'chatbotPrivato') {
+    if (m.isGroup)
+      return conn.reply(m.chat, ONLY_PRIVATE_CHATBOT_MSG, m);
     if (!global.privateChatbot) global.privateChatbot = {};
     global.privateChatbot[m.sender] = setTo;
   } else {
     chatData[selected.key] = setTo;
   }
 
-  if (global.db?.data?.chats) {
-    global.db.data.chats[m.chat] = chatData;
-  }
+  global.db.data.chats[m.chat] = chatData;
 
-  const stateIcon = (selected.key === 'chatbotPrivato'
-    ? (global.privateChatbot?.[m.sender] ? '🟢' : '🔴')
-    : (chatData[selected.key] ? '🟢' : '🔴'));
-
-  const stateVerb = setTo ? '𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚' : '𝐝𝐢𝐬𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚';
   const statusMsg = `
 ${STATUS_HEADER}
-|˚₊꒷ ${stateIcon} ꒱ ฅ﹕*${selected.label}* ${stateVerb} ₊˚๑
+ ${setTo ? '✅' : '❌'} ﹕ *${selected.label}* ${setTo ? '𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚' : '𝐝𝐢𝐬𝐚𝐭𝐭𝐢𝐯𝐚𝐭𝐚'}
 ${STATUS_FOOTER}
 `.trim();
 
-  await conn.reply(m.chat, statusMsg, m);
+  await conn.sendMessage(m.chat, {
+    text: statusMsg,
+    buttons: [
+      {
+        buttonId: usedPrefix + "menusicurezza",
+        buttonText: { displayText: "🗿 Menu Funzioni" },
+        type: 1
+      }
+    ],
+    headerType: 1
+  }, { quoted: m });
+
 };
 
-handler.help = ['attiva <feature>', 'disabilita <feature>', 'disattiva <feature>'];
-handler.tags = ['Impostazioni Bot', 'owner'];
-handler.command = /^(attiva|disabilita|disattiva|enable|disable)/i;
-handler.group = true;
-handler.ownerOnly = false;
+handler.help = ['attiva <feature>', 'disattiva <feature>'];
+handler.tags = ['settings'];
+handler.command = /^(attiva|disattiva|disabilita)/i;
 
 export default handler;
