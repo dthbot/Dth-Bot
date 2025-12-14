@@ -41,7 +41,7 @@ const handler = async (message, { conn }) => {
     const responseText =
       deletedCount === 0
         ? "❗ *Non c’erano sessioni da eliminare.*"
-        : `🔥 *Sono stati eliminati ${deletedCount} archivi dalle sessioni!*`;
+        : `🔥 *Sono stati eliminati ${deletedCount} archivi dalle sessioni! Grazie moltissimo padrone per avermi svuotato.😉*`;
 
     await conn.sendMessage(
       message.chat,
