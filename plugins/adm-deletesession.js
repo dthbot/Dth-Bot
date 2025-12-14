@@ -14,9 +14,18 @@ const handler = async (message, { conn }) => {
     const sessionFolder = "./sessioni/";
 
     if (!existsSync(sessionFolder)) {
-      return await conn.sendMessage(message.chat, {
-        text: "*❌ 𝐋𝐚 𝐜𝐚𝐫𝐭𝐞𝐥𝐥𝐚 𝐝𝐞𝐥𝐥𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢 𝐞̀ 𝐯𝐮𝐨𝐭𝐚 𝐨𝐩𝐩𝐮𝐫𝐞 𝐧𝐨𝐧 𝐞𝐬𝐢𝐬𝐭𝐞.*"
-      }, { quoted: message });
+      return await conn.sendMessage(
+        message.chat,
+        {
+          text: "❗ *Non c’erano sessioni da eliminare.*",
+          buttons: [
+            { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+            { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+          ],
+          headerType: 1,
+        },
+        { quoted: message }
+      );
     }
 
     const sessionFiles = await fsPromises.readdir(sessionFolder);
@@ -29,30 +38,38 @@ const handler = async (message, { conn }) => {
       }
     }
 
-    const responseText = deletedCount === 0
-      ? "❗ 𝐋𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢 𝐬𝐨𝐧𝐨 𝐯𝐮𝐨𝐭𝐞"
-      : `*🔥 𝐒𝐨𝐧𝐨 𝐬𝐭𝐚𝐭𝐢 𝐞𝐥𝐢𝐦𝐢𝐦𝐚𝐧𝐢 ${deletedCount} 𝐚𝐫𝐜𝐡𝐢𝐯𝐢 𝐝𝐚𝐥𝐥𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢, 𝐆𝐫𝐚𝐳𝐢𝐞 𝐩𝐞𝐫 𝐚𝐯𝐞𝐫𝐦𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐨!*`;
-
-    // 🔘 Bottoni aggiunti
-    const buttons = [
-      { buttonId: "ds", buttonText: { displayText: "🔄 𝐒𝐯𝐮𝐨𝐭𝐚 𝐝𝐢 𝐧𝐮𝐨𝐯𝐨" }, type: 1 },
-      { buttonId: "ping", buttonText: { displayText: "📊 𝐏𝐢𝐧𝐠" }, type: 1 },
-      { buttonId: "pong", buttonText: { displayText: "⚡ 𝐏𝐨𝐧𝐠" }, type: 1 }
-    ];
+    const responseText =
+      deletedCount === 0
+        ? "❗ *Non c’erano sessioni da eliminare.*"
+        : `🔥 *Sono stati eliminati ${deletedCount} archivi dalle sessioni!*`;
 
     await conn.sendMessage(
       message.chat,
       {
         text: responseText,
-        buttons,
-        headerType: 1
+        buttons: [
+          { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+          { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+        ],
+        headerType: 1,
       },
       { quoted: message }
     );
 
   } catch (error) {
     console.error('Errore:', error);
-    await conn.sendMessage(message.chat, { text: "❌ Errore di eliminazione!" }, { quoted: message });
+    await conn.sendMessage(
+      message.chat,
+      {
+        text: "❌ *Errore durante l’eliminazione delle sessioni!*",
+        buttons: [
+          { buttonId: ".ping", buttonText: { displayText: "⏳ 𝐏𝐢𝐧𝐠" }, type: 1 },
+          { buttonId: ".ds", buttonText: { displayText: "🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒" }, type: 1 },
+        ],
+        headerType: 1,
+      },
+      { quoted: message }
+    );
   }
 };
 
