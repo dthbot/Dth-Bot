@@ -1,60 +1,44 @@
-import 'os';
-import 'util';
-import 'human-readable';
-import '@realvare/based';
-import 'fs';
-import 'perf_hooks';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import '../lib/language.js';
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-let handler = async (m, { conn, usedPrefix, command }) => {
+let handler = async (m, { conn, usedPrefix }) => {
 
-    const menuText = `
+  const menuText = `
 ⚡𝑴𝑬𝑵𝑼 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈⚡
 ╔═══════════════════╗
-*COME SI USA?*
 .attiva (funzione)
-.disattiva (funzione) 
+.disattiva (funzione)
 
-➥ Benvenuto ⛓️
-➥ AntiSpam 💬
-➥ AntiTrava 🚫
-➥ AntiNuke ⚠️
-➥ AntiBestemmie 🤬
-➥ SoloAdmin 👑
-➥ AntiBot 🤖
-➥ AntiMedia 📷
-➥ AntiTikTok 📽️
-➥ AntiLink ⛓️
-➥ Antiinsta 📽️
+➥ Benvenuto
+➥ AntiSpam
+➥ AntiTrava
+➥ AntiNuke
+➥ AntiBestemmie
+➥ SoloAdmin
+➥ AntiBot
+➥ AntiMedia
+➥ AntiTikTok
+➥ AntiLink
+➥ AntiInsta
 
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* *2.0*
+Versione: 1.0
 ╚═══════════════════╝
-`.trim();
+`.trim()
 
-    const imagePath = path.join(__dirname, '../media/sicurezza.jpeg');
+  const imagePath = path.join(__dirname, '../media/sicurezza.jpeg')
 
-    await conn.sendMessage(m.chat, {
-        image: { url: imagePath },
-        caption: menuText,
-        buttons: [
-            { buttonId: `${usedPrefix}menu`, buttonText: { displayText: "🏠 Menu Principale" }, type: 1 },
-            { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: "👑 Menu Owner" }, type: 1 },
-            { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: "🛡️ Menu Admin" }, type: 1 },
-            { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: "👥 Menu Gruppo" }, type: 1 },
-            { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: "🤖 Menu IA" }, type: 1 }
-        ],
-        viewOnce: true,
-        headerType: 4
-    });
-};
+  await conn.sendMessage(m.chat, {
+    image: fs.readFileSync(imagePath),
+    caption: menuText
+  }, { quoted: m })
+}
 
-handler.help = ["menusicurezza"];
-handler.tags = ["menu"];
-handler.command = /^(menusicurezza)$/i;
+handler.help = ['menusicurezza']
+handler.tags = ['menu']
+handler.command = /^(menusicurezza)$/i
 
-export default handler;
+export default handler
