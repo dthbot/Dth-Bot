@@ -88,7 +88,7 @@ export async function handler(chatUpdate) {
       groupData.suspendedUntil = now + 45000
 
       await conn.sendMessage(chatId, {
-        text: `『 ⚠ 』 Anti-spam comandi\n\nTroppi comandi in poco tempo!\nAttendi *45 secondi* prima di usare altri comandi.\n\n> sviluppato da sam aka vare`,
+        text: `『 ⚠ 』 Anti-spam comandi\n\nTroppi comandi in poco tempo!\nAttendi *10 secondi* prima di usare altri comandi.`,
         mentions: [m.sender]
       })
       return
@@ -515,8 +515,8 @@ export async function participantsUpdate({ id, participants, action }) {
 
   let chat = global.db.data.chats[id] || {}
   let text = ''
-  let nomeDelBot = global.db.data.nomedelbot || `𝐂𝐡𝐚𝐭𝐔𝐧𝐢𝐭𝐲-𝐁𝐨𝐭`
-  let jidCanale = global.db.data.jidcanale || '120363259442839354@newsletter'
+  let nomeDelBot = global.db.data.nomedelbot || `𝔻𝕋ℍ-𝔹𝕆𝕋`
+  let jidCanale = global.db.data.jidcanale || ''
 
   switch (action) {
     case 'add':
