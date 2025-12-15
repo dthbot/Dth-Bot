@@ -1,33 +1,71 @@
-let handler = async (m, { conn, text, participants, command, usedPrefix }) => {
-    // Se non è stato menzionato nessuno, verifica se il messaggio è una risposta
-    if (!text) {
-        if (m.quoted && m.quoted.sender) {
-            text = '@' + m.quoted.sender.split('@')[0];
-        } else {
-            return conn.reply(m.chat, ` Devi menzionare qualcuno o rispondere a un messaggio per baciarlo💋! Esempio: ${usedPrefix + command} @utente`, m);
-        }
+let handler = async (m, { conn, text, command, usedPrefix }) => {
+
+  // Normalizza il testo
+  text = text?.trim()
+
+  // Caso: .bacia @  → deve essere una risposta
+  if (text === '@') {
+    if (m.quoted?.sender) {
+      m.mentionedJid = [m.quoted.sender]
+    } else {
+      return conn.reply(
+        m.chat,
+        `💋 Devi rispondere a un messaggio per usare *${usedPrefix + command} @*`,
+        m
+      )
     }
+  }
 
-    // Prende gli utenti menzionati nel messaggio
-    let utentiMenzionati = m.mentionedJid;
-
-    // Se non ci sono menzionati e non è una risposta, usa il sender del messaggio citato
-    if (!utentiMenzionati.length && m.quoted && m.quoted.sender) {
-        utentiMenzionati = [m.quoted.sender];
+  // Caso: niente testo
+  if (!text) {
+    if (m.quoted?.sender) {
+      m.mentionedJid = [m.quoted.sender]
+    } else {
+      return conn.reply(
+        m.chat,
+        `💋 Devi menzionare qualcuno o rispondere a un messaggio!\n\nEsempi:\n${usedPrefix + command} @utente\n${usedPrefix + command} @ (rispondendo)`,
+        m
+      )
     }
+  }
 
-    // Se ancora non c'è nessuno da baciare
-    if (!utentiMenzionati.length) {
-        return m.reply("💋 *Devi menzionare qualcuno per baciarlo!*\nEsempio: *.bacia @utente*");
-    }
+  let utentiMenzionati = m.mentionedJid || []
 
-    let utenteBaciato = utentiMenzionati[0];
+  if (!utentiMenzionati.length) {
+    return m.reply('💋 *Devi indicare qualcuno da baciare!*')
+  }
 
-    // Messaggio del bacio
-    let messaggio = `💋 *${await conn.getName(m.sender)} ha dato un bacio a ${await conn.getName(utenteBaciato)}!* 😘`;
+  const baciatore = m.sender
+  const baciato = utentiMenzionati[0]
 
-    await conn.sendMessage(m.chat, { text: messaggio, mentions: [utenteBaciato] }, { quoted: m });
-};
+  // Impedisce di baciare se stessi
+  if (baciatore === baciato) {
+    return m.reply('😳 Non puoi baciare te stesso!')
+  }
 
-handler.command = ["bacia"];
-export default handler;
+  const tagBaciatore = '@' + baciatore.split('@')[0]
+  const tagBaciato = '@' + baciato.split('@')[0]
+
+  const messaggio = `
+💖 *Momento romantico nel gruppo!* 💖
+
+💋 ${tagBaciatore} si avvicina con un sorriso  
+e dà un dolcissimo bacio a ${tagBaciato} 😘✨
+
+💕 *L’amore è nell’aria!* 💕
+`.trim()
+
+  await conn.sendMessage(
+    m.chat,
+    {
+      text: messaggio,
+      mentions: [baciatore, baciato]
+    },
+    { quoted: m }
+  )
+}
+
+handler.command = ['bacia']
+handler.group = true
+
+export default handler
