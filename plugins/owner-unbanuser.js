@@ -5,11 +5,13 @@ import { owners } from '../config.js'
 
 const DATA_FILE = path.join('./database', 'bannedUsers.json')
 
+// Carica utenti bannati
 let bannedUsers = {}
 if (fs.existsSync(DATA_FILE)) {
   bannedUsers = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
 }
 
+// Salva utenti bannati
 const saveData = () => {
   fs.writeFileSync(DATA_FILE, JSON.stringify(bannedUsers, null, 2))
 }
@@ -37,6 +39,7 @@ let handler = async (m, { conn }) => {
   return conn.sendMessage(chatId, { text: `✅ @${target.split('@')[0]} è stato sbannato!`, mentions: [target] }, { quoted: m })
 }
 
+// Blocca automaticamente i messaggi degli utenti bannati
 handler.before = async (m) => {
   if (!m.isGroup) return
   const chatId = m.chat
