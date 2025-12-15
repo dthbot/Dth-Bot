@@ -1,54 +1,52 @@
-let handler = async (message, { conn, text, participants }) => {
-    if (!text && !message.mentionedJid?.[0] && !message.quoted) {
-        return conn.reply(message.chat, '❗ Per favore tagga un utente, rispondi a un messaggio o scrivi il numero di telefono (es: 3934xxxxxxx)', message);
-    }
+// banuser.js
+import fs from 'fs'
+import path from 'path'
+import { owners } from '../config.js'
 
-    let target;
+const DATA_FILE = path.join('./database', 'bannedUsers.json')
 
-    if (message.mentionedJid?.[0]) {
-        target = message.mentionedJid[0];
-    } else if (message.quoted) {
-        target = message.quoted.sender;
-    } else if (text) {
-        let number = text.replace(/\D/g, '');
-        if (number.length < 8) return conn.reply(message.chat, '❗ Numero non valido.', message);
-        target = number + '@s.whatsapp.net';
-    }
+let bannedUsers = {}
+if (fs.existsSync(DATA_FILE)) {
+  bannedUsers = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
+}
 
-    let users = global.db.data.users;
-    if (!users[target]) users[target] = {};
-    users[target].banned = true;
+const saveData = () => {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(bannedUsers, null, 2))
+}
 
-    let fakeMsg = {
-        key: {
-            participants: "0@s.whatsapp.net",
-            fromMe: false,
-            id: "Halo"
-        },
-        message: {
-            locationMessage: {
-                name: "Utente bloccato",
-                jpegThumbnail: await (await fetch("https://telegra.ph/file/710185c7e0247662d8ca6.png")).buffer(),
-                vcard: `BEGIN:VCARD
-VERSION:5.0
-N:;Unlimited;;;
-FN:Unlimited
-ORG:Unlimited
-TITLE:
-item1.TEL;waid=19709001746:+1 (970) 900-1746
-item1.X-ABLabel:Unlimited
-X-WA-BIZ-DESCRIPTION:ofc
-X-WA-BIZ-NAME:Unlimited
-END:VCARD`
-            }
-        },
-        participant: "0@s.whatsapp.net"
-    };
+let handler = async (m, { conn }) => {
+  if (!m.isGroup) return
 
-    conn.reply(message.chat, "✅ 𝐐𝐮𝐞𝐬𝐭𝐨 𝐮𝐭𝐞𝐧𝐭𝐞 è 𝐬𝐭𝐚𝐭𝐨 𝐛𝐥𝐨𝐜𝐜𝐚𝐭𝐨 𝐝𝐚𝐥 𝐛𝐨𝐭", fakeMsg);
-};
+  if (!owners.includes(m.sender)) {
+    return m.reply('🚫 Solo gli *owner* possono usare questo comando.')
+  }
 
-handler.command = /^banuser$/i;
-handler.rowner = true;
+  const chatId = m.chat
+  if (!bannedUsers[chatId]) bannedUsers[chatId] = []
 
-export default handler;
+  let target = m.mentionedJid?.[0] || m.quoted?.sender
+  if (!target) return m.reply('❗ Usa il comando rispondendo a un messaggio o menzionando un utente.')
+  if (target === m.sender) return m.reply('😐 Non puoi bannare te stesso.')
+
+  if (bannedUsers[chatId].includes(target)) {
+    return conn.sendMessage(chatId, { text: `🚫 @${target.split('@')[0]} è già bannato.`, mentions: [target] }, { quoted: m })
+  }
+
+  bannedUsers[chatId].push(target)
+  saveData()
+  return conn.sendMessage(chatId, { text: `⛔ @${target.split('@')[0]} è stato bannato!`, mentions: [target] }, { quoted: m })
+}
+
+handler.before = async (m) => {
+  if (!m.isGroup) return
+  const chatId = m.chat
+  if (bannedUsers[chatId]?.includes(m.sender)) {
+    await m.delete()
+    return true
+  }
+}
+
+handler.command = ['banuser']
+handler.group = true
+
+export default handler
