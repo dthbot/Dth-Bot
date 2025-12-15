@@ -37,8 +37,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   const messaggio = `
 💖 *Momento romantico* 💖
 
-💋 ${tagBaciatore}  *si avvicina con dolcezza  
-e dà un limone hard a* ${tagBaciato} 😘✨
+💋 ${tagBaciatore}  *si avvicina con dolcezza e dà un limone hard a* ${tagBaciato} 😘✨
 
 🌸 *Che scena adorabile!* 🌸
 `.trim()
