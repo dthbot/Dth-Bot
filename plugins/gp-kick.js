@@ -16,19 +16,19 @@ async function handler(m, { isBotAdmin, isOwner, text, conn }) {
 
   if (mention === ownerBot) {
     return await conn.sendMessage(m.chat, {
-      text: 'ⓘ Non puoi rimuovere il creatore del bot'
+      text: 'ⓘ Non puoi rimuovere il creatore del bot suka bastardo'
     }, { quoted: m })
   }
 
   if (mention === conn.user.jid) {
     return await conn.sendMessage(m.chat, {
-      text: 'ⓘ Non puoi rimuovere il bot'
+      text: 'ⓘ Non puoi rimuovere il bot sei proprio un coglione'
     }, { quoted: m })
   }
 
   if (mention === m.sender) {
     return await conn.sendMessage(m.chat, {
-      text: 'ⓘ Non puoi rimuovere te stesso'
+      text: 'ⓘ Non puoi rimuovere te stesso, se vuoi ti kicka 𝕯𝖊ⱥ𝖉𝖑𝐲'
     }, { quoted: m })
   }
 
@@ -41,13 +41,13 @@ async function handler(m, { isBotAdmin, isOwner, text, conn }) {
 
   if (owner) {
     return await conn.sendMessage(m.chat, {
-      text: "ⓘ L'utente che hai provato a rimuovere 𝐞̀ il creatore del gruppo"
+      text: "ⓘ L'utente che hai provato a rimuovere 𝐞̀ il creatore del gruppo mannaggia"
     }, { quoted: m })
   }
 
   if (admin) {
     return await conn.sendMessage(m.chat, {
-      text: "ⓘ L'utente che hai provato a rimuovere è admin"
+      text: "ⓘ L'utente che hai provato a rimuovere è admin porcoddio"
     }, { quoted: m })
   }
 
