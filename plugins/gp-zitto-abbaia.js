@@ -1,19 +1,19 @@
 // gp-accuccia-abbaia.js
 // Comandi: .accuccia / .abbaia
-// Solo admin gruppo
+// Solo admin gruppo (controllo FORZATO)
 
 let mutedUsers = new Set()
 
-let handler = async (m, { conn, command, participants }) => {
+let handler = async (m, { conn, command }) => {
   if (!m.isGroup) return
 
-  // ✅ controllo admin CORRETTO
-  const isAdmin = participants
+  // 🔒 CONTROLLO ADMIN SICURO
+  const metadata = await conn.groupMetadata(m.chat)
+  const admins = metadata.participants
     .filter(p => p.admin)
     .map(p => p.id)
-    .includes(m.sender)
 
-  if (!isAdmin) {
+  if (!admins.includes(m.sender)) {
     return m.reply('🚫 Solo gli *admin* possono usare questo comando.')
   }
 
@@ -32,7 +32,10 @@ let handler = async (m, { conn, command, participants }) => {
     if (mutedUsers.has(target)) {
       return conn.sendMessage(
         m.chat,
-        { text: `🤐 @${target.split('@')[0]} è già a cuccia.`, mentions: [target] },
+        {
+          text: `🤐 @${target.split('@')[0]} è già *a cuccia*.`,
+          mentions: [target]
+        },
         { quoted: m }
       )
     }
@@ -40,7 +43,10 @@ let handler = async (m, { conn, command, participants }) => {
     mutedUsers.add(target)
     return conn.sendMessage(
       m.chat,
-      { text: `🛑 @${target.split('@')[0]} è stato messo *A CUCCIA*. 🐕`, mentions: [target] },
+      {
+        text: `🛑 @${target.split('@')[0]} è stato messo *A CUCCIA* 🐕`,
+        mentions: [target]
+      },
       { quoted: m }
     )
   }
@@ -50,7 +56,10 @@ let handler = async (m, { conn, command, participants }) => {
     if (!mutedUsers.has(target)) {
       return conn.sendMessage(
         m.chat,
-        { text: `🐶 @${target.split('@')[0]} non era a cuccia.`, mentions: [target] },
+        {
+          text: `🐶 @${target.split('@')[0]} non era a cuccia.`,
+          mentions: [target]
+        },
         { quoted: m }
       )
     }
@@ -58,13 +67,16 @@ let handler = async (m, { conn, command, participants }) => {
     mutedUsers.delete(target)
     return conn.sendMessage(
       m.chat,
-      { text: `🗣️ @${target.split('@')[0]} può *ABBAIARE* di nuovo! 🔊`, mentions: [target] },
+      {
+        text: `🔊 @${target.split('@')[0]} può *ABBAIARE* di nuovo!`,
+        mentions: [target]
+      },
       { quoted: m }
     )
   }
 }
 
-// 🔇 blocco messaggi utenti mutati
+// 🔇 blocca i messaggi degli utenti mutati
 handler.before = async (m) => {
   if (!m.isGroup) return
   if (mutedUsers.has(m.sender)) {
