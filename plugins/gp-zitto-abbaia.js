@@ -1,26 +1,28 @@
 // gp-accuccia-abbaia.js
-// Plugin handler-style
 // Comandi: .accuccia / .abbaia
 // Solo admin gruppo
 
-// 🔇 mute globale (se vuoi per-gruppo te lo faccio)
 let mutedUsers = new Set()
 
-let handler = async (m, { conn, command }) => {
+let handler = async (m, { conn, command, participants }) => {
   if (!m.isGroup) return
 
-  // 🔹 controllo admin
-  if (!m.isAdmin) {
+  // ✅ controllo admin CORRETTO
+  const isAdmin = participants
+    .filter(p => p.admin)
+    .map(p => p.id)
+    .includes(m.sender)
+
+  if (!isAdmin) {
     return m.reply('🚫 Solo gli *admin* possono usare questo comando.')
   }
 
-  // 🔹 target: reply o mention
+  // 🎯 target: reply o mention
   let target = m.mentionedJid?.[0] || m.quoted?.sender
   if (!target) {
     return m.reply('❗ Usa il comando rispondendo a un messaggio o menzionando un utente.')
   }
 
-  // ❌ no auto-mute
   if (target === m.sender) {
     return m.reply('😐 Non puoi farlo su te stesso.')
   }
@@ -38,7 +40,7 @@ let handler = async (m, { conn, command }) => {
     mutedUsers.add(target)
     return conn.sendMessage(
       m.chat,
-      { text: `🛑 @${target.split('@')[0]} è stato messo *A CUCCIA*.`, mentions: [target] },
+      { text: `🛑 @${target.split('@')[0]} è stato messo *A CUCCIA*. 🐕`, mentions: [target] },
       { quoted: m }
     )
   }
@@ -56,13 +58,13 @@ let handler = async (m, { conn, command }) => {
     mutedUsers.delete(target)
     return conn.sendMessage(
       m.chat,
-      { text: `🗣️ @${target.split('@')[0]} può *ABBAIARE* di nuovo.`, mentions: [target] },
+      { text: `🗣️ @${target.split('@')[0]} può *ABBAIARE* di nuovo! 🔊`, mentions: [target] },
       { quoted: m }
     )
   }
 }
 
-// 🔹 BLOCCA I MESSAGGI DEI MUTATI
+// 🔇 blocco messaggi utenti mutati
 handler.before = async (m) => {
   if (!m.isGroup) return
   if (mutedUsers.has(m.sender)) {
@@ -73,7 +75,6 @@ handler.before = async (m) => {
 
 handler.command = ['accuccia', 'abbaia']
 handler.group = true
-handler.admin = true
 handler.botAdmin = true
 
 export default handler
