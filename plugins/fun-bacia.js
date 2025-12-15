@@ -1,44 +1,32 @@
 let handler = async (m, { conn, text, command, usedPrefix }) => {
 
-  // Normalizza il testo
   text = text?.trim()
 
-  // Caso: .bacia @  → deve essere una risposta
-  if (text === '@') {
-    if (m.quoted?.sender) {
-      m.mentionedJid = [m.quoted.sender]
-    } else {
-      return conn.reply(
-        m.chat,
-        `💋 Devi rispondere a un messaggio per usare *${usedPrefix + command} @*`,
-        m
-      )
-    }
+  let target = null
+
+  // 1️⃣ Se c'è una menzione, usa quella
+  if (m.mentionedJid && m.mentionedJid.length > 0) {
+    target = m.mentionedJid[0]
   }
 
-  // Caso: niente testo
-  if (!text) {
-    if (m.quoted?.sender) {
-      m.mentionedJid = [m.quoted.sender]
-    } else {
-      return conn.reply(
-        m.chat,
-        `💋 Devi menzionare qualcuno o rispondere a un messaggio!\n\nEsempi:\n${usedPrefix + command} @utente\n${usedPrefix + command} @ (rispondendo)`,
-        m
-      )
-    }
+  // 2️⃣ Se NON c'è menzione, ma è una risposta
+  else if (m.quoted && m.quoted.sender) {
+    target = m.quoted.sender
   }
 
-  let utentiMenzionati = m.mentionedJid || []
-
-  if (!utentiMenzionati.length) {
-    return m.reply('💋 *Devi indicare qualcuno da baciare!*')
+  // 3️⃣ Nessuno dei due → errore
+  if (!target) {
+    return conn.reply(
+      m.chat,
+      `💋 Devi *menzionare qualcuno* o *rispondere a un messaggio* per baciarlo!\n\nEsempi:\n${usedPrefix + command} @utente\n${usedPrefix + command} (rispondendo)`,
+      m
+    )
   }
 
   const baciatore = m.sender
-  const baciato = utentiMenzionati[0]
+  const baciato = target
 
-  // Impedisce di baciare se stessi
+  // ❌ niente auto-bacio
   if (baciatore === baciato) {
     return m.reply('😳 Non puoi baciare te stesso!')
   }
@@ -49,10 +37,10 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   const messaggio = `
 💖 *Momento romantico* 💖
 
-💋 ${tagBaciatore}  *si avvicina con un sorriso  
-e dà un limone hard a*  ${tagBaciato} 😘✨
+💋 ${tagBaciatore}  *si avvicina con dolcezza  
+e dà un limone hard a* ${tagBaciato} 😘✨
 
-💕 *L’amore è nell’aria!* 💕
+🌸 *Che scena adorabile!* 🌸
 `.trim()
 
   await conn.sendMessage(
