@@ -47,10 +47,10 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   const tagBaciato = '@' + baciato.split('@')[0]
 
   const messaggio = `
-💖 *Momento romantico nel gruppo!* 💖
+💖 *Momento romantico* 💖
 
-💋 ${tagBaciatore} si avvicina con un sorriso  
-e dà un dolcissimo bacio a ${tagBaciato} 😘✨
+💋 ${tagBaciatore} *si avvicina con un sorriso  
+e dà un limone hard a* ${tagBaciato} 😘✨
 
 💕 *L’amore è nell’aria!* 💕
 `.trim()
