@@ -4,16 +4,17 @@ let handler = async (m, { conn }) => {
   if (!m.text) return
 
   if (m.text.toLowerCase().includes('vampexe')) {
-    const sticker = fs.readFileSync('./media/vampexe.webp')
+    const buffer = fs.readFileSync('./media/vampexe.webp')
 
     await conn.sendMessage(
       m.chat,
-      { sticker },
+      { sticker: buffer },
       { quoted: m }
     )
   }
 }
 
-handler.all = true
+// QUESTA È LA PARTE CHIAVE
+handler.before = true
 
 export default handler
