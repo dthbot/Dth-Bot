@@ -11,11 +11,11 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
 
             // 🔥 Cambia NOME del gruppo
             let oldName = groupMetadata.subject || "";
-            let newName = `${oldName} | 𝐒𝐕𝐓 𝐁𝐲 𝕯𝖊ⱥ𝖙𝖍`;
+            let newName = `${oldName} | 𝑺𝒗𝒕𝒕 𝑩𝒚 𝒁𝒚𝒌𝒂 & 𝑫𝒆𝒂𝒅𝒍𝒚`;
             await conn.groupUpdateSubject(m.chat, newName);
 
             // 🔥 Cambia DESCRIZIONE del gruppo
-            let nuovaDescrizione = `𝔾𝕣𝕦𝕡𝕡𝕠 𝔻𝕠𝕞𝕚𝕟𝕒𝕥𝕠 𝔻𝕒 𝕯𝖊ⱥ𝖙𝖍`;
+            let nuovaDescrizione = `𝔾𝕣𝕦𝕡𝕡𝕠 𝔻𝕠𝕞𝕚𝕟𝕒𝕥𝕠`;
             await conn.groupUpdateDescription(m.chat, nuovaDescrizione);
 
             // 🔥 Disattiva welcome
@@ -23,13 +23,13 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
 
             // 🔥 Messaggio introduttivo
             await conn.sendMessage(m.chat, {
-                text: "𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚 𝕯𝖊ⱥ𝖙𝖍 𝐨𝐫𝐚 𝐬𝐭𝐚𝐭𝐞 𝐬𝐞𝐝𝐮𝐭𝐢 𝐞 𝐚𝐛𝐛𝐚𝐢𝐚𝐭𝐞 𝐜𝐚𝐧𝐢."
+                text: "𝐿𝑎𝑠𝑐𝑖𝑎 𝑐ℎ𝑒 𝑙'𝑜𝑠𝑐𝑢𝑟𝑖𝑡𝑎̀ 𝑡𝑖 𝑐𝑜𝑛𝑠𝑢𝑚𝑖, 𝑐ℎ𝑒 𝑠𝑡𝑟𝑎𝑝𝑝𝑖 𝑣𝑖𝑎 𝑙𝑎 𝑡𝑢𝑎 𝑢𝑚𝑎𝑛𝑖𝑡𝑎̀ 𝑢𝑛 𝑓𝑟𝑎𝑚𝑚𝑒𝑛𝑡𝑜 𝑎𝑙𝑙𝑎 𝑣𝑜𝑙𝑡𝑎, 𝑓𝑖𝑛𝑐ℎ𝑒̀ 𝑎𝑛𝑐ℎ𝑒 𝑖𝑙 𝑡𝑢𝑜 𝑢𝑙𝑡𝑖𝑚𝑜 𝑟𝑒𝑠𝑝𝑖𝑟𝑜 𝑛𝑜𝑛 𝑙𝑒 𝑎𝑝𝑝𝑎𝑟𝑡𝑒𝑟𝑟𝑎̀..."
             });
 
             // 🔥 Link + menzioni
             let utenti = participants.map(u => u.id);
             await conn.sendMessage(m.chat, {
-                text: '𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/G2laiklcixkA1xYXI788T1?mode=hqrc *Anche qui* \n\nhttps://chat.whatsapp.com/JRfUGXVNaOg3Of6eQI9jDe',
+                text: '𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/DLSv8PfynEaD95HEQcWyzV',
                 mentions: utenti
             });
 
