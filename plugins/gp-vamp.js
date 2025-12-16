@@ -14,19 +14,15 @@ let handler = async (m, { conn }) => {
 
   const text = `
 ╭───────────────╮
-│ 💖 *Moglie di 𝕯𝖊ⱥ𝖉𝖑𝐲* 💖
+│ 🖤 moglie di 𝕯𝖊ⱥ𝖉𝖑𝐲 🖤
 ╰───────────────╯
 
-🌹 *Lei non è solo una ragazza.*
-È un pensiero fisso,
-un battito che non sbaglia mai.
+*Non è solo una donna.
+È il mio pensiero costante.
+Fascino che lascia il segno.
+Sovrana anche senza trono.*
 
-🖤 Forte, vera, unica  
-🔥 Bellezza che non si spegne  
-👑 Regina senza corona  
-
-💍 *La mia scelta.*
-🩸 La mia vamp.
+-𝒄𝒐𝒏 𝒍𝒆𝒊, 𝒕𝒖𝒕𝒕𝒐 𝒉𝒂 𝒔𝒆𝒏𝒔𝒐
   `.trim()
 
   await conn.sendMessage(
