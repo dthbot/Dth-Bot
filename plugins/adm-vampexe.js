@@ -1,32 +1,17 @@
-//Plugin fatto da Axtral_WiZaRd
-
 import fs from 'fs'
 
-let handler = message => message;
+let handler = async (m, { conn }) => {
+  if (!m.text) return
 
-handler.all = async function (message) {
-    if (!message.isGroup) return null;
+  if (m.text.toLowerCase().includes('vampexe')) {
+    const sticker = fs.readFileSync('./media/vampexe.webp')
 
-    let chatData = global.db.data.chats[message.chat];
-
-    if (!chatData.cinema) return null;
-
-    if (!message.text) return null;
-
-    if (/vampexe/i.test(message.text)) {
-        const stickerPath = './media/vampexe.webp';
-        const stickerData = fs.readFileSync(stickerPath);
-
-        await conn.sendMessage(
-            message.chat,
-            { sticker: stickerData },
-            { quoted: message }
-        );
-    }
-};
-
-export default handler;
-
-function pickRandom(array) {
-    return array[Math.floor(Math.random() * array.length)];
+    await conn.sendMessage(
+      m.chat,
+      { sticker },
+      { quoted: m }
+    )
+  }
 }
+
+export default handler
