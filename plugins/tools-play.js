@@ -1,133 +1,93 @@
-import axios from 'axios';
+import yts from "yt-search";
+import { spawn } from "child_process";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
-// --- CONFIGURAZIONE API ---
-// Usiamo un'API pubblica stabile per Spotify (Delirius API o simili)
-const SEARCH_API = 'https://delirius-api-oficial.vercel.app/api/search/spotify?q=';
-const DOWNLOAD_API = 'https://delirius-api-oficial.vercel.app/api/download/spotify?url=';
+function downloadYTDLPToFile(url, format = "best", filename) {
+  return new Promise((resolve, reject) => {
+    const args = ["-f", format, "-o", filename];
 
-// --- FUNZIONE DI DOWNLOAD ---
-async function spotifyDownload(url, m, conn, title) {
-    // Messaggio di attesa
-    const waitMsg = await conn.sendMessage(m.chat, { text: `🎧 Scarico da Spotify: *${title}*...` }, { quoted: m });
-
-    try {
-        // 1. Richiedi il link di download
-        const { data } = await axios.get(`${DOWNLOAD_API}${url}`);
-        
-        // Verifica se l'API ha risposto correttamente
-        if (!data || !data.status || !data.data || !data.data.url) {
-            throw new Error("L'API non ha restituito un link valido.");
-        }
-
-        const downloadUrl = data.data.url; // Link diretto MP3
-        const coverImage = data.data.image; // Copertina album
-        const artist = data.data.artist;
-
-        // 2. Invia l'audio
-        await conn.sendMessage(m.chat, { 
-            audio: { url: downloadUrl }, 
-            mimetype: "audio/mpeg",
-            fileName: `${title}.mp3`,
-            contextInfo: {
-                externalAdReply: {
-                    title: title,
-                    body: `Artista: ${artist}`,
-                    thumbnailUrl: coverImage,
-                    sourceUrl: url,
-                    mediaType: 1,
-                    renderLargerThumbnail: true
-                }
-            }
-        }, { quoted: m });
-
-        // Cancella messaggio di attesa (opzionale, o invia conferma)
-        await conn.sendMessage(m.chat, { text: `✅ *${title}* inviato!`, edit: waitMsg.key });
-
-    } catch (e) {
-        console.error(`[SpotifyDL] Errore: ${e.message}`);
-        await conn.sendMessage(m.chat, { text: `❌ Errore nel download da Spotify.\nRiprova più tardi.`, edit: waitMsg.key });
+    if (format === "bestaudio") {
+      args.push("--extract-audio", "--audio-format", "m4a", "--audio-quality", "0");
     }
+
+    args.push(url);
+
+    const ytdlp = spawn("yt-dlp", args);
+
+    let error = [];
+    ytdlp.stderr.on("data", chunk => error.push(chunk));
+
+    ytdlp.on("close", code => {
+      if (code !== 0) return reject(Buffer.concat(error).toString());
+      resolve(filename);
+    });
+  });
 }
 
-// --- HANDLER PRINCIPALE ---
-const handler = async (m, { conn, text: rawText, usedPrefix }) => {
-    try {
-        // Parsing Input
-        const btnId = m?.message?.listResponseMessage?.singleSelectReply?.selectedRowId || "";
-        const text = m.text || btnId || rawText || "";
-        
-        const command = text.replace(usedPrefix, "").trim().split(/\s+/)[0].toLowerCase();
-        
-        // Permettiamo sia .play che .spotify
-        if (!['play', 'spotify', 'song'].includes(command)) return;
+const handler = async (m, { conn, text, command }) => {
+  if (!text) return conn.reply(m.chat, "Inserisci un titolo o link YouTube", m);
 
-        const argsString = text.replace(new RegExp(`^${usedPrefix}(play|spotify|song)\\s*`), "").trim();
+  let search = await yts(text);
+  let vid = search.videos[0];
+  if (!vid) return conn.reply(m.chat, "Nessun risultato trovato", m);
 
-        // --- CASO 1: DOWNLOAD DIRETTO (Dal click della lista) ---
-        if (argsString.startsWith('sp_dl_')) {
-            // Formato ID: sp_dl_URL_TITOLO
-            const parts = argsString.substring('sp_dl_'.length).split('|||'); // Uso ||| come separatore sicuro
-            const url = parts[0];
-            const title = parts[1] || 'Canzone Spotify';
+  let url = vid.url;
+  let thumb = vid.thumbnail;
+  const tempDir = os.tmpdir();
 
-            await spotifyDownload(url, m, conn, title);
-            return;
-        }
+  try {
+    if (command === "playaudio-dl") {
+      await conn.reply(m.chat, "🎵 Ora Scarico l’audio…", m);
+      const audioFile = path.join(tempDir, `${vid.title}.m4a`.replace(/[/\\?%*:|"<>]/g, "_"));
+      await downloadYTDLPToFile(url, "bestaudio", audioFile);
 
-        // --- CASO 2: RICERCA ---
-        if (!argsString) {
-            return m.reply(`💚 *Spotify Play*\nScrivi il titolo di una canzone.\n\nEsempio:\n*${usedPrefix}play* Blinding Lights`);
-        }
+      await conn.sendMessage(
+        m.chat,
+        { audio: fs.readFileSync(audioFile), mimetype: "audio/mp4", fileName: path.basename(audioFile) },
+        { quoted: m }
+      );
 
-        await m.reply(`🔍 Cerco "*${argsString}*" su Spotify...`);
-
-        // Chiamata API Ricerca
-        const { data } = await axios.get(`${SEARCH_API}${encodeURIComponent(argsString)}`);
-
-        if (!data || !data.status || !data.data || data.data.length === 0) {
-            return m.reply('❌ Nessun risultato trovato su Spotify.');
-        }
-
-        // Prendiamo i primi 8 risultati
-        const results = data.data.slice(0, 8);
-
-        const listRows = results.map((track, index) => ({
-            title: `${index + 1}. ${track.title}`,
-            description: `👤 ${track.artist} | ⏱ ${track.duration}`,
-            // ID univoco per il download:
-            rowId: `${usedPrefix}play sp_dl_${track.url}|||${track.title}`
-        }));
-
-        const infoMessage = `
-💚 *RISULTATI SPOTIFY* 💚
-━━━━━━━━━━━━━━━━━━━
-Ho trovato *${results.length}* brani.
-Scegli quale scaricare:
-━━━━━━━━━━━━━━━━━━━
-`;
-
-        const listSections = [{
-            title: "Top Risultati Spotify",
-            rows: listRows
-        }];
-
-        // Invio List Message
-        await conn.sendMessage(m.chat, {
-            text: infoMessage.trim(),
-            title: 'Spotify Player',
-            buttonText: '🎵 Apri Lista',
-            sections: listSections,
-            listType: 1
-        }, { quoted: m });
-
-    } catch (error) {
-        console.error("Errore Spotify Plugin:", error);
-        m.reply("⚠ Errore nel plugin Spotify.");
+      fs.unlinkSync(audioFile); // pulisce il file temporaneo
+      return;
     }
+
+    if (command === "playvideo-dl") {
+      await conn.reply(m.chat, "🎬 Scarico il video…", m);
+      const videoFile = path.join(tempDir, `${vid.title}.mp4`.replace(/[/\\?%*:|"<>]/g, "_"));
+      await downloadYTDLPToFile(url, "best[ext=mp4]", videoFile);
+
+      await conn.sendMessage(
+        m.chat,
+        { video: fs.readFileSync(videoFile), mimetype: "video/mp4", fileName: path.basename(videoFile) },
+        { quoted: m }
+      );
+
+      fs.unlinkSync(videoFile);
+      return;
+    }
+
+    // 🔥 Bottoni
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: { url: thumb },
+        caption: `🎶 *${vid.title}*\n\n⏱ Durata: ${vid.timestamp}\n👁️ Visualizzazioni: ${vid.views}\n\nScegli cosa scaricare:`,
+        buttons: [
+          { buttonId: `.playaudio-dl ${url}`, buttonText: { displayText: "🎵 Scarica Audio" }, type: 1 },
+          { buttonId: `.playvideo-dl ${url}`, buttonText: { displayText: "🎬 Scarica Video" }, type: 1 }
+        ],
+        headerType: 4
+      },
+      { quoted: m }
+    );
+
+  } catch (e) {
+    console.error(e);
+    return conn.reply(m.chat, "❗ Errore durante il download", m);
+  }
 };
 
-handler.command = ['play', 'spotify', 'song'];
-handler.tags = ['media'];
-handler.help = ['.play <titolo>'];
-
+handler.command = ["play", "playaudio-dl", "playvideo-dl"];
 export default handler;
