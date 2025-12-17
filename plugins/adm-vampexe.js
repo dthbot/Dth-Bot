@@ -1,31 +1,22 @@
-// Plugin fatto da Axtral_WiZaRd (fixed for ChatUnity)
-
 import fs from 'fs'
 
-let handler = message => message
+let handler = async function (m) {
+    const stickerPath = './media/vampexe.webp'
+    if (!fs.existsSync(stickerPath)) return
 
-handler.before = async function (message) {
-    if (!message.isGroup) return
-    if (!message.text) return
-
-    let chatData = global.db.data.chats[message.chat]
-    if (!chatData || !chatData.vampexe) return
-
-    if (/vampexe/i.test(message.text)) {
-        const stickerPath = './media/vampexe.webp'
-
-        if (!fs.existsSync(stickerPath)) return
-
-        await this.sendFile(
-            message.chat,
-            stickerPath,
-            'vampexe.webp',
-            '',
-            message,
-            true,
-            { asSticker: true }
-        )
-    }
+    await this.sendFile(
+        m.chat,
+        stickerPath,
+        'vampexe.webp',
+        '',
+        m,
+        true,
+        { asSticker: true }
+    )
 }
+
+// 👇 QUESTO È IL SEGRETO
+handler.customPrefix = /vampexe/i
+handler.command = new RegExp
 
 export default handler
