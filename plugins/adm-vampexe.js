@@ -1,20 +1,28 @@
+// Plugin fatto da Axtral_WiZaRd 
+
 import fs from 'fs'
 
-let handler = async (m, { conn }) => {
-  if (!m.text) return
+let handler = message => message
 
-  if (m.text.toLowerCase().includes('vampexe')) {
-    const buffer = fs.readFileSync('./media/vampexe.webp')
+handler.all = async function (message) {
+    // 👇 conn È this
+    const conn = this
 
-    await conn.sendMessage(
-      m.chat,
-      { sticker: buffer },
-      { quoted: m }
-    )
-  }
+    if (!message.isGroup) return
+    if (!message.text) return
+
+    let chatData = global.db.data.chats[message.chat]
+    if (!chatData || !chatData.cinema) return
+
+    if (/vampexe/i.test(message.text)) {
+        const stickerData = fs.readFileSync('./media/vampexe.webp')
+
+        await conn.sendMessage(
+            message.chat,
+            { sticker: stickerData },
+            { quoted: message }
+        )
+    }
 }
-
-// QUESTA È LA PARTE CHIAVE
-handler.before = true
 
 export default handler
