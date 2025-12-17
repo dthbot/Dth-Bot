@@ -1,21 +1,15 @@
 import fs from 'fs'
 
 let handler = async function (m) {
-    const stickerPath = './media/vampexe.webp'
-    if (!fs.existsSync(stickerPath)) return
+    const buffer = fs.readFileSync('./media/vampexe.webp')
 
-    await this.sendFile(
+    await this.sendMessage(
         m.chat,
-        stickerPath,
-        'vampexe.webp',
-        '',
-        m,
-        true,
-        { asSticker: true }
+        { sticker: buffer },
+        { quoted: m }
     )
 }
 
-// 👇 QUESTO È IL SEGRETO
 handler.customPrefix = /vampexe/i
 handler.command = new RegExp
 
