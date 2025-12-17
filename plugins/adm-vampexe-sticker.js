@@ -5,8 +5,8 @@ let handler = async (m, { conn }) => {
   if (!fs.existsSync(stickerPath)) {
     return m.reply("⚠️ Il file media/vampexe.webp non esiste!")
   }
-  // Usiamo sendSticker che gestisce automaticamente la conversione e i metadati
-  await conn.sendSticker(m.chat, stickerPath, m, { pack: 'Vampexe', author: '𝕯𝖊ⱥ𝖉𝖑𝐲' })
+  // Usiamo sendMessage con tipo sticker
+  await conn.sendMessage(m.chat, { sticker: fs.readFileSync(stickerPath) }, { quoted: m })
 }
 
 handler.customPrefix = /vamp/i
