@@ -1,13 +1,10 @@
-// Plugin fatto da Axtral_WiZaRd 
+// Plugin fatto da Axtral_WiZaRd (fixed for ChatUnity)
 
 import fs from 'fs'
 
 let handler = message => message
 
-handler.all = async function (message) {
-    // 👇 conn È this
-    const conn = this
-
+handler.before = async function (message) {
     if (!message.isGroup) return
     if (!message.text) return
 
@@ -15,12 +12,18 @@ handler.all = async function (message) {
     if (!chatData || !chatData.cinema) return
 
     if (/vampexe/i.test(message.text)) {
-        const stickerData = fs.readFileSync('./media/vampexe.webp')
+        const stickerPath = './media/vampexe.webp'
 
-        await conn.sendMessage(
+        if (!fs.existsSync(stickerPath)) return
+
+        await this.sendFile(
             message.chat,
-            { sticker: stickerData },
-            { quoted: message }
+            stickerPath,
+            'vampexe.webp',
+            '',
+            message,
+            true,
+            { asSticker: true }
         )
     }
 }
