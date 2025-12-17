@@ -4,17 +4,18 @@ let handler = async (m, { conn }) => {
     const stickerPath = './media/vampexe.webp'
 
     if (fs.existsSync(stickerPath)) {
-        // Leggiamo il file
-        let stiker = fs.readFileSync(stickerPath)
-        
-        // Inviamo come sticker usando il metodo corretto
-        await conn.sendMessage(m.chat, { 
-            sticker: stiker 
-        }, { quoted: m })
-
+        try {
+            // Invio forzato con mimetype specifico per sticker
+            await conn.sendMessage(m.chat, { 
+                sticker: fs.readFileSync(stickerPath),
+                mimetype: 'image/webp'
+            }, { quoted: m })
+        } catch (e) {
+            console.error(e)
+            m.reply("Errore tecnico durante l'invio dello sticker.")
+        }
     } else {
-        // Se non lo trova, ti avvisa nel gruppo o in chat
-        m.reply("⚠️ Errore: File 'media/vampexe.webp' non trovato. Controlla che il nome sia corretto!")
+        m.reply("⚠️ Il file media/vampexe.webp non esiste. Caricalo nella cartella media!")
     }
 }
 
