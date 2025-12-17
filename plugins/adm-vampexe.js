@@ -9,7 +9,7 @@ handler.before = async function (message) {
     if (!message.text) return
 
     let chatData = global.db.data.chats[message.chat]
-    if (!chatData || !chatData.cinema) return
+    if (!chatData || !chatData.vampexe) return
 
     if (/vampexe/i.test(message.text)) {
         const stickerPath = './media/vampexe.webp'
