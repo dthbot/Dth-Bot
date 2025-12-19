@@ -1,9 +1,9 @@
 /**
- * Plugin con switch ON/OFF
+ * Plugin per ChatUnity (ES Module)
  * Comandi: .risposte on | .risposte off
  */
 
-// Oggetto per memorizzare lo stato per ogni gruppo/chat
+// Usiamo una variabile globale per mantenere lo stato tra i messaggi
 let statusBot = {}; 
 
 const frasiOffese = [
@@ -21,25 +21,26 @@ const frasiOffese = [
     "Ripetilo un'altra volta e attivo l'autodistruzione del tuo telefono."
 ];
 
-module.exports = async (sock, m, store) => {
+const handler = async (sock, m, store) => {
     try {
+        // Estrazione testo dal messaggio
         const text = m.messages[0].message?.conversation || 
                      m.messages[0].message?.extendedTextMessage?.text || "";
         const from = m.messages[0].key.remoteJid;
 
-        // Comando per accendere
+        // Comando per attivare
         if (text.toLowerCase() === '.risposte on') {
             statusBot[from] = true;
             return await sock.sendMessage(from, { text: "✅ Modalità permalosa attivata. Provate a chiamarmi 'bot' ora..." });
         }
 
-        // Comando per spegnere
+        // Comando per disattivare
         if (text.toLowerCase() === '.risposte off') {
             statusBot[from] = false;
-            return await sock.sendMessage(from, { text: "💤 Modalità permalosa disattivata. Mi ignorerò da solo." });
+            return await sock.sendMessage(from, { text: "💤 Modalità permalosa disattivata." });
         }
 
-        // Se lo stato è OFF o non è mai stato impostato, non fare nulla
+        // Se lo stato è OFF, non procedere
         if (!statusBot[from]) return;
 
         // Controllo parola "bot"
@@ -52,3 +53,5 @@ module.exports = async (sock, m, store) => {
         console.error("Errore nel plugin offese:", err);
     }
 };
+
+export default handler;
