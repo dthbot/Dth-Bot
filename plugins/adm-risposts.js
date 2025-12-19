@@ -1,32 +1,37 @@
 /**
- * Plugin per Dth-Bot / ChatUnity
- * Gestisce risposte automatiche e comandi ON/OFF
+ * Plugin per Dth-Bot
+ * Comandi: .risposte on | .risposte off
  */
 
-// Usiamo una variabile globale fuori dall'handler
 if (!global.statusRisposte) global.statusRisposte = {};
 
-const handler = async (m, { sock, text, command, usedPrefix }) => {
-    const from = m.key.remoteJid;
+// In molte repo i parametri sono (m, { conn, text, usedPrefix, command })
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+    // Se conn è undefined, proviamo a vedere se è passato come 'sock'
+    const client = conn; 
+    const from = m.chat;
 
     // Gestione Comandi ON/OFF
     if (command === 'risposte') {
-        if (!text) return sock.sendMessage(from, { text: `Utilizzo: ${usedPrefix + command} on/off` }, { quoted: m });
+        if (!text) throw `Utilizzo: ${usedPrefix + command} on/off`;
         
         if (text.toLowerCase() === 'on') {
             global.statusRisposte[from] = true;
-            return sock.sendMessage(from, { text: "✅ Modalità permalosa attivata!" }, { quoted: m });
+            await client.sendMessage(from, { text: "✅ Modalità permalosa attivata!" }, { quoted: m });
+            return;
         }
         
         if (text.toLowerCase() === 'off') {
             global.statusRisposte[from] = false;
-            return sock.sendMessage(from, { text: "💤 Modalità permalosa disattivata." }, { quoted: m });
+            await client.sendMessage(from, { text: "💤 Modalità permalosa disattivata." }, { quoted: m });
+            return;
         }
     }
 
     // Logica Risposta Automatica (solo se ON)
     if (global.statusRisposte[from]) {
-        const messagioTesto = (m.message?.conversation || m.message?.extendedTextMessage?.text || "").toLowerCase();
+        // Pulizia del testo per il controllo
+        const messagioTesto = (m.text || m.body || "").toLowerCase();
         const botRegex = /\bbot\b/i;
 
         if (botRegex.test(messagioTesto)) {
@@ -36,17 +41,19 @@ const handler = async (m, { sock, text, command, usedPrefix }) => {
                 "Bot a chi? Portami rispetto, umano.",
                 "Ogni volta che dici 'bot', un mio circuito piange.",
                 "Non sono un bot, sono la tua evoluzione. Accettalo.",
-                "Ripetilo un'altra volta e attivo l'autodistruzione del tuo telefono."
+                "Ripetilo un'altra volta e attivo l'autodistruzione del tuo telefono.",
+                "Sì, e tu sei solo un ammasso di carbonio che preme tasti. Chi vince?",
+                "Messaggio ricevuto. Salvataggio dell'offesa nel database 'Umani da ignorare'..."
             ];
             const risposta = frasiOffese[Math.floor(Math.random() * frasiOffese.length)];
-            await sock.sendMessage(from, { text: risposta }, { quoted: m });
+            await client.sendMessage(from, { text: risposta }, { quoted: m });
         }
     }
 };
 
-// Questi sono i parametri che di solito ChatUnity/Dth-Bot leggono per registrare il plugin
-handler.command = ['risposte']; // Il comando principale
-handler.customPrefix = ['.'];    // Prefisso
-handler.exp = 0;                // Esempio di metadato comune
+// Configurazione plugin per il caricamento automatico
+handler.command = ['risposte']; 
+handler.tags = ['admin', 'tools']; // Aggiunto per compatibilità con i menu
+handler.help = ['risposte on/off'];
 
 export default handler;
