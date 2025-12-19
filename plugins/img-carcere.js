@@ -59,7 +59,7 @@ let handler = async (m, { conn, args }) => {
 
     await conn.sendMessage(m.chat, {
       image: imageBuffer,
-      caption: `> *Powered by ChatUnity*`
+      caption: `> *Powered by Dth-Bot*`
     });
 
   } catch (error) {
