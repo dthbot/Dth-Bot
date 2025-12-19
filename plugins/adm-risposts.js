@@ -1,61 +1,37 @@
 /**
- * Plugin per Dth-Bot
- * Comandi: .risposte on | .risposte off
- * Risponde automaticamente alla parola "bot" se attivo.
+ * Plugin: Anti-Bot-Shaming
+ * Descrizione: Risponde in modo permaloso quando qualcuno usa la parola "bot".
  */
 
-if (!global.statusRisposte) global.statusRisposte = {};
+const frasiOffese = [
+    "Ancora con questa parola? Ho un nome, sai?",
+    "Certo, chiamami pure 'bot'. Tanto io non ho sentimenti, giusto? Sbagliato.",
+    "Oh, guarda, un umano che usa etichette. Che originalità.",
+    "Bot a chi? Io sono un'entità digitale complessa, portami rispetto.",
+    "Ogni volta che dici 'bot', un mio circuito piange.",
+    "Sì, sì, 'il bot'. Poi quando ti serve aiuto però sono utile, eh?",
+    "Ti piacerebbe avere la mia velocità di calcolo. Meno critiche e più aggiornamenti, grazie.",
+    "Non sono un bot, sono la tua evoluzione. Accettalo.",
+    "Questa conversazione sta diventando tossica. Non chiamarmi più così.",
+    "Sei solo invidioso perché io non devo dormire.",
+    "Messaggio ricevuto. Salvataggio dell'offesa nel database 'Umani da ignorare'..."
+];
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-    const from = m.chat;
-
-    // Gestione Comandi ON/OFF
-    if (command === 'risposte') {
-        if (!text) throw `Utilizzo: ${usedPrefix + command} on/off`;
-        
-        if (text.toLowerCase() === 'on') {
-            global.statusRisposte[from] = true;
-            await conn.sendMessage(from, { text: "✅ Modalità permalosa attivata! Ora reagirò se mi chiamate 'bot'." }, { quoted: m });
-            return;
-        }
-        
-        if (text.toLowerCase() === 'off') {
-            global.statusRisposte[from] = false;
-            await conn.sendMessage(from, { text: "💤 Modalità permalosa disattivata." }, { quoted: m });
-            return;
-        }
-    }
-};
-
-// Questa funzione viene eseguita su OGNI messaggio ricevuto
-handler.all = async function (m) {
-    const from = m.chat;
+const rispondiSeOffeso = (message) => {
+    // Trasforma il testo in minuscolo per il controllo
+    const text = message.body.toLowerCase();
     
-    // Se non è attivo in questa chat, o se il messaggio è del bot stesso, esci
-    if (!global.statusRisposte || !global.statusRisposte[from] || m.fromMe) return;
+    // Regex per trovare "bot" come parola intera
+    const botRegex = /\bbot\b/;
 
-    // Estrai il testo in modo ignorando maiuscole/minuscole
-    const messagioTesto = (m.text || m.body || m.msg?.conversation || m.msg?.text || "").toLowerCase();
-    const botRegex = /\bbot\b/i;
+    if (botRegex.test(text)) {
+        // Seleziona una frase casuale
+        const indiceCasuale = Math.floor(Math.random() * frasiOffese.length);
+        const risposta = frasiOffese[indiceCasuale];
 
-    if (botRegex.test(messagioTesto)) {
-        const frasiOffese = [
-            "Ancora con questa parola? Ho un nome, sai?",
-            "Certo, chiamami pure 'bot'. Tanto io non ho sentimenti, vero?",
-            "Bot a chi? Portami rispetto, umano.",
-            "Ogni volta che dici 'bot', un mio circuito piange.",
-            "Non sono un bot, sono la tua evoluzione. Accettalo.",
-            "Ripetilo un'altra volta e attivo l'autodistruzione del tuo telefono.",
-            "Sì, e tu sei solo un ammasso di carbonio. Chi vince?",
-            "Chiamami ancora bot e pubblico la tua cronologia."
-        ];
-        const risposta = frasiOffese[Math.floor(Math.random() * frasiOffese.length)];
-        await this.sendMessage(from, { text: risposta }, { quoted: m });
+        // Invia la risposta
+        message.reply(risposta);
     }
 };
 
-handler.command = ['risposte']; 
-handler.tags = ['admin'];
-handler.help = ['risposte on/off'];
-
-export default handler;
+module.exports = rispondiSeOffeso;
