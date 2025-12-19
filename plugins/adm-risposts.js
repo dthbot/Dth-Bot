@@ -35,10 +35,3 @@ const rispondiSeOffeso = (message) => {
 };
 
 module.exports = rispondiSeOffeso;
-
-
-
-
-
-
-puoi mettere le frasi che dice il bot quando qualcuno dice Bot in grassetto?
