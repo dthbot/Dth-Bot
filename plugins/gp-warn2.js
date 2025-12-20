@@ -1,7 +1,14 @@
 let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {      
     if (!m.isGroup) return m.reply('❌ Questo comando funziona solo nei gruppi')
-    if (!m.isAdmin) return m.reply('🚫 Solo gli admin possono usare questo comando')
-    if (!m.botAdmin) return m.reply('🤖 Devo essere admin per gestire i warn')
+
+    // --- Controllo admin manuale ---
+    const participants = groupMetadata.participants
+    const isAdmin = participants.find(u => u.jid === m.sender)?.admin
+    const isBotAdmin = participants.find(u => u.jid === conn.user.jid)?.admin
+
+    if (!isAdmin) return m.reply('🚫 Solo gli admin possono usare questo comando')
+    if (!isBotAdmin) return m.reply('🤖 Devo essere admin per gestire i warn')
+    // --------------------------------
 
     let who
     if (m.isGroup) {
@@ -9,6 +16,8 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
     } else {
         who = m.chat
     }
+
+    if (!who) return m.reply('⚠️ Tagga un utente o rispondi a un messaggio')
 
     // inizializza dati utente
     if (!global.db.data.users[who]) global.db.data.users[who] = {}
@@ -22,7 +31,6 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
         case 'ammonisci':
         case 'avvertimento':
         case 'warning':
-            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
             if (user.warn < MAX_WARNS - 1) {
                 user.warn += 1
                 m.reply(
@@ -46,7 +54,6 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
             break
 
         case 'unwarn':
-            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
             if (user.warn > 0) user.warn -= 1
             m.reply(
 `╭─✅ *WARN RIMOSSO*
@@ -57,7 +64,6 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
             break
 
         case 'delwarn':
-            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
             user.warn = 0
             m.reply(
 `╭─🗑️ *WARN AZZERATI*
