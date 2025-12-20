@@ -17,6 +17,8 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 ➥ P/promuovi 👑
 ➥ R/retrocevi 🤡
 ➥ Warn ☢️
+➥ Listwarn ⏳
+➥ Unwarn ❌
 ➥ Delwarn ✅
 ➥ Muta 🔇
 ➥ Smuta 🔊
