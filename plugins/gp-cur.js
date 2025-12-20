@@ -26,12 +26,16 @@ const setUser = (id, name) => {
 
 // ─── Funzioni API Last.fm ───────────────
 async function fetchNoCache(url) {
-  const res = await fetch(url)
-  return await res.json()
+  try {
+    const res = await fetch(url)
+    return await res.json()
+  } catch (e) {
+    return null
+  }
 }
 
 async function getRecentTrack(user) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${user}&api_key=${LASTFM_API_KEY}&format=json&limit=2&_=${Date.now()}`
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${user}&api_key=${LASTFM_API_KEY}&format=json&limit=1&_=${Date.now()}`
   const json = await fetchNoCache(url)
   return json?.recenttracks?.track?.[0]
 }
@@ -42,17 +46,19 @@ async function getTrackInfo(user, artist, track) {
   return json?.track
 }
 
-// ─── Funzioni popolarità ───────────────
+// ─── Funzioni popolarità (Fixata) ──────────
 function popularityBar(listeners) {
-  const max = 500000
-  const level = Math.min(10, Math.round((listeners / max) * 10))
+  const max = 1000000 
+  let level = Math.floor((listeners / max) * 10)
+  if (listeners > 0 && level === 0) level = 1
+  if (level > 10) level = 10
   return '█'.repeat(level) + '░'.repeat(10 - level)
 }
 
 function popularityLabel(listeners) {
-  if (listeners < 5000) return '🖤 Underground'
-  if (listeners < 50000) return '✨ Niche'
-  if (listeners < 200000) return '🔥 Popolare'
+  if (listeners < 10000) return '🖤 Underground'
+  if (listeners < 100000) return '✨ Niche'
+  if (listeners < 500000) return '🔥 Popolare'
   return '🌍 HIT'
 }
 
@@ -62,16 +68,13 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
   // 🔹 SETUSER
   if (command === 'setuser') {
     const username = text.trim()
-    if (!username) {
-      return conn.sendMessage(m.chat, { text: `❌ Usa: ${usedPrefix}setuser <username>` })
-    }
+    if (!username) return m.reply(`❌ Usa: ${usedPrefix}setuser <username>`)
     setUser(m.sender, username)
-    return conn.sendMessage(m.chat, { text: `✅ Username Last.fm *${username}* salvato!` })
+    return m.reply(`✅ Username Last.fm *${username}* salvato!`)
   }
 
   // 🔹 CUR
   if (command === 'cur') {
-    // Se viene menzionato qualcuno, usa il primo menzionato; altrimenti mittente
     let targetId = m.mentionedJid?.[0] || m.sender
     const user = getUser(targetId)
 
@@ -83,7 +86,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     }
 
     const track = await getRecentTrack(user)
-    if (!track) return m.reply('❌ Nessuna traccia trovata')
+    if (!track) return m.reply('❌ Nessuna traccia trovata.')
 
     const artist = track.artist['#text']
     const title = track.name
@@ -92,18 +95,16 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 
     const info = await getTrackInfo(user, artist, title)
 
-    const playcount = Number(info?.userplaycount || 0)
-    const durationMs = Number(info?.duration || 0)
-    const minutes = durationMs
-      ? Math.round((playcount * durationMs) / 60000)
-      : 0
+    // Fix Popolarità: gestione corretta dei dati numerici
+    const listeners = parseInt(info?.listeners || 0)
+    const playcount = parseInt(info?.userplaycount || 0)
+    const durationMs = parseInt(info?.duration || 0)
+    const minutes = durationMs ? Math.round((playcount * durationMs) / 60000) : 0
 
     const tags = info?.toptags?.tag
       ?.slice(0, 4)
       .map(t => `#${t.name}`)
       .join(' ') || '—'
-
-    const listeners = Number(info?.listeners || 0)
 
     const displayName = '@' + targetId.split('@')[0]
 
@@ -118,7 +119,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 🎨 Mood: ${tags}
 
 🔥 Popolarità: ${popularityBar(listeners)}
-📊 Listener: *${listeners}*
+📊 Listener totali: *${listeners.toLocaleString()}*
 🏷️ Stato: *${popularityLabel(listeners)}*
 `.trim()
 
@@ -131,8 +132,6 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
 }
 
 handler.command = ['cur', 'setuser']
-
-// Tutti i membri del gruppo possono usarlo
 handler.group = true
 
 export default handler
