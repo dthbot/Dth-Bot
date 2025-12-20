@@ -2,28 +2,30 @@ import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 
-// __dirname per ES module
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// percorso database sicuro
 const DB_DIR = path.join(__dirname, "../database")
 const DB_PATH = path.join(DB_DIR, "warns.json")
-
 const MAX_WARNS = 3
 
-// crea cartella database se non esiste
 if (!fs.existsSync(DB_DIR)) {
     fs.mkdirSync(DB_DIR, { recursive: true })
 }
 
-// crea file se non esiste
 if (!fs.existsSync(DB_PATH)) {
     fs.writeFileSync(DB_PATH, JSON.stringify({}))
 }
 
 const getDB = () => JSON.parse(fs.readFileSync(DB_PATH))
 const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2))
+
+const send = async (sock, jid, text, mentions = []) => {
+    return await sock.sendMessage(jid, {
+        text,
+        mentions
+    })
+}
 
 export default {
     name: "warn",
@@ -32,26 +34,28 @@ export default {
     desc: "Sistema warn con kick automatico",
     async exec({ sock, m, command, isAdmin, isBotAdmin }) {
 
-        if (!m.isGroup)
-            return m.reply(
+        const chat = m.chat
+
+        if (!m.isGroup) {
+            return send(sock, chat,
 `╭─❌ *ERRORE*
 │ Questo comando funziona solo nei gruppi
-╰────────────`
-            )
+╰────────────`)
+        }
 
-        if (!isAdmin)
-            return m.reply(
+        if (!isAdmin) {
+            return send(sock, chat,
 `╭─🚫 *PERMESSI*
 │ Solo gli admin possono usare questo comando
-╰────────────`
-            )
+╰────────────`)
+        }
 
-        if (!isBotAdmin)
-            return m.reply(
+        if (!isBotAdmin) {
+            return send(sock, chat,
 `╭─🤖 *BOT NON ADMIN*
 │ Devo essere admin per gestire i warn
-╰────────────`
-            )
+╰────────────`)
+        }
 
         const db = getDB()
 
@@ -60,11 +64,10 @@ export default {
             const users = Object.keys(db).filter(u => db[u] > 0)
 
             if (users.length === 0) {
-                return m.reply(
+                return send(sock, chat,
 `╭─📭 *LISTA WARN*
 │ Nessun utente ha warn
-╰────────────`
-                )
+╰────────────`)
             }
 
             let text = `╭─📋 *LISTA WARN ATTIVI*\n`
@@ -73,17 +76,17 @@ export default {
             }
             text += `╰────────────`
 
-            return m.reply(text, { mentions: users })
+            return send(sock, chat, text, users)
         }
 
         const user = m.mentionedJid?.[0]
-        if (!user)
-            return m.reply(
+        if (!user) {
+            return send(sock, chat,
 `╭─⚠️ *USO CORRETTO*
 │ Tagga un utente
 │ .${command} @user
-╰────────────`
-            )
+╰────────────`)
+        }
 
         if (!db[user]) db[user] = 0
 
@@ -93,32 +96,26 @@ export default {
             saveDB(db)
 
             if (db[user] >= MAX_WARNS) {
-                await sock.groupParticipantsUpdate(
-                    m.chat,
-                    [user],
-                    "remove"
-                )
+                await sock.groupParticipantsUpdate(chat, [user], "remove")
 
                 db[user] = 0
                 saveDB(db)
 
-                return m.reply(
+                return send(sock, chat,
 `╭─🚨 *LIMITE WARN RAGGIUNTO*
 │ 👤 Utente: @${user.split("@")[0]}
 │ ⚠️ Warn: ${MAX_WARNS}/${MAX_WARNS}
 │ 🔨 Azione: *KICK*
 ╰────────────`,
-                    { mentions: [user] }
-                )
+                [user])
             }
 
-            return m.reply(
+            return send(sock, chat,
 `╭─⚠️ *WARN AGGIUNTO*
 │ 👤 Utente: @${user.split("@")[0]}
 │ 📊 Warn: ${db[user]}/${MAX_WARNS}
 ╰────────────`,
-                { mentions: [user] }
-            )
+            [user])
         }
 
         /* ───── UNWARN ───── */
@@ -126,13 +123,12 @@ export default {
             if (db[user] > 0) db[user]--
             saveDB(db)
 
-            return m.reply(
+            return send(sock, chat,
 `╭─✅ *WARN RIMOSSO*
 │ 👤 Utente: @${user.split("@")[0]}
 │ 📊 Warn rimasti: ${db[user]}/${MAX_WARNS}
 ╰────────────`,
-                { mentions: [user] }
-            )
+            [user])
         }
 
         /* ───── DELWARN ───── */
@@ -140,13 +136,12 @@ export default {
             db[user] = 0
             saveDB(db)
 
-            return m.reply(
+            return send(sock, chat,
 `╭─🗑️ *WARN AZZERATI*
 │ 👤 Utente: @${user.split("@")[0]}
 │ 📊 Warn: 0/${MAX_WARNS}
 ╰────────────`,
-                { mentions: [user] }
-            )
+            [user])
         }
     }
                 }
