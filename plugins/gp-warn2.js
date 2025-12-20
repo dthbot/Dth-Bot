@@ -1,4 +1,4 @@
-const fs = require("fs")
+import fs from "fs"
 
 const DB_PATH = "./database/warns.json"
 const MAX_WARNS = 3
@@ -11,7 +11,7 @@ if (!fs.existsSync(DB_PATH)) {
 const getDB = () => JSON.parse(fs.readFileSync(DB_PATH))
 const saveDB = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2))
 
-module.exports = {
+export default {
     name: "warn",
     alias: ["unwarn", "delwarn", "listwarn"],
     category: "moderation",
@@ -62,7 +62,7 @@ module.exports = {
             return m.reply(text, { mentions: users })
         }
 
-        const user = m.mentionedJid[0]
+        const user = m.mentionedJid?.[0]
         if (!user)
             return m.reply(
 `╭─⚠️ *USO CORRETTO*
@@ -135,4 +135,4 @@ module.exports = {
             )
         }
     }
-  }
+}
