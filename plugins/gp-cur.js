@@ -1,4 +1,4 @@
-// gp-cur.js — Last.fm CUR + SETUSER
+// gp-cur.js — Last.fm CUR + SETUSER (Fixed Mood & Popularity)
 import fetch from 'node-fetch'
 import fs from 'fs'
 import path from 'path'
@@ -10,13 +10,10 @@ const USERS_FILE = path.join(__dirname, '..', 'lastfm_users.json')
 
 if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, '{}', 'utf8')
 
-// ─── Config ──────────────────────────────
 const LASTFM_API_KEY = '36f859a1fc4121e7f0e931806507d5f9'
 
-// ─── Funzioni utenti ─────────────────────
 const loadUsers = () => JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'))
 const saveUsers = (u) => fs.writeFileSync(USERS_FILE, JSON.stringify(u, null, 2))
-
 const getUser = (id) => loadUsers()[id] || null
 const setUser = (id, name) => {
   const users = loadUsers()
@@ -24,48 +21,50 @@ const setUser = (id, name) => {
   saveUsers(users)
 }
 
-// ─── Funzioni API Last.fm ───────────────
 async function fetchNoCache(url) {
   try {
     const res = await fetch(url)
     return await res.json()
-  } catch (e) {
-    return null
-  }
+  } catch { return null }
 }
 
+// Ottiene l'ultima traccia ascoltata
 async function getRecentTrack(user) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${user}&api_key=${LASTFM_API_KEY}&format=json&limit=1&_=${Date.now()}`
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${user}&api_key=${LASTFM_API_KEY}&format=json&limit=1`
   const json = await fetchNoCache(url)
   return json?.recenttracks?.track?.[0]
 }
 
+// Ottiene info dettagliate (Tags, Listeners, User Playcount)
 async function getTrackInfo(user, artist, track) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&username=${user}&format=json`
+  const url = `https://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&username=${user}&format=json`
   const json = await fetchNoCache(url)
   return json?.track
 }
 
-// ─── Funzioni popolarità (Fixata) ──────────
+// Fallback per i tag se la traccia non ne ha
+async function getArtistInfo(artist) {
+  const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getInfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&format=json`
+  const json = await fetchNoCache(url)
+  return json?.artist
+}
+
 function popularityBar(listeners) {
-  const max = 1000000 
-  let level = Math.floor((listeners / max) * 10)
-  if (listeners > 0 && level === 0) level = 1
-  if (level > 10) level = 10
+  const max = 2000000 // Soglia per HIT mondiale
+  let level = Math.min(10, Math.max(1, Math.round((listeners / max) * 10)))
+  if (listeners === 0) level = 0
   return '█'.repeat(level) + '░'.repeat(10 - level)
 }
 
 function popularityLabel(listeners) {
-  if (listeners < 10000) return '🖤 Underground'
-  if (listeners < 100000) return '✨ Niche'
-  if (listeners < 500000) return '🔥 Popolare'
+  if (listeners < 15000) return '🖤 Underground'
+  if (listeners < 150000) return '✨ Niche'
+  if (listeners < 600000) return '🔥 Popolare'
   return '🌍 HIT'
 }
 
-// ─── Handler ────────────────────────────
 const handler = async (m, { conn, usedPrefix, command, text }) => {
 
-  // 🔹 SETUSER
   if (command === 'setuser') {
     const username = text.trim()
     if (!username) return m.reply(`❌ Usa: ${usedPrefix}setuser <username>`)
@@ -73,53 +72,49 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     return m.reply(`✅ Username Last.fm *${username}* salvato!`)
   }
 
-  // 🔹 CUR
   if (command === 'cur') {
     let targetId = m.mentionedJid?.[0] || m.sender
     const user = getUser(targetId)
 
-    if (!user) {
-      return conn.sendMessage(m.chat, {
-        text: `❌ L'utente non ha registrato un username Last.fm.\nUsa: ${usedPrefix}setuser <username>`,
-        mentions: [targetId]
-      })
-    }
+    if (!user) return conn.sendMessage(m.chat, { text: `❌ Registrati con ${usedPrefix}setuser <username>`, mentions: [targetId] })
 
     const track = await getRecentTrack(user)
-    if (!track) return m.reply('❌ Nessuna traccia trovata.')
+    if (!track) return m.reply('❌ Nessun ascolto trovato.')
 
-    const artist = track.artist['#text']
-    const title = track.name
+    const artistName = track.artist['#text']
+    const trackName = track.name
     const album = track.album?.['#text'] || '—'
     const image = track.image?.find(i => i.size === 'extralarge')?.['#text']
 
-    const info = await getTrackInfo(user, artist, title)
+    const info = await getTrackInfo(user, artistName, trackName)
+    
+    // Gestione Tag (Mood) con fallback sull'artista
+    let tagsArr = info?.toptags?.tag || []
+    if (tagsArr.length === 0) {
+        const artistInfo = await getArtistInfo(artistName)
+        tagsArr = artistInfo?.tags?.tag || []
+    }
+    const tags = tagsArr.slice(0, 4).map(t => `#${t.name.toLowerCase()}`).join(' ') || '#music'
 
-    // Fix Popolarità: gestione corretta dei dati numerici
     const listeners = parseInt(info?.listeners || 0)
     const playcount = parseInt(info?.userplaycount || 0)
     const durationMs = parseInt(info?.duration || 0)
-    const minutes = durationMs ? Math.round((playcount * durationMs) / 60000) : 0
-
-    const tags = info?.toptags?.tag
-      ?.slice(0, 4)
-      .map(t => `#${t.name}`)
-      .join(' ') || '—'
+    const minutes = durationMs ? Math.round((playcount * durationMs) / 60000) : '—'
 
     const displayName = '@' + targetId.split('@')[0]
 
     const caption = `
 🎧 *In riproduzione di ${displayName}*
 
-🎵 *${title}*
-🎤 ${artist}
+🎵 *${trackName}*
+🎤 ${artistName}
 💿 ${album}
 
-⏱️ Minuti ascoltati da te: *${minutes}*
+⏱️ Minuti totali ascoltati: *${minutes}*
 🎨 Mood: ${tags}
 
 🔥 Popolarità: ${popularityBar(listeners)}
-📊 Listener totali: *${listeners.toLocaleString()}*
+📊 Listener: *${listeners.toLocaleString()}*
 🏷️ Stato: *${popularityLabel(listeners)}*
 `.trim()
 
@@ -135,3 +130,4 @@ handler.command = ['cur', 'setuser']
 handler.group = true
 
 export default handler
+      
