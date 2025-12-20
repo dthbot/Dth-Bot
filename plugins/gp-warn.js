@@ -18,7 +18,7 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
     if (user.warn < (war - 1)) {
         user.warn += 1
         let caption = `
-┏━━━〔 **⚠️ AVVERTIMENTO** 〕━━━┓
+┏━〔 **⚠️ AVVERTIMENTO** 〕━┓
 ┃
 ┃ 👤 **Utente:** @${who.split`@`[0]}
 ┃ 📝 **Stato:** ${user.warn} / ${war}
