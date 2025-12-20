@@ -1,9 +1,23 @@
 import fs from "fs"
+import path from "path"
+import { fileURLToPath } from "url"
 
-const DB_PATH = "./database/warns.json"
+// __dirname per ES module
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+// percorso database sicuro
+const DB_DIR = path.join(__dirname, "../database")
+const DB_PATH = path.join(DB_DIR, "warns.json")
+
 const MAX_WARNS = 3
 
-// crea database se non esiste
+// crea cartella database se non esiste
+if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true })
+}
+
+// crea file se non esiste
 if (!fs.existsSync(DB_PATH)) {
     fs.writeFileSync(DB_PATH, JSON.stringify({}))
 }
@@ -135,4 +149,4 @@ export default {
             )
         }
     }
-}
+                }
