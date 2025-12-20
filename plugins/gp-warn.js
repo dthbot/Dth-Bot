@@ -1,20 +1,27 @@
 let war = 3 // Limite massimo di avvertimenti
 
-let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {      
-    // Controllo se il plugin è disattivato (basato sulla tua istruzione salvata)
+let handler = async (m, { conn, text, args, usedPrefix, command }) => {      
+    // Controllo se il plugin è disattivato tramite il tuo comando .risposte
     if (global.db.data.chats[m.chat]?.risposte === false) return
 
     let who
     if (m.isGroup) who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : false
     else who = m.chat
 
-    if (!who) return m.reply(`*⚠️ Specifica chi vuoi ammonire!*\n\nEsempio: _${usedPrefix + command} @utente_ o rispondi a un suo messaggio.`)
-    if (!(who in global.db.data.users)) return m.reply(`*❌ L'utente non è presente nel database.*`)
+    if (!who) return m.reply(`*⚠️ Specifica un utente!*\n\nEsempio: _${usedPrefix + command} @utente_`)
+    if (!(who in global.db.data.users)) return m.reply(`*❌ Utente non trovato nel database.*`)
 
     let user = global.db.data.users[who]
     let name = await conn.getName(who)
-    user.warn = user.warn || 0 // Inizializza se non esiste
+    user.warn = user.warn || 0
 
+    // LOGICA PER RESET WARN (delwarn)
+    if (command.match(/^(delwarn|unwarn|resetwarn)$/i)) {
+        user.warn = 0
+        return conn.reply(m.chat, `✅ **RESET EFFETTUATO**\n\nGli avvertimenti di @${who.split`@`[0]} sono stati azzerati.`, m, { mentions: [who] })
+    }
+
+    // LOGICA PER AGGIUNGERE WARN (warn)
     if (user.warn < (war - 1)) {
         user.warn += 1
         let caption = `
@@ -25,17 +32,17 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━┛
 
-*Attenzione ${name}, segui le regole del gruppo per evitare l'espulsione automatica!*`.trim()
+*Attenzione ${name}, rispetta il regolamento per non essere rimosso!*`.trim()
 
         await conn.reply(m.chat, caption, m, { mentions: [who] })
     } else {
-        user.warn = 0 // Reset avvertimenti
+        user.warn = 0 
         let finalMessage = `
-┏━━━━〔 **⛔ ESPULSIONE** 〕━━━━┓
+┏━━〔 **⛔ ESPULSIONE** 〕━━┓
 ┃
 ┃ 👤 **Utente:** @${who.split`@`[0]}
 ┃ 📉 **Motivo:** Raggiunto limite warn (${war}/${war})
-┃ 🛡️ **Azione:** Rimozione immediata.
+┃ 🛡️ **Azione:** Rimozione in corso...
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━┛`.trim()
 
@@ -45,9 +52,9 @@ let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }
     }
 }
 
-handler.help = ['warn @user']
+handler.help = ['warn @user', 'delwarn @user']
 handler.tags = ['group']
-handler.command = /^(ammonisci|avvertimento|warn|warning)$/i
+handler.command = /^(ammonisci|avvertimento|warn|warning|delwarn|unwarn|resetwarn)$/i
 handler.group = true
 handler.admin = true
 handler.botAdmin = true
