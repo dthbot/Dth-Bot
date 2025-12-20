@@ -1,134 +1,94 @@
-import fs from "fs"
-import path from "path"
-import { fileURLToPath } from "url"
+let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {      
+    if (!m.isGroup) return m.reply('❌ Questo comando funziona solo nei gruppi')
+    if (!m.isAdmin) return m.reply('🚫 Solo gli admin possono usare questo comando')
+    if (!m.botAdmin) return m.reply('🤖 Devo essere admin per gestire i warn')
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+    let who
+    if (m.isGroup) {
+        who = m.mentionedJid?.[0] ? m.mentionedJid[0] : m.quoted?.sender
+    } else {
+        who = m.chat
+    }
 
-const DB_DIR = path.join(__dirname, "../database")
-const DB_PATH = path.join(DB_DIR, "warns.json")
-const MAX_WARNS = 3
+    // inizializza dati utente
+    if (!global.db.data.users[who]) global.db.data.users[who] = {}
+    if (!global.db.data.users[who].warn) global.db.data.users[who].warn = 0
 
-if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true })
-if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify({}))
+    const MAX_WARNS = 3
+    let user = global.db.data.users[who]
 
-const getDB = () => JSON.parse(fs.readFileSync(DB_PATH))
-const saveDB = (d) => fs.writeFileSync(DB_PATH, JSON.stringify(d, null, 2))
-
-export default {
-    name: "warn",
-    alias: ["unwarn", "delwarn", "listwarn"],
-    category: "moderation",
-    async exec({ sock, m, command, isAdmin, isBotAdmin }) {
-
-        const jid = m.key.remoteJid   // 🔥 QUESTO È IL FIX
-
-        const send = (text, mentions = []) => {
-            return sock.sendMessage(jid, { text, mentions })
-        }
-
-        if (!m.isGroup)
-            return send(
-`╭─❌ *ERRORE*
-│ Solo nei gruppi
-╰────────────`
-            )
-
-        if (!isAdmin)
-            return send(
-`╭─🚫 *PERMESSI*
-│ Solo admin
-╰────────────`
-            )
-
-        if (!isBotAdmin)
-            return send(
-`╭─🤖 *BOT NON ADMIN*
-│ Devo essere admin
-╰────────────`
-            )
-
-        const db = getDB()
-
-        /* ───── LISTWARN ───── */
-        if (command === "listwarn") {
-            const users = Object.keys(db).filter(u => db[u] > 0)
-
-            if (users.length === 0)
-                return send(
-`╭─📭 *LISTA WARN*
-│ Nessun warn
+    switch(command.toLowerCase()) {
+        case 'warn':
+        case 'ammonisci':
+        case 'avvertimento':
+        case 'warning':
+            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
+            if (user.warn < MAX_WARNS - 1) {
+                user.warn += 1
+                m.reply(
+`╭─⚠️ *AVVERTIMENTO*
+│ 👤 Utente: @${who.split("@")[0]}
+│ 📊 Warn: ${user.warn}/${MAX_WARNS}
 ╰────────────`
                 )
-
-            let txt = `╭─📋 *LISTA WARN*\n`
-            for (let u of users) {
-                txt += `│ 👤 @${u.split("@")[0]} → ⚠️ ${db[u]}/${MAX_WARNS}\n`
+            } else {
+                user.warn = 0
+                m.reply(
+`╭─⛔ *UTENTE RIMOSSO*
+│ 👤 Utente: @${who.split("@")[0]}
+│ ⚠️ Warn: ${MAX_WARNS}/${MAX_WARNS}
+│ 🔨 Azione: *KICK*
+╰────────────`
+                )
+                await time(1000)
+                await conn.groupParticipantsUpdate(m.chat, [who], 'remove')
             }
-            txt += `╰────────────`
+            break
 
-            return send(txt, users)
-        }
-
-        const user = m.mentionedJid?.[0]
-        if (!user)
-            return send(
-`╭─⚠️ *USO*
-│ .${command} @user
+        case 'unwarn':
+            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
+            if (user.warn > 0) user.warn -= 1
+            m.reply(
+`╭─✅ *WARN RIMOSSO*
+│ 👤 Utente: @${who.split("@")[0]}
+│ 📊 Warn: ${user.warn}/${MAX_WARNS}
 ╰────────────`
             )
+            break
 
-        if (!db[user]) db[user] = 0
+        case 'delwarn':
+            if (!who) return m.reply(`⚠️ Tagga un utente o rispondi a un messaggio`)
+            user.warn = 0
+            m.reply(
+`╭─🗑️ *WARN AZZERATI*
+│ 👤 Utente: @${who.split("@")[0]}
+│ 📊 Warn: 0/${MAX_WARNS}
+╰────────────`
+            )
+            break
 
-        /* ───── WARN ───── */
-        if (command === "warn") {
-            db[user]++
-            saveDB(db)
-
-            if (db[user] >= MAX_WARNS) {
-                await sock.groupParticipantsUpdate(jid, [user], "remove")
-                db[user] = 0
-                saveDB(db)
-
-                return send(
-`╭─🚨 *KICK*
-│ @${user.split("@")[0]}
-│ Warn ${MAX_WARNS}/${MAX_WARNS}
-╰────────────`,
-                [user])
+        case 'listwarn':
+            let list = Object.keys(global.db.data.users)
+                        .filter(u => global.db.data.users[u].warn > 0)
+            if (list.length === 0) return m.reply('📭 Nessun utente ha warn')
+            let text = `╭─📋 *LISTA WARN ATTIVI*\n`
+            for (let u of list) {
+                text += `│ 👤 @${u.split("@")[0]} → ⚠️ ${global.db.data.users[u].warn}/${MAX_WARNS}\n`
             }
-
-            return send(
-`╭─⚠️ *WARN*
-│ @${user.split("@")[0]}
-│ ${db[user]}/${MAX_WARNS}
-╰────────────`,
-            [user])
-        }
-
-        /* ───── UNWARN ───── */
-        if (command === "unwarn") {
-            if (db[user] > 0) db[user]--
-            saveDB(db)
-
-            return send(
-`╭─✅ *UNWARN*
-│ @${user.split("@")[0]}
-│ ${db[user]}/${MAX_WARNS}
-╰────────────`,
-            [user])
-        }
-
-        /* ───── DELWARN ───── */
-        if (command === "delwarn") {
-            db[user] = 0
-            saveDB(db)
-
-            return send(
-`╭─🗑️ *RESET WARN*
-│ @${user.split("@")[0]}
-╰────────────`,
-            [user])
-        }
+            text += '╰────────────'
+            m.reply(text)
+            break
     }
-                                                 }
+}
+
+// Helper
+const time = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+handler.help = ['warn @user','unwarn @user','delwarn @user','listwarn']
+handler.tags = ['group']
+handler.command = /^(ammonisci|avvertimento|warn|warning|unwarn|delwarn|listwarn)$/i
+handler.group = true
+handler.admin = true
+handler.botAdmin = true
+
+export default handler
