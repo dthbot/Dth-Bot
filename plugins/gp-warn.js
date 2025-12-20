@@ -1,48 +1,50 @@
-let war = 3 // Limite massimo di avvertimenti
+let war = 3 // Soglia massima
 
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {      
-    // Controllo se il plugin è disattivato tramite il tuo comando .risposte
+    // Controllo toggle richiesto (.risposte on/off)
     if (global.db.data.chats[m.chat]?.risposte === false) return
 
     let who
     if (m.isGroup) who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : false
     else who = m.chat
 
-    if (!who) return m.reply(`*⚠️ Specifica un utente!*\n\nEsempio: _${usedPrefix + command} @utente_`)
-    if (!(who in global.db.data.users)) return m.reply(`*❌ Utente non trovato nel database.*`)
-
+    if (!who) return m.reply(`*⚠️ Tagga qualcuno o rispondi a un suo messaggio!*\n\nEsempio: _${usedPrefix + command} @utente_`)
+    
+    // Inizializzazione dati utente se non presenti
+    if (!global.db.data.users[who]) global.db.data.users[who] = { warn: 0 }
     let user = global.db.data.users[who]
     let name = await conn.getName(who)
-    user.warn = user.warn || 0
 
-    // LOGICA PER RESET WARN (delwarn)
-    if (command.match(/^(delwarn|unwarn|resetwarn)$/i)) {
-        user.warn = 0
-        return conn.reply(m.chat, `✅ **RESET EFFETTUATO**\n\nGli avvertimenti di @${who.split`@`[0]} sono stati azzerati.`, m, { mentions: [who] })
+    // --- LOGICA TOGLIWARN ---
+    if (command === 'togliwarn') {
+        if (!user.warn || user.warn === 0) {
+            return m.reply(`⚠️ L'utente @${who.split`@`[0]} non ha alcun avvertimento da rimuovere.`, null, { mentions: [who] })
+        }
+        user.warn = 0 // Azzera tutti i warn
+        return conn.reply(m.chat, `✅ **AVVERTIMENTI AZZERATI**\n\nTutti i warn di @${who.split`@`[0]} sono stati rimossi con successo.`, m, { mentions: [who] })
     }
 
-    // LOGICA PER AGGIUNGERE WARN (warn)
-    if (user.warn < (war - 1)) {
-        user.warn += 1
+    // --- LOGICA WARN (Aggiungi) ---
+    user.warn = (user.warn || 0) + 1
+
+    if (user.warn < war) {
         let caption = `
-┏━〔 **⚠️ AVVERTIMENTO** 〕━┓
+┏━〔 *⚠️ AVVERTIMENTO* 〕━┓
 ┃
 ┃ 👤 **Utente:** @${who.split`@`[0]}
 ┃ 📝 **Stato:** ${user.warn} / ${war}
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━┛
-
-*Attenzione ${name}, rispetta il regolamento per non essere rimosso!*`.trim()
-
+`.trim()
         await conn.reply(m.chat, caption, m, { mentions: [who] })
     } else {
-        user.warn = 0 
+        user.warn = 0 // Reset per il futuro
         let finalMessage = `
-┏━━〔 **⛔ ESPULSIONE** 〕━━┓
+┏━━〔 *⛔ ESPULSIONE* 〕━━┓
 ┃
 ┃ 👤 **Utente:** @${who.split`@`[0]}
 ┃ 📉 **Motivo:** Raggiunto limite warn (${war}/${war})
-┃ 🛡️ **Azione:** Rimozione in corso...
+┃ 🛡️ **Azione:** Rimozione automatica in corso...
 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━┛`.trim()
 
@@ -52,9 +54,10 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     }
 }
 
-handler.help = ['warn @user', 'delwarn @user']
+handler.help = ['warn @user', 'togliwarn @user']
 handler.tags = ['group']
-handler.command = /^(ammonisci|avvertimento|warn|warning|delwarn|unwarn|resetwarn)$/i
+// Elenco comandi aggiornato
+handler.command = /^(warn|warning|ammonisci|togliwarn)$/i
 handler.group = true
 handler.admin = true
 handler.botAdmin = true
@@ -63,4 +66,4 @@ export default handler
 
 const time = async (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
+    }
