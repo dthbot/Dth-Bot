@@ -104,18 +104,18 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     const displayName = '@' + targetId.split('@')[0]
 
     const caption = `
-🎧 *In riproduzione di ${displayName}*
+🎧 𝐕𝐞𝐝𝐢𝐚𝐦𝐨 𝐜𝐨𝐬𝐚 𝐚𝐬𝐜𝐨𝐥𝐭𝐚 ${displayName}
 
 🎵 *${trackName}*
 🎤 ${artistName}
 💿 ${album}
 
-⏱️ Minuti totali ascoltati: *${minutes}*
-🎨 Mood: ${tags}
+⏱️ 𝐌𝐢𝐧𝐮𝐭𝐢 𝐚𝐬𝐜𝐨𝐥𝐭𝐚𝐭𝐢: *${minutes}*
+🎨 𝐌𝐨𝐨𝐝: ${tags}
 
-🔥 Popolarità: ${popularityBar(listeners)}
-📊 Listener: *${listeners.toLocaleString()}*
-🏷️ Stato: *${popularityLabel(listeners)}*
+🔥 𝐏𝐨𝐩𝐨𝐥𝐚𝐫𝐢𝐭à: ${popularityBar(listeners)}
+📊 𝐋𝐢𝐬𝐭𝐞𝐧𝐞𝐫: *${listeners.toLocaleString()}*
+🏷️ 𝐒𝐭𝐚𝐭𝐨: *${popularityLabel(listeners)}*
 `.trim()
 
     return conn.sendMessage(m.chat, {
