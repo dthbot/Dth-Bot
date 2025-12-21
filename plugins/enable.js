@@ -140,8 +140,8 @@ ${STATUS_FOOTER}
 
 };
 
-handler.help = ['attiva <feature>', 'disattiva <feature>'];
+handler.help = ['attiva <feature>', '1 <feature>', 'disattiva <feature>', '0 <feature>'];
 handler.tags = ['settings'];
-handler.command = /^(attiva|disattiva|disabilita)/i;
+handler.command = /^(attiva|1|disattiva|0|disabilita)/i;
 
 export default handler;
