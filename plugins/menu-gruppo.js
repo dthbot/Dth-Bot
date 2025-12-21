@@ -33,6 +33,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➥ Playnik 🎬
 ➥ Vecna 👹
 ➥ Chucknorris 🕵️‍♂️
+➥ Sigaretta 🚬
 ➥ Wallet 👛
 ➥ Banca 🏦
 ➥ Ruba 🕵🏽
