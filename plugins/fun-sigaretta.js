@@ -79,8 +79,8 @@ const handler = async (m, { conn, usedPrefix = '.' }) => {
     
     const caption = `${title}
 
-Benvenuto nella *guida passo-passo* per rollare una sigaretta con tabacco legale!  
-Questa guida è pensata **solo per adulti**, in modo responsabile, e con un tono informativo.
+Benvenuto nella *guida passo-passo* per rollare una sigaretta oppure un cannone!  
+Questa guida è pensata *solo per adulti**, in modo responsabile.
 
 👇 *Scegli uno step* per proseguire:`;
 
