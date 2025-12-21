@@ -17,7 +17,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Immagine 2
 ➤ Immagine 3
 
-📄 *TESTO & UTILITÀz
+📄 *TESTO & UTILITÀ*
 ➤ Riassunto
 ➤ Ricetta
 ════════════════════
