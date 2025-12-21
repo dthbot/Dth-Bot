@@ -50,6 +50,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➥ Zizzania 🤡
 ➥ Obbligo 🚫
 ➥ Ditalino 💋
+➥ Pene 🍆
 ➥ Sega 💋
 ➥ Scopa 💋
 ➥ Insulta 😹
