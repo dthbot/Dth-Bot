@@ -34,11 +34,6 @@ const handler = async (message, { conn, usedPrefix = '.', command }) => {
 
 ─────────────────────
 
-➥ Consigliafilm 🎬
-➥ Pokeball 🏐
-➥ Agejob 👾
-➥ Sigaretta 🚬
-➥ Bestemmiometro on/off 😠
 ➥ Rsban 👾
 ➥ Ping 🚀
 ➥ Staff 🤖
