@@ -14,22 +14,23 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 
     // NUOVO MENU TESTO
     const menuText = `
-⚡𝑴𝑬𝑵𝑼 𝑶𝑾𝑵𝑬𝑹⚡
-╔═══════════════════╗
+⚡ 𝑴𝑬𝑵𝑼 𝑶𝑾𝑵𝑬𝑹 ⚡
+════════════════════
+🚫 *GESTIONE UTENTI*
+➤ Banuser 🔇
+➤ Unbanuser 🔊
 
-➥ Banuser 🔇
-➥ Unbanuser 🔊
-➥ Join + Link ⚠️
-➥ Out 👋
-➥ Deathdomina ☠️
-➥ BigTag 📢
-➥ bonoir (afk mode) 🚫
-➥ wakeywakey ✅
-➥ Aggiorna 🌐
+👋 *GESTIONE BOT*
+➤ Join + Link ⚠️
+➤ Out 👋
+➤ Aggiorna 🌐
 
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* *2.0*
-
-╚═══════════════════╝
+📢 *FUNZIONI SPECIALI* 
+➤ BigTag
+➤ Bonoir (AFK mode) 🚫
+➤ Wakeywakey ✅
+════════════════════
+🔖 Versione: 2.0
 `.trim();
 
     const imagePath = path.join(__dirname, '../media/owner.jpeg');
