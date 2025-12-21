@@ -11,31 +11,41 @@ const __dirname = path.dirname(__filename);
 const handler = async (message, { conn, usedPrefix, command }) => {
 
     const menuText = `
-⚡𝑴𝑬𝑵𝑼 𝑨𝑫𝑴𝑰𝑵⚡
-╔═══════════════════╗
+⚙️ 𝑴𝑬𝑵𝑼 𝐀𝐃𝐌𝐈𝐍 / 𝐆𝐑𝐔𝐏𝐏𝐎 ⚙️
+════════════════════
+👑 *GESTIONE RUOLI*
+➤ P / Promuovi
+➤ R / Retrocedi
+➤ Admins
 
-➥ P/promuovi 👑
-➥ R/retrocevi 🤡
-➥ Warn ☢️
-➥ Listwarn ⏳
-➥ Unwarn ❌
-➥ Delwarn ✅
-➥ Muta 🔇
-➥ Smuta 🔊
-➥ Tag 💬
-➥ Aperto 🔓
-➥ Chiuso 🔒
-➥ Inattivi ⏰
-➥ Admins 👑
-➥ Kick 👋
-➥ SetBye ⛓️
-➥ SetBenvenuto ⛓️
-➥ Link ⚠️
-➥ Linkqr ⚠️
+⚠️ *WARN & DISCIPLINA*
+➤ Warn
+➤ Listwarn
+➤ Unwarn
+➤ Delwarn
 
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* *2.0*
+🔇 *CONTROLLO CHAT* 
+➤ Muta
+➤ Smuta
+➤ Tag
 
-╚═══════════════════╝
+🔒 *IMPOSTAZIONI GRUPPO*
+➤ Aperto
+➤ Chiuso
+➤ Inattivi
+
+👋 *UTENTI*
+➤ Kick
+
+⛓️ *MESSAGGI AUTOMATICI*
+➤ SetBye
+➤ SetBenvenuto
+
+🔗 *LINK*
+➤ Link
+➤ Linkqr
+════════════════════
+🔖 Versione: 2.0
 `.trim();
 
     const imagePath = path.join(__dirname, '../media/admin.jpeg');
