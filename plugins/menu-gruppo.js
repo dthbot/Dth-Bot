@@ -13,8 +13,7 @@ const handler = async (message, { conn, usedPrefix }) => {
  ➥ Meteo (città) 🌍
 ➥ Orario (città) 🕒
 ➥ Id (gruppo) 🆔
-➥ Cercaimg (cerca immagine) 🔍
-➥ Sticker 🎞️
+➥ S/Sticker 🎞️
 ➥ Png 🖼️
 ➥ Hd 📷
 ➥ Rimuovisfondo (foto) 🖼️
@@ -30,9 +29,6 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➥ Bandiera 🏳️
 ➥ Ic 🎼
 ➥ Auto 🚗
-➥ Playnik 🎬
-➥ Vecna 👹
-➥ Chucknorris 🕵️‍♂️
 ➥ Sigaretta 🚬
 ➥ Wallet 👛
 ➥ Banca 🏦
@@ -51,6 +47,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➥ Zizzania 🤡
 ➥ Obbligo 🚫
 ➥ Ditalino 💋
+➥ Tette [@] 💦
 ➥ Pene 🍆
 ➥ Sega 💋
 ➥ Scopa 💋
