@@ -29,17 +29,18 @@ const handler = async (message, { conn, usedPrefix = '.', command }) => {
     // ===== TUO MENU TESTUALE PERSONALIZZATO =====
     const extraMenu = `\n🏠 *MENU PRINCIPALE*
 
-*Founder* :
-➥ 𝕯𝖊ⱥ𝖉𝖑𝐲 💀
-
-─────────────────────
-
-➥ Rsban 👾
-➥ Ping 🚀
-➥ Staff 🤖
-➥ Creatore 👑
-
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* ${vs}
+👑 FOUNDER 👑
+════════════════════
+💀 *Founder*
+➤ 𝕯𝖊ⱥ𝖉𝖑𝐲
+════════════════════
+⚙️ *COMANDI*
+➤ Rsban 👾
+➤ Ping 🚀
+➤ Staff 🤖
+➤ Creatore 👑
+════════════════════
+🔖 Versione: ${vs}
 `;
 
     const menuText = generateMenuText(userCount) + extraMenu;
