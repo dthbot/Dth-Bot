@@ -41,6 +41,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➥ Divorzia 💔
 ➥ Amore 🩷
 ➥ Bacia 💋
+➥ Teletrasporto [@] 🔮
 ➥ Mira [@] 🔫
 ➥ Sborra [@] 💦
 ➥ Pompino [@] 🥱
