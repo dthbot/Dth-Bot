@@ -1,25 +1,35 @@
-let handler = async (m, { conn, command, text }) => {
-    // Calcolo della percentuale di rincoglionimento
-    let percentage = Math.floor(Math.random() * 101);
+let handler = async (m, { conn }) => {
+    // Controllo: serve una persona taggata
+    if (!m.mentionedJid || !m.mentionedJid[0]) {
+        return m.reply('❌ Devi taggare una persona\nEsempio: .rincoglionito @utente')
+    }
 
-    // Frase finale basata sulla percentuale
-    let finalPhrase = percentage >= 50 
-        ? "🤔 *Wow, la situazione è grave! Potrebbe essere troppo tardi...*" 
-        : "😅 *C'è ancora speranza, ma attenzione!*";
+    let target = m.mentionedJid[0]
+    let user = target.split('@')[0]
 
-    // Messaggio completo
+    // Calcolo della percentuale
+    let percentage = Math.floor(Math.random() * 101)
+
+    // Frase finale
+    let finalPhrase = percentage >= 50
+        ? "🤔 *Wow, la situazione è grave! Potrebbe essere troppo tardi...*"
+        : "😅 *C'è ancora speranza, ma attenzione!*"
+
     let message = `
 ━━━━━━━━━━━━━━━━━━━━━━━
 🤪 *CALCOLATORE DI RINCOGLIONIMENTO* 🤪
 ━━━━━━━━━━━━━━━━━━━━━━━
-😵 *${text} è rincoglionito al:*  
+😵 *@${user}* è rincoglionito al:  
 💥 *${percentage}%* di livello! 💥
 ━━━━━━━━━━━━━━━━━━━━━━━
 ${finalPhrase}
-`.trim();
+`.trim()
 
-    m.reply(message, null, { mentions: conn.parseMention(message) });
-};
+    m.reply(message, null, { mentions: [target] })
+}
 
-handler.command = /^(rincoglionito)$/i;
-export default handler;
+handler.help = ['rincoglionito @utente']
+handler.tags = ['fun']
+handler.command = /^(rincoglionito)$/i
+
+export default handler
