@@ -7,55 +7,70 @@ const __dirname = path.dirname(__filename);
 const handler = async (message, { conn, usedPrefix }) => {
 
     const menuText = `
-⚡𝑴𝑬𝑵𝑼 𝐆𝐑𝐔𝐏𝐏𝐎⚡
-╔═══════════════════╗
+⚡ 𝑴𝑬𝑵𝑼 𝐆𝐑𝐔𝐏𝐏𝐎 ⚡
+════════════════════
+🌍 *INFO & UTILITÀ*
+➤ Meteo (città)
+➤ Orario (città)
+➤ Id (gruppo)
 
- ➥ Meteo (città) 🌍
-➥ Orario (città) 🕒
-➥ Id (gruppo) 🆔
-➥ S/Sticker 🎞️
-➥ Png 🖼️
-➥ Hd 📷
-➥ Rimuovisfondo (foto) 🖼️
-➥ Bonk 🫢
-➥ Hornycard [@] 😮‍💨
-➥ Stupido/a [@] 🫥
-➥ Wanted [@] 🤯
-➥ Nokia [@] 📱
-➥ Carcere [@] 🚔
-➥ Tris ⭕
-➥ Dado 🎲
-➥ Slot 🎰
-➥ Bandiera 🏳️
-➥ Ic 🎼
-➥ Auto 🚗
-➥ Sigaretta 🚬
-➥ Wallet 👛
-➥ Banca 🏦
-➥ Ruba 🕵🏽
-➥ Sposa 💍
-➥ Divorzia 💔
-➥ Amore 🩷
-➥ Bacia 💋
-➥ Teletrasporto [@] 🔮
-➥ Mira [@] 🔫
-➥ Sborra [@] 💦
-➥ Pompino [@] 🥱
-➥ Odio 😡
-➥ Rizz 🤩
-➥ Minaccia ☠️
-➥ Zizzania 🤡
-➥ Obbligo 🚫
-➥ Ditalino 💋
-➥ Tette [@] 💦
-➥ Pene 🍆
-➥ Sega 💋
-➥ Scopa 💋
-➥ Insulta 😹
+🖼️ *MEDIA & GRAFICA*
+➤ S / Sticker
+➤ Png
+➤ Hd
+➤ Rimuovisfondo (foto)
 
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* *2.0*
+🎮 *GIOCHI & RANDOM* 
+➤ Tris ⭕
+➤ Dado 🎲
+➤ Slot 🎰
+➤ Bandiera 🏳️
 
-╚═══════════════════╝
+👤 *TAG & INTERAZIONI*
+➤ Bonk 🫢
+➤ Hornycard [@]
+➤ Stupido/a [@]
+➤ Wanted [@]
+➤ Nokia [@]
+➤ Carcere [@]
+➤ Teletrasporto [@]
+➤ Rincoglionito [@]
+➤ Mira [@]
+
+💬 *SOCIAL & AZIONI*
+➤ Bacia 💋
+➤ Amore 🩷
+➤ Odio 😡
+➤ Rizz 🤩
+➤ Minaccia ☠️
+➤ Zizzania 🤡
+➤ Obbligo 🚫
+➤ Insulta 😹
+
+💍 *RELAZIONI*
+➤ Sposa 💍
+➤ Divorzia 💔
+
+💰 *ECONOMIA*
+➤ Wallet 👛
+➤ Banca 🏦
+➤ Ruba 🕵🏽
+
+🎭 *VARIE*
+➤ Ic 🎼
+➤ Auto 🚗
+➤ Sigaretta 🚬
+
+🔞 *NSFW*
+➤ Tette [@]
+➤ Pene
+➤ Sega
+➤ Scopa
+➤ Sborra
+➤ Pompino
+➤ Ditalino
+════════════════════
+🔖 Versione: 2.0
 `.trim();
 
     const imagePath = path.join(__dirname, '../media/gruppo.jpeg');
