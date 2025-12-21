@@ -8,25 +8,30 @@ const __dirname = path.dirname(__filename)
 let handler = async (m, { conn, usedPrefix }) => {
 
   const menuText = `
-⚡𝑴𝑬𝑵𝑼 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈⚡
-╔═══════════════════╗
-.attiva (funzione)
-.disattiva (funzione)
+⚡ 𝑴𝑬𝑵𝑼 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈 ⚡
+════════════════════
+🛠️ *COMANDI BASE*
+➤ .attiva (funzione)
+➤ .disattiva (funzione)
 
-➥ Benvenuto
-➥ AntiSpam
-➥ AntiTrava
-➥ AntiNuke
-➥ AntiBestemmie
-➥ SoloAdmin
-➥ AntiBot
-➥ AntiMedia
-➥ AntiTikTok
-➥ AntiLink
-➥ AntiInsta
+🛡️ *PROTEZIONIz 
+➤ AntiSpam
+➤ AntiTrava
+➤ AntiNuke
+➤ AntiBestemmie
+➤ AntiBot
 
-*Versione*: *2.0*
-╚═══════════════════╝
+🔒 *CONTROLLO GRUPPO* 
+➤ SoloAdmin
+➤ AntiMedia
+➤ AntiLink
+➤ AntiTikTok
+➤ AntiInsta
+
+👋 *BENVENUTO*
+➤ Benvenuto
+════════════════════
+🔖 Versione: 2.0
 `.trim()
 
   const imagePath = path.join(__dirname, '../media/sicurezza.jpeg')
@@ -48,6 +53,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 handler.help = ['menusicurezza']
 handler.tags = ['menu']
-handler.command = /^(menusicurezza)$/i
+handler.command = /^(menusicurezza|funzioni)$/i
 
 export default handler
