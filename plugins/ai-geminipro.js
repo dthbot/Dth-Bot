@@ -1,70 +1,79 @@
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'
 
 const API_KEYS = [
-  "AIzaSyDgwJzvsyHXL-QepGP72t835XY2X57EWDA",
-  "AIzaSyBm3KriW-iEwe2kR7KVg8WoOZVYoLqjis8"
-];
+  "AIzaSyC_3aCK0G894f8LbeGNEXVwQA9Fcpp1Ci8",
+  "AIzaSyCXOXepZsNuxH0ChqsuO6gJQIc8wPyrl5Q"
+]
 
+// ===============================
+// FUNZIONE GEMINI
+// ===============================
 async function queryGemini(prompt) {
   for (let i = 0; i < API_KEYS.length; i++) {
-    const key = API_KEYS[i];
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+    const key = API_KEYS[i]
 
+    try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${key}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          }),
-          signal: controller.signal
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: prompt }]
+              }
+            ]
+          })
         }
-      );
+      )
 
-      clearTimeout(timeout);
+      if (!response.ok) {
+        const err = await response.text()
+        console.error(`❌ Gemini key ${i + 1} errore:`, err)
+        continue
+      }
 
-      if (!response.ok) continue;
+      const data = await response.json()
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text
 
-      const data = await response.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (reply) return reply
 
-      if (reply) return reply;
-
-    } catch (err) {
-      console.warn(`Chiave ${i + 1} fallita`);
+    } catch (e) {
+      console.warn(`⚠️ Gemini key ${i + 1} non valida`)
     }
   }
 
-  return "❌ Nessuna risposta valida da Gemini.";
+  return "❌ Gemini non ha risposto. Riprova più tardi."
 }
 
+// ===============================
 // HANDLER
-var handler = async (m, { conn, text, usedPrefix, command }) => {
+// ===============================
+var handler = async (m, { conn, text }) => {
   if (!text) {
-    return m.reply("Scrivi qualcosa dopo il comando.");
+    return m.reply("✏️ Scrivi qualcosa dopo il comando.\nEsempio: .ia ciao")
   }
 
   try {
-    await conn.sendPresenceUpdate('composing', m.chat);
+    await conn.sendPresenceUpdate('composing', m.chat)
 
-    const prompt = text; // meglio NON forzare "sei gemini..."
-    const reply = await queryGemini(prompt);
-
-    await m.reply(reply);
+    const reply = await queryGemini(text)
+    await m.reply(reply)
 
   } catch (e) {
-    console.error(e);
-    await m.reply("⚠️ Errore durante la richiesta a Gemini.");
+    console.error(e)
+    await m.reply("⚠️ Errore durante la richiesta a Gemini.")
   }
-};
+}
 
-// COMANDI
-handler.command = ['ia', 'gemini', 'geminipro'];
-handler.help = ['ia <testo>'];
-handler.tags = ['tools'];
-handler.premium = false;
+// ===============================
+// CONFIG COMANDI
+// ===============================
+handler.command = ['ia', 'gemini']
+handler.tags = ['tools']
+handler.help = ['ia <testo>']
+handler.premium = false
 
-export default handler;
+export default handler
