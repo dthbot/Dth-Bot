@@ -5,21 +5,23 @@ const handler = async (message, { conn, usedPrefix }) => {
     const imagePath = './media/ia.jpeg';
 
     const menuText = `
-⚡𝑴𝑬𝑵𝑼 𝑰𝑨⚡
-╔═══════════════════╗
+⚡ 𝑴𝑬𝑵𝑼 𝑰𝑨 ⚡
+════════════════════
+🤖 *CHAT INTELLIGENTE*
+➤ Ia
+➤ Gemini
+➤ ChatGBT
 
-➥ Ia 🤖
-➥ Gemini 🤖
-➥ ChatGBT 🤖
-➥ Immagine 🖼️
-➥ Immagine 2 🖼️
-➥ Immagine 3 🖼️
-➥ Riassunto 💬
-➥ Ricetta 📃
+🖼️ *GENERAZIONE IMMAGINI*
+➤ Immagine
+➤ Immagine 2
+➤ Immagine 3
 
-*𝑽𝑬𝑹𝑺𝑰𝑶𝑵𝑬:* *2.0*
-
-╚═══════════════════╝
+📄 *TESTO & UTILITÀz
+➤ Riassunto
+➤ Ricetta
+════════════════════
+🔖 Versione: 2.0
 `.trim();
 
     await conn.sendMessage(message.chat, {
