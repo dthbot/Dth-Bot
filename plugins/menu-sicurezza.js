@@ -25,15 +25,24 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➥ AntiLink
 ➥ AntiInsta
 
-Versione: 1.0
+*Versione*: *2.0*
 ╚═══════════════════╝
 `.trim()
 
   const imagePath = path.join(__dirname, '../media/sicurezza.jpeg')
 
   await conn.sendMessage(m.chat, {
-    image: fs.readFileSync(imagePath),
-    caption: menuText
+    image: { url: imagePath },
+    caption: menuText,
+    buttons: [
+        { buttonId: `${usedPrefix}menu`, buttonText: { displayText: "🏠 Menu Principale" }, type: 1 },
+        { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: "🛡️ Menu Admin" }, type: 1 },
+        { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: "💎 Menu Owner" }, type: 1 },
+        { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: "👥 Menu Gruppo" }, type: 1 },
+        { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: "🤖 Menu IA" }, type: 1 }
+    ],
+    viewOnce: true,
+    headerType: 4
   }, { quoted: m })
 }
 
