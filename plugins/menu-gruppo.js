@@ -36,6 +36,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Teletrasporto [@]
 ➤ Rincoglionito [@]
 ➤ Mira [@]
+➤ Hotdog [@]
 
 💬 *SOCIAL & AZIONI*
 ➤ Bacia 💋
