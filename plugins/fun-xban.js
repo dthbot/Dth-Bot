@@ -1,19 +1,21 @@
 let delay = ms => new Promise(res => setTimeout(res, ms));
 
 let handler = async (m, { conn, args }) => {
-
   if (!args[0]) {
     return m.reply('❌ Usa il comando così:\n*.xban 393xxxxxxxxx*');
   }
 
-  // Numero originale
-  let rawNumber = args[0];
+  // Pulisce il numero (toglie +, spazi, ecc.)
+  let number = args.join('').replace(/\D/g, '');
 
-  // Controllo prefisso +1
-  if (rawNumber.startsWith('+1') || rawNumber.startsWith('1')) {
-    let num = rawNumber.replace(/\D/g, '');
-    let jid = num + '@s.whatsapp.net';
+  // Controllo validità minima
+  if (number.length < 8) {
+    return m.reply('❌ Numero non valido');
+  }
 
+  // Controllo prefisso +1 (USA)
+  if (number.startsWith('1')) {
+    let jid = number + '@s.whatsapp.net';
     return conn.reply(
       m.chat,
       `😭 Non posso bannarti perché hai il +1`,
@@ -22,8 +24,6 @@ let handler = async (m, { conn, args }) => {
     );
   }
 
-  // Pulizia numero
-  let number = rawNumber.replace(/\D/g, '');
   let jid = number + '@s.whatsapp.net';
   let target = '@' + number;
 
@@ -35,9 +35,7 @@ let handler = async (m, { conn, args }) => {
   ];
 
   for (let msg of messages) {
-    await conn.reply(m.chat, msg, m, {
-      mentions: [jid]
-    });
+    await conn.reply(m.chat, msg, m, { mentions: [jid] });
     await delay(2000);
   }
 };
