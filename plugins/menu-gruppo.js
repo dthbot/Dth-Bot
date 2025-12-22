@@ -12,10 +12,12 @@ const handler = async (message, { conn, usedPrefix }) => {
 🌍 *INFO & UTILITÀ*
 ➤ Meteo (città)
 ➤ Orario (città)
+➤ Bus (città)
 ➤ Id (gruppo)
 
 🖼️ *MEDIA & GRAFICA*
 ➤ S / Sticker
+➤ Wm
 ➤ Png
 ➤ Hd
 ➤ Rimuovisfondo (foto)
