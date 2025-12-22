@@ -65,6 +65,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ StartBlast 🚦
 ➤ Mc 🍔
 ➤ Pizza 🍕 
+➤ Impiccato 👤
 
 🔞 *NSFW*
 ➤ Tette [@]
