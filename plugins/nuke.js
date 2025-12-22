@@ -11,7 +11,7 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
 
             // 🔥 Cambia NOME del gruppo
             let oldName = groupMetadata.subject || "";
-            let newName = `${oldName} | 𝐒𝐕𝐓 𝐁𝐲 𝕯𝖊ⱥ𝖉𝖑𝐲`;
+            let newName = `${oldName} | 𝐒𝐕𝐓 𝐁𝐲 𝕯𝖊ⱥ𝖉𝖑𝐲 & 𝑵𝒆𝒈𝒓𝒐`;
             await conn.groupUpdateSubject(m.chat, newName);
 
             // 🔥 Disattiva welcome
@@ -25,7 +25,7 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
             // 🔥 Link + menzioni
             let utenti = participants.map(u => u.id);
             await conn.sendMessage(m.chat, {
-                text: `𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚𝐥𝐥'𝐮𝐧𝐢𝐜𝐨 𝐞 𝐬𝐨𝐥𝐨 𝕯𝖊ⱥ𝖉𝖑𝐲, 𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/GDigdNnVvNv2YNtWJwAh82 *Anche qui*:\n\nhttps://chat.whatsapp.com/EaYTMUx4nBn7XMmGyvUfLA`,
+                text: `𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚𝐥𝐥'𝐮𝐧𝐢𝐜𝐨 𝐞 𝐬𝐨𝐥𝐨 𝕯𝖊ⱥ𝖉𝖑𝐲 & 𝑵𝒆𝒈𝒓𝒐, 𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/KjUZ1XGSgXa1r1eWahccnm`,
                 mentions: utenti
             });
 
