@@ -1,56 +1,113 @@
-let handler = async (m, { conn, command, text, args, usedPrefix }) => {
-  const words = ['javascript', 'nodejs', 'programming', 'hangman', 'developer']; // Parole da indovinare
-  const chosenWord = words[Math.floor(Math.random() * words.length)]; // Scegli una parola casuale
-  let guessedWord = Array(chosenWord.length).fill('_'); // Stato attuale della parola
-  let attempts = 6; // Numero di tentativi
-  let wrongGuesses = []; // Lettere sbagliate
+let handler = async (m, { conn, command }) => {
 
-  let testo = `🎮 *Gioco dell'Impiccato* 🎮\n\n` +
-              `Indovina la parola:\n${guessedWord.join(' ')}\n\n` +
-              `Tentativi rimanenti: ${attempts}\n\n` +
-              `Lettere sbagliate: ${wrongGuesses.join(', ') || 'Nessuna'}`;
+  conn.impiccato = conn.impiccato || {};
 
-  conn.reply(m.chat, testo, m);
+  if (conn.impiccato[m.chat]) {
+    return m.reply('🎮 C\'è già una partita in corso!\nRispondi al messaggio del bot.');
+  }
 
-  const filter = (msg) => msg.sender === m.sender && /^[a-z]$/i.test(msg.text); // Controlla input valido (una lettera)
-  const collector = conn.createMessageCollector(m.chat, filter, { time: 60000 }); // Timeout 1 minuto
+  // Lista di parole più lunga
+  const words = [
+    'javascript', 'nodejs', 'programmazione', 'developer', 'bot',
+    'hangman', 'python', 'java', 'react', 'angular', 'vue', 
+    'typescript', 'html', 'css', 'database', 'mongodb', 'sql',
+    'algorithm', 'function', 'variable', 'object', 'array', 'loop',
+    'debug', 'compile', 'server', 'client', 'api', 'frontend', 'backend'
+  ];
 
-  collector.on('collect', async (msg) => {
-    const letter = msg.text.toLowerCase();
-    if (wrongGuesses.includes(letter) || guessedWord.includes(letter)) {
-      return conn.reply(m.chat, `❌ Hai già provato questa lettera!`, m);
+  const chosenWord = words[Math.floor(Math.random() * words.length)];
+
+  let game = {
+    word: chosenWord,
+    guessed: Array(chosenWord.length).fill('_'),
+    attempts: 6,
+    wrong: [],
+    starter: m.sender
+  };
+
+  conn.impiccato[m.chat] = game;
+
+  let text =
+`🎮 *GIOCO DELL’IMPICCATO* 🎮
+
+${game.guessed.join(' ')}
+
+❤️ Tentativi: ${game.attempts}
+❌ Errori: ${game.wrong.join(', ') || 'Nessuno'}
+
+📩 *Rispondi a questo messaggio* con una lettera o con la parola`;
+
+  let sent = await conn.reply(m.chat, text, m);
+  game.msgId = sent.key.id;
+
+  setTimeout(() => {
+    if (conn.impiccato[m.chat]) {
+      delete conn.impiccato[m.chat];
+      conn.reply(m.chat, `⏳ Tempo scaduto!\nLa parola era *${chosenWord}*`);
     }
-
-    if (chosenWord.includes(letter)) {
-      for (let i = 0; i < chosenWord.length; i++) {
-        if (chosenWord[i] === letter) guessedWord[i] = letter;
-      }
-      if (guessedWord.join('') === chosenWord) {
-        collector.stop('won');
-        return conn.reply(m.chat, `🎉 Hai vinto! La parola era *${chosenWord}* 🎉`, m);
-      }
-    } else {
-      wrongGuesses.push(letter);
-      attempts--;
-      if (attempts === 0) {
-        collector.stop('lost');
-        return conn.reply(m.chat, `💀 Hai perso! La parola era *${chosenWord}* 💀`, m);
-      }
-    }
-
-    testo = `🎮 *Gioco dell'Impiccato* 🎮\n\n` +
-            `Indovina la parola:\n${guessedWord.join(' ')}\n\n` +
-            `Tentativi rimanenti: ${attempts}\n\n` +
-            `Lettere sbagliate: ${wrongGuesses.join(', ') || 'Nessuna'}`;
-    conn.reply(m.chat, testo, m);
-  });
-
-  collector.on('end', (_, reason) => {
-    if (reason === 'time') {
-      conn.reply(m.chat, `⏳ Tempo scaduto! La parola era *${chosenWord}*`, m);
-    }
-  });
+  }, 60000);
 };
 
-handler.command = /^impiccato$/i; // Comando per avviare il gioco
+// === GESTIONE RISPOSTE ===
+handler.before = async (m, { conn }) => {
+  conn.impiccato = conn.impiccato || {};
+  let game = conn.impiccato[m.chat];
+  if (!game) return;
+
+  if (!m.quoted || m.quoted.id !== game.msgId) return;
+
+  if (m.sender !== game.starter) return;
+
+  let input = m.text.toLowerCase().trim();
+  if (!input) return;
+
+  if (input.length > 1) {
+    if (input === game.word) {
+      delete conn.impiccato[m.chat];
+      return conn.reply(m.chat, `🎉 *HAI VINTO!*\nLa parola era *${game.word}*`);
+    } else {
+      game.attempts--;
+    }
+  } else {
+    if (game.wrong.includes(input) || game.guessed.includes(input)) {
+      return m.reply('❌ Lettera già usata!');
+    }
+
+    if (game.word.includes(input)) {
+      for (let i = 0; i < game.word.length; i++) {
+        if (game.word[i] === input) game.guessed[i] = input;
+      }
+    } else {
+      game.wrong.push(input);
+      game.attempts--;
+    }
+  }
+
+  if (game.guessed.join('') === game.word) {
+    delete conn.impiccato[m.chat];
+    return conn.reply(m.chat, `🎉 *HAI VINTO!*\nLa parola era *${game.word}*`);
+  }
+
+  if (game.attempts <= 0) {
+    delete conn.impiccato[m.chat];
+    return conn.reply(m.chat, `💀 *HAI PERSO!*\nLa parola era *${game.word}*`);
+  }
+
+  let update =
+`🎮 *IMPICCATO* 🎮
+
+${game.guessed.join(' ')}
+
+❤️ Tentativi: ${game.attempts}
+❌ Errori: ${game.wrong.join(', ') || 'Nessuno'}
+
+📩 Rispondi a questo messaggio`;
+
+  conn.reply(m.chat, update);
+};
+
+handler.command = /^impiccato$/i;
+handler.tags = ['game'];
+handler.help = ['impiccato'];
+
 export default handler;
