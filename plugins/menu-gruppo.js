@@ -40,6 +40,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 💬 *SOCIAL & AZIONI*
 ➤ Bacia 💋
 ➤ Amore 🩷
+➤ Trovafida ❤️
 ➤ Odio 😡
 ➤ Rizz 🤩
 ➤ Minaccia ☠️
