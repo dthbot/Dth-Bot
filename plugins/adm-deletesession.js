@@ -1,23 +1,26 @@
 // Plugin fatto da Axtral_WiZaRd e modificato da dieh!
+// Fix permessi OWNER + ADMIN (owner bypassa admin)
 
 import { existsSync, promises as fsPromises } from 'fs'
 import path from 'path'
 
-const handler = async (message, { conn, isOwner, isAdmin }) => {
+const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
 
-  // 🔐 SOLO OWNER O ADMIN
-  if (!isOwner && !isAdmin) {
-    return message.reply(
-      '❌ *Questo comando è riservato agli admin o all’owner del bot*'
-    )
+  // 🔐 PERMESSI
+  if (!isOwner) {
+    if (!isGroup || !isAdmin) {
+      return message.reply(
+        '❌ *Questo comando è riservato agli admin o all’owner del bot*'
+      )
+    }
   }
 
-  // ⚠️ Deve essere usato in privato col bot
+  // ⚠️ SOLO CHAT PRIVATA COL BOT
   if (global.conn.user.jid !== conn.user.jid) {
     return conn.sendMessage(
       message.chat,
       {
-        text: "*🚨 𝐔𝐭𝐢𝐥𝐢𝐳𝐳𝐚 𝐪𝐮𝐞𝐬𝐭𝐨 𝐜𝐨𝐦𝐚𝐧𝐝𝐨 𝐝𝐢𝐫𝐞𝐭𝐭𝐚𝐦𝐞𝐧𝐭𝐞 𝐧𝐞𝐥 𝐧𝐮𝐦𝐞𝐫𝐨 𝐝𝐞𝐥 𝐛𝐨𝐭.*"
+        text: '*🚨 Usa questo comando direttamente in privato col bot.*'
       },
       { quoted: message }
     )
@@ -27,13 +30,13 @@ const handler = async (message, { conn, isOwner, isAdmin }) => {
     const sessionFolder = './sessioni/'
 
     if (!existsSync(sessionFolder)) {
-      return await conn.sendMessage(
+      return conn.sendMessage(
         message.chat,
         {
           text: '❗ *Non c’erano sessioni da eliminare.*',
           buttons: [
-            { buttonId: '.ping', buttonText: { displayText: '⏳ 𝐏𝐢𝐧𝐠' }, type: 1 },
-            { buttonId: '.ds', buttonText: { displayText: '🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒' }, type: 1 }
+            { buttonId: '.ping', buttonText: { displayText: '⏳ Ping' }, type: 1 },
+            { buttonId: '.ds', buttonText: { displayText: '🗑️ Rifai DS' }, type: 1 }
           ],
           headerType: 1
         },
@@ -41,52 +44,39 @@ const handler = async (message, { conn, isOwner, isAdmin }) => {
       )
     }
 
-    const sessionFiles = await fsPromises.readdir(sessionFolder)
-    let deletedCount = 0
+    const files = await fsPromises.readdir(sessionFolder)
+    let deleted = 0
 
-    for (const file of sessionFiles) {
+    for (const file of files) {
       if (file !== 'creds.json') {
         await fsPromises.unlink(path.join(sessionFolder, file))
-        deletedCount++
+        deleted++
       }
     }
 
-    const responseText =
-      deletedCount === 0
-        ? '❗ *Non c’erano sessioni da eliminare.*'
-        : `🔥 *Sono stati eliminati ${deletedCount} archivi dalle sessioni!*`
-
     await conn.sendMessage(
       message.chat,
       {
-        text: responseText,
+        text:
+          deleted === 0
+            ? '❗ *Non c’erano sessioni da eliminare.*'
+            : `🔥 *Eliminati ${deleted} file di sessione con successo!*`,
         buttons: [
-          { buttonId: '.ping', buttonText: { displayText: '⏳ 𝐏𝐢𝐧𝐠' }, type: 1 },
-          { buttonId: '.ds', buttonText: { displayText: '🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒' }, type: 1 }
+          { buttonId: '.ping', buttonText: { displayText: '⏳ Ping' }, type: 1 },
+          { buttonId: '.ds', buttonText: { displayText: '🗑️ Rifai DS' }, type: 1 }
         ],
         headerType: 1
       },
       { quoted: message }
     )
 
-  } catch (error) {
-    console.error('Errore:', error)
-    await conn.sendMessage(
-      message.chat,
-      {
-        text: '❌ *Errore durante l’eliminazione delle sessioni!*',
-        buttons: [
-          { buttonId: '.ping', buttonText: { displayText: '⏳ 𝐏𝐢𝐧𝐠' }, type: 1 },
-          { buttonId: '.ds', buttonText: { displayText: '🗑️ 𝐑𝐢𝐟𝐚𝐢 𝐃𝐒' }, type: 1 }
-        ],
-        headerType: 1
-      },
-      { quoted: message }
-    )
+  } catch (e) {
+    console.error(e)
+    message.reply('❌ *Errore durante l’eliminazione delle sessioni*')
   }
 }
 
-handler.help = ['del_reg_in_session_owner']
+handler.help = ['ds']
 handler.tags = ['owner', 'admin']
 handler.command = ['ds', 'deletesession', 'svuotasessioni']
 
