@@ -3,15 +3,8 @@ let handler = async (m, { conn, usedPrefix }) => {
     const sender = m.sender
 
     // auto-creazione mittente
-    if (!users[sender]) {
-        users[sender] = {
-            exp: 0,
-            money: 0,
-            level: 0,
-            adopted: [],
-            parent: null
-        }
-    }
+    if (!users[sender]) users[sender] = {}
+    if (!users[sender].adopted) users[sender].adopted = []
 
     const target =
         m.mentionedJid && m.mentionedJid[0]
@@ -27,15 +20,8 @@ let handler = async (m, { conn, usedPrefix }) => {
         return m.reply('❌ Non puoi adottare te stesso.')
 
     // auto-creazione adottato
-    if (!users[target]) {
-        users[target] = {
-            exp: 0,
-            money: 0,
-            level: 0,
-            adopted: [],
-            parent: null
-        }
-    }
+    if (!users[target]) users[target] = {}
+    if (!('parent' in users[target])) users[target].parent = null
 
     if (users[target].parent)
         return m.reply('❌ Questa persona è già stata adottata.')
