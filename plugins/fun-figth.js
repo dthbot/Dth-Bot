@@ -1,10 +1,20 @@
 const challenges = {};
 
 let handler = async (m, { conn, command, usedPrefix }) => {
+  if (command !== 'fight') return;
+
   const users = global.db.data.users;
   const sender = m.sender;
 
-  if (command !== 'fight') return;
+  // auto-creazione mittente
+  if (!users[sender]) {
+    users[sender] = {
+      exp: 0,
+      money: 0,
+      level: 0,
+      lastclaim: 0
+    };
+  }
 
   const opponent =
     m.mentionedJid && m.mentionedJid[0]
@@ -19,8 +29,15 @@ let handler = async (m, { conn, command, usedPrefix }) => {
   if (opponent === sender)
     return m.reply('❌ Non puoi sfidare te stesso.');
 
-  if (!users[opponent])
-    return m.reply("❌ L'avversario non esiste nel database.");
+  // auto-creazione avversario
+  if (!users[opponent]) {
+    users[opponent] = {
+      exp: 0,
+      money: 0,
+      level: 0,
+      lastclaim: 0
+    };
+  }
 
   if (challenges[sender] || challenges[opponent])
     return m.reply('⚠️ Uno dei due è già in una sfida.');
