@@ -55,6 +55,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Obbligo 🚫
 ➤ Insulta 😹
 ➤ Lavoro 👷🏻
+➤ Macchina 🏎️
 
 💍 *RELAZIONI*
 ➤ Sposa 💍
@@ -65,6 +66,8 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Wallet 👛
 ➤ Banca 🏦
 ➤ Ruba 🕵🏽
+➤ Deposita ✅
+➤ Dona 👤
 
 🎭 *VARIE*
 ➤ Ic 🎼
