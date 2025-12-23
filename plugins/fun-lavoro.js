@@ -99,12 +99,12 @@ let handler = async (m, { conn, usedPrefix, text: rawText }) => {
             const jobText = `
 💼 *OPPORTUNITÀ: ${data.age}* 💼
 
-╔═══════════════════════════════╗
+╔══════════════════════════╗
 ║ 🟢 *LAVORO PROPOSTO:* ${job.name}
-╠═══════════════════════════════╣
+╠══════════════════════════╣
 ║ 💰 *GUADAGNO STIMATO:* ${job.earnings}
 ║ 📱 *APP/METODO:* ${job.app}
-╚═══════════════════════════════╝
+╚══════════════════════════╝
 
 *TUTORIAL & CONSIGLI:*
 ${job.tutorial}
