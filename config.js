@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 
 global.botnumber = '';
 global.confirmCode = '';
-global.nomebot = '𝔻𝕋ℍ-𝔹𝕆𝕋';
-global.packname = '𝔻𝕋ℍ-𝔹𝕆𝕋';
+global.nomebot = 'ᴅᴛʜ-ʙᴏᴛ';
+global.packname = 'ᴅᴛʜ-ʙᴏᴛ';
 global.author = '𝕯𝖊𝖉𝖑𝖞';
 global.vs = '2.0';
 global.collab = 'Demon Slayer';
