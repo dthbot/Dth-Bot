@@ -27,6 +27,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Dado 🎲
 ➤ Slot 🎰
 ➤ Bandiera 🏳️
+➤ Impiccato 👤
 
 👤 *TAG & INTERAZIONI*
 ➤ Bonk [@]
@@ -70,7 +71,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ StartBlast 🚦
 ➤ Mc 🍔
 ➤ Pizza 🍕 
-➤ Impiccato 👤
+➤ Winx 🧚🏿
 
 🔞 *NSFW*
 ➤ Tette [@]
