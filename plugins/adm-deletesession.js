@@ -1,28 +1,15 @@
 // Plugin fatto da Axtral_WiZaRd e modificato da dieh!
-// Fix permessi OWNER + ADMIN (owner bypassa admin)
+// FIX DEFINITIVO owner/admin
 
 import { existsSync, promises as fsPromises } from 'fs'
 import path from 'path'
 
 const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
 
-  // 🔐 PERMESSI
-  if (!isOwner) {
-    if (!isGroup || !isAdmin) {
-      return message.reply(
-        '❌ *Questo comando è riservato agli admin o all’owner del bot*'
-      )
-    }
-  }
-
-  // ⚠️ SOLO CHAT PRIVATA COL BOT
-  if (global.conn.user.jid !== conn.user.jid) {
-    return conn.sendMessage(
-      message.chat,
-      {
-        text: '*🚨 Usa questo comando direttamente in privato col bot.*'
-      },
-      { quoted: message }
+  // 🔐 PERMESSI REALI
+  if (!isOwner && !(isGroup && isAdmin)) {
+    return message.reply(
+      '❌ *Questo comando è riservato agli admin o all’owner del bot*'
     )
   }
 
@@ -33,12 +20,7 @@ const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
       return conn.sendMessage(
         message.chat,
         {
-          text: '❗ *Non c’erano sessioni da eliminare.*',
-          buttons: [
-            { buttonId: '.ping', buttonText: { displayText: '⏳ Ping' }, type: 1 },
-            { buttonId: '.ds', buttonText: { displayText: '🗑️ Rifai DS' }, type: 1 }
-          ],
-          headerType: 1
+          text: '❗ *Non c’erano sessioni da eliminare.*'
         },
         { quoted: message }
       )
@@ -60,12 +42,7 @@ const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
         text:
           deleted === 0
             ? '❗ *Non c’erano sessioni da eliminare.*'
-            : `🔥 *Eliminati ${deleted} file di sessione con successo!*`,
-        buttons: [
-          { buttonId: '.ping', buttonText: { displayText: '⏳ Ping' }, type: 1 },
-          { buttonId: '.ds', buttonText: { displayText: '🗑️ Rifai DS' }, type: 1 }
-        ],
-        headerType: 1
+            : `🔥 *Eliminati ${deleted} file di sessione!*`
       },
       { quoted: message }
     )
