@@ -1,16 +1,18 @@
 // Plugin fatto da Axtral_WiZaRd e modificato da dieh!
-// FIX DEFINITIVO owner/admin
+// SOLO ADMIN
 
 import { existsSync, promises as fsPromises } from 'fs'
 import path from 'path'
 
-const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
+const handler = async (message, { conn, isAdmin, isGroup }) => {
 
-  // 🔐 PERMESSI REALI
-  if (!isOwner && !(isGroup && isAdmin)) {
-    return message.reply(
-      '❌ *Questo comando è riservato agli admin o all’owner del bot*'
-    )
+  // 🔐 SOLO ADMIN E SOLO NEI GRUPPI
+  if (!isGroup) {
+    return message.reply('❌ *Questo comando può essere usato solo nei gruppi*')
+  }
+
+  if (!isAdmin) {
+    return message.reply('❌ *Questo comando è riservato agli admin del gruppo*')
   }
 
   try {
@@ -19,9 +21,7 @@ const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
     if (!existsSync(sessionFolder)) {
       return conn.sendMessage(
         message.chat,
-        {
-          text: '❗ *Non c’erano sessioni da eliminare.*'
-        },
+        { text: '❗ *Non c’erano sessioni da eliminare.*' },
         { quoted: message }
       )
     }
@@ -54,7 +54,9 @@ const handler = async (message, { conn, isOwner, isAdmin, isGroup }) => {
 }
 
 handler.help = ['ds']
-handler.tags = ['owner', 'admin']
+handler.tags = ['admin']
 handler.command = ['ds', 'deletesession', 'svuotasessioni']
+handler.group = true
+handler.admin = true
 
 export default handler
