@@ -18,7 +18,7 @@ global.owner = [
   ['573135258986', '𝕯𝖊𝖉𝖑𝖞', true],
   ['212775499775', 'Hell', true], 
   ['447529503948', 'vixiie', true],
-  ['xxxxxxxxxx'],
+  ['48726875208', 'Vampexe', true],
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx']
 ];
