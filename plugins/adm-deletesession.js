@@ -1,9 +1,16 @@
-//Plugin fatto da Axtral_WiZaRd e modificato da dieh!
+// Plugin fatto da Axtral_WiZaRd e modificato da dieh!
+
 import { existsSync, promises as fsPromises } from 'fs';
 import path from 'path';
 
-const handler = async (message, { conn }) => {
+const handler = async (message, { conn, isOwner }) => {
 
+  // 🔐 SOLO OWNER
+  if (!isOwner) {
+    return message.reply('❌ *Questo comando è riservato esclusivamente all’owner del bot*');
+  }
+
+  // ⚠️ Deve essere usato in privato col bot
   if (global.conn.user.jid !== conn.user.jid) {
     return conn.sendMessage(message.chat, {
       text: "*🚨 𝐔𝐭𝐢𝐥𝐢𝐳𝐳𝐚 𝐪𝐮𝐞𝐬𝐭𝐨 𝐜𝐨𝐦𝐚𝐧𝐝𝐨 𝐝𝐢𝐫𝐞𝐭𝐭𝐚𝐦𝐞𝐧𝐭𝐞 𝐧𝐞𝐥 𝐧𝐮𝐦𝐞𝐫𝐨 𝐝𝐞𝐥 𝐛𝐨𝐭.*"
@@ -74,8 +81,7 @@ const handler = async (message, { conn }) => {
 };
 
 handler.help = ['del_reg_in_session_owner'];
-handler.tags = ["owner"];
-handler.command = ["ds", "deletesession", "svuotasessioni"];
-handler.admin = true;
+handler.tags = ['owner'];
+handler.command = ['ds', 'deletesession', 'svuotasessioni'];
 
 export default handler;
