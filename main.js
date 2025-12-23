@@ -215,15 +215,14 @@ const question = (t) => {
 let opzione;
 if (!methodCodeQR && !methodCode && !fs.existsSync(`./${authFile}/creds.json`)) {
   do {
-    const menu = `╭★────★────★────★────★────★
-│      ꒰ ¡METODO DI COLLEGAMENTO! ꒱
+    const menu = `╭────────────────────
+│       ¡METODO DI COLLEGAMENTO! 
 │
 │  👾  Opzione 1: Codice QR
 │  ☁️  Opzione 2: Codice 8 caratteri
 │
-╰★────★────★────★────★
-               ꒷꒦ ✦ ChatUnity ✦ ꒷꒦
-╰♡꒷ ๑ ⋆˚₊⋆───ʚ˚ɞ───⋆˚₊⋆ ๑ ⪩﹐
+╰────────────────
+                 りｲん乃のｲ // ᴅᴛʜ-ʙᴏᴛ 
 `;
     opzione = await question(menu + '\nInserisci la tua scelta ---> ');
     if (!/^[1-2]$/.test(opzione)) {
@@ -376,7 +375,7 @@ if (!fs.existsSync(`./${authFile}/creds.json`)) {
         const randomCode = generateRandomCode();
         let codeBot = await conn.requestPairingCode(addNumber, randomCode);
         codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
-        console.log(chalk.bold.white(chalk.bgBlueBright('꒰🩸꒱ ◦•≫ CODICE DI COLLEGAMENTO:')), chalk.bold.white(chalk.white(codeBot)));
+        console.log(chalk.bold.white(chalk.bgBlueBright('🩸≫ CODICE COLLEGALO GAY:')), chalk.bold.white(chalk.white(codeBot)));
       }, 3000);
     }
   }
@@ -455,11 +454,11 @@ async function connectionUpdate(update) {
       global.connectionMessagesPrinted.badSession = true;
       await global.reloadHandler(true).catch(console.error);
     } else if (reason === DisconnectReason.connectionLost && !global.connectionMessagesPrinted.connectionLost) {
-      console.log(chalk.bold.blueBright(`\n╭⭑⭒━━━✦❘༻ ⚠️  CONNESSIONE PERSA COL SERVER ༺❘✦━━━⭒⭑\n┃      🔄 RICONNESSIONE IN CORSO... \n╰⭑⭒━━━✦❘༻☾⋆₊✧ chatunity-bot ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
+      console.log(chalk.bold.blueBright(`\n╭⭑⭒━━━✦❘༻ ⚠️  CONNESSIONE PERSA COL SERVER ༺❘✦━━━⭒⭑\n┃      🔄 RICONNESSIONE IN CORSO... \n╰⭑⭒━━━✦❘༻☾⋆₊✧ りｲん乃のｲ // ᴅᴛʜ-ʙᴏᴛ ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
       global.connectionMessagesPrinted.connectionLost = true;
       await global.reloadHandler(true).catch(console.error);
     } else if (reason === DisconnectReason.connectionReplaced && !global.connectionMessagesPrinted.connectionReplaced) {
-      console.log(chalk.bold.yellowBright(`╭⭑⭒━━━✦❘༻ ⚠️  CONNESSIONE SOSTITUITA ༺❘✦━━━⭒⭑\n┃  È stata aperta un'altra sessione, \n┃  chiudi prima quella attuale.\n╰⭑⭒━━━✦❘༻☾⋆⁺₊✧ chatunity-bot ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
+      console.log(chalk.bold.yellowBright(`╭⭑⭒━━━✦❘༻ ⚠️  CONNESSIONE SOSTITUITA ༺❘✦━━━⭒⭑\n┃  È stata aperta un'altra sessione, \n┃  chiudi prima quella attuale.\n╰⭑⭒━━━✦❘༻☾⋆⁺₊✧ りｲん乃のｲ // ᴅᴛʜ-ʙᴏᴛ ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
       global.connectionMessagesPrinted.connectionReplaced = true;
     } else if (reason === DisconnectReason.loggedOut && !global.connectionMessagesPrinted.loggedOut) {
       console.log(chalk.bold.redBright(`\n⚠️ DISCONNESSO, ELIMINA LA CARTELLA ${global.authFile} E SCANSIONA IL CODICE QR ⚠️`));
@@ -470,7 +469,7 @@ async function connectionUpdate(update) {
       global.connectionMessagesPrinted.restartRequired = true;
       await global.reloadHandler(true).catch(console.error);
     } else if (reason === DisconnectReason.timedOut && !global.connectionMessagesPrinted.timedOut) {
-      console.log(chalk.bold.yellowBright(`\n╭⭑⭒━━━✦❘༻ ⌛ TIMEOUT CONNESSIONE ༺❘✦━━━⭒⭑\n┃     🔄 RICONNESSIONE IN CORSO...\n╰⭑⭒━━━✦❘༻☾⋆⁺₊✧ chatunity-bot ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
+      console.log(chalk.bold.yellowBright(`\n╭⭑⭒━━━✦❘༻ ⌛ TIMEOUT CONNESSIONE ༺❘✦━━━⭒⭑\n┃     🔄 RICONNESSIONE IN CORSO...\n╰⭑⭒━━━✦❘༻☾⋆⁺₊✧ りｲん乃のｲ // ᴅᴛʜ-ʙᴏᴛ ✧₊⁺⋆☽༺❘✦━━━⭒⭑`));
       global.connectionMessagesPrinted.timedOut = true;
       await global.reloadHandler(true).catch(console.error);
     } else if (reason !== DisconnectReason.restartRequired && reason !== DisconnectReason.connectionClosed && !global.connectionMessagesPrinted.unknown) {
@@ -586,7 +585,7 @@ async function connectSubBots() {
     });
     console.log(chalk.bold.magenta(`
 ╭﹕₊˚ ★ ⁺˳ꕤ₊⁺・꒱
-  ⋆  ︵︵ ★ ChatUnity connesso ★ ︵︵ ⋆
+  ⋆  ︵︵ ★ ᴅᴛʜ-ʙᴏᴛ connesso ★ ︵︵ ⋆
 ╰. ꒷꒦ ꒷꒦‧˚₊˚꒷꒦꒷‧˚₊˚꒷꒦꒷`));
     await connectSubBots();
   } catch (error) {
@@ -624,7 +623,7 @@ global.reloadHandler = async function (restatConn) {
   }
 
   conn.welcome = '@user benvenuto/a in @subject';
-  conn.bye = '@user ha abbandonato il gruppo';
+  conn.bye = '@user ha abbandonato @subject';
   conn.spromote = '@user è stato promosso ad amministratore';
   conn.sdemote = '@user non è più amministratore';
   conn.sIcon = 'immagine gruppo modificata';
