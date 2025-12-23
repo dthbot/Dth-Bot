@@ -54,6 +54,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Zizzania 🤡
 ➤ Obbligo 🚫
 ➤ Insulta 😹
+➤ Lavoro 👷🏻
 
 💍 *RELAZIONI*
 ➤ Sposa 💍
