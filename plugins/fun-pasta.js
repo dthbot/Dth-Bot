@@ -1,30 +1,41 @@
 let handler = async (m, { conn, mentionedJid }) => {
-    // Controlla se c'è una menzione, altrimenti usa chi ha inviato il comando
+    // Chi riceve il piatto
     let destinatario = mentionedJid && mentionedJid.length > 0 ? mentionedJid[0] : m.sender;
     let user = `@${destinatario.split("@")[0]}`;
 
-    let messaggio = `🍝 *SPAGHETTI TIME!* 🍝\n\n🥄 ${user}, ecco un bel piatto di spaghetti per te! Buon appetito! 🤌😋`;
+    // Messaggio principale decorato
+    let messaggio = `
+🍝✨ *SPAGHETTI TIME!* ✨🍝
 
-    // Lista di immagini funzionanti di spaghetti
+🥄 Ciao ${user}! Oggi ti porto un piatto speciale di spaghetti fumanti! 🔥
+
+🍅 *Ingredienti speciali*: Amore ❤️, Allegria 😆, Sorrisi 😋
+
+🍽️ *Consiglio dello chef*: Mangia con calma, chiacchiera e goditi ogni forchettata! 🍝
+
+💫 *Buon appetito!* 💫
+`;
+
+    // Lista immagini sicure e funzionanti
     let immagini = [
-        "https://www.giallozafferano.it/images/16-1649/Spaghetti-alla-Carbonara_450x300.jpg",
-        "https://www.ricette.com/wp-content/uploads/2013/12/spaghetti-pomodoro.jpg",
-        "https://www.cucchiaio.it/content/cucchiaio/it/ricette/2018/06/spaghetti-aglio-olio-e-peperoncino/jcr:content/header-par/image_single.img.jpg/1627917698503.jpg"
+        "https://cdn.pixabay.com/photo/2017/10/18/14/45/spaghetti-2867252_1280.jpg",
+        "https://cdn.pixabay.com/photo/2014/04/22/02/56/spaghetti-329399_1280.jpg",
+        "https://cdn.pixabay.com/photo/2015/09/02/12/53/spaghetti-918845_1280.jpg",
+        "https://cdn.pixabay.com/photo/2017/03/12/13/41/spaghetti-2131248_1280.jpg"
     ];
 
-    // Sceglie un'immagine casuale tra quelle disponibili
+    // Scegli immagine casuale
     let imageUrl = immagini[Math.floor(Math.random() * immagini.length)];
 
-    // Invia il messaggio con immagine e menzione
-    await conn.sendMessage(m.chat, { 
-        image: { url: imageUrl }, 
-        caption: messaggio, 
-        mentions: [destinatario] 
+    // Invia messaggio con immagine e menzione
+    await conn.sendMessage(m.chat, {
+        image: { url: imageUrl },
+        caption: messaggio,
+        mentions: [destinatario]
     }, { quoted: m });
 };
 
-// Configurazione del comando per Gab
-handler.command = ["spaghetti", "pasta"];
+handler.command = ["spaghetti","pasta"];
 handler.category = "fun";
 handler.desc = "Manda un piatto di spaghetti a qualcuno 🍝";
 
