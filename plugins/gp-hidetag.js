@@ -1,8 +1,15 @@
-const handler = async (m, { conn, text, participants, command }) => {
+const handler = async (m, { conn, text, participants, isAdmin, isOwner }) => {
   try {
-    const users = participants.map((u) => conn.decodeJid(u.id));
+    // 🔐 Permessi: admin O owner del bot
+    if (!isAdmin && !isOwner) {
+      return m.reply('❌ *Solo admin o owner del bot possono usare questo comando*');
+    }
+
+    const users = participants.map(u => conn.decodeJid(u.id));
+
     if (m.quoted) {
       const quoted = m.quoted;
+
       if (quoted.mtype === 'imageMessage') {
         const media = await quoted.download();
         await conn.sendMessage(m.chat, {
@@ -10,24 +17,24 @@ const handler = async (m, { conn, text, participants, command }) => {
           caption: text || quoted.text || '',
           mentions: users
         }, { quoted: m });
-      }
-      else if (quoted.mtype === 'videoMessage') {
+
+      } else if (quoted.mtype === 'videoMessage') {
         const media = await quoted.download();
         await conn.sendMessage(m.chat, {
           video: media,
           caption: text || quoted.text || '',
           mentions: users
         }, { quoted: m });
-      }
-      else if (quoted.mtype === 'audioMessage') {
+
+      } else if (quoted.mtype === 'audioMessage') {
         const media = await quoted.download();
         await conn.sendMessage(m.chat, {
           audio: media,
           mimetype: 'audio/mp4',
           mentions: users
         }, { quoted: m });
-      }
-      else if (quoted.mtype === 'documentMessage') {
+
+      } else if (quoted.mtype === 'documentMessage') {
         const media = await quoted.download();
         await conn.sendMessage(m.chat, {
           document: media,
@@ -36,41 +43,40 @@ const handler = async (m, { conn, text, participants, command }) => {
           caption: text || quoted.text || '',
           mentions: users
         }, { quoted: m });
-      }
-      else if (quoted.mtype === 'stickerMessage') {
+
+      } else if (quoted.mtype === 'stickerMessage') {
         const media = await quoted.download();
         await conn.sendMessage(m.chat, {
           sticker: media,
           mentions: users
         }, { quoted: m });
-      }
-      else {
+
+      } else {
         await conn.sendMessage(m.chat, {
           text: quoted.text || text || '',
           mentions: users
         }, { quoted: m });
       }
-    }
-    else if (text) {
+
+    } else if (text) {
       await conn.sendMessage(m.chat, {
-        text: text,
+        text,
         mentions: users
       }, { quoted: m });
-    }
-    else {
+
+    } else {
       return m.reply('❌ *Inserisci un testo o rispondi a un messaggio/media*');
     }
-    
+
   } catch (e) {
-    console.error('Errore tag/hidetag:', e);
-    m.reply(`${global.errore || '❌ Si è verificato un errore'}`);
+    console.error('Errore hidetag/tag:', e);
+    m.reply(global.errore || '❌ Si è verificato un errore');
   }
 };
 
 handler.help = ['hidetag', 'totag', 'tag'];
 handler.tags = ['gruppo'];
 handler.command = /^(\.?hidetag|totag|tag)$/i;
-handler.admin = true;
 handler.group = true;
 
 export default handler;
