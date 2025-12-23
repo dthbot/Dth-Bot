@@ -129,7 +129,7 @@ ${finalNote}
 
         // --- 3. Menu Iniziale (SOSTITUITO CON Button Message) ---
         const menuText = `
-🌟 GUIDA AL LAVORO* 🌟
+🌟 *GUIDA AL LAVORO* 🌟
 ━━━━━━━━━━━━━━━━━━━
 Per quale fascia d'età stai cercando un impiego?
 Seleziona un'opzione qui sotto.
