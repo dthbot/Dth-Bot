@@ -1,62 +1,63 @@
-// Plugin fatto da Axtral_WiZaRd e modificato da dieh!
-// SOLO ADMIN
+//Plugin fatto da Axtral_WiZaRd
+import { existsSync, promises as fsPromises } from 'fs';
+import path from 'path';
 
-import { existsSync, promises as fsPromises } from 'fs'
-import path from 'path'
+const handler = async (message, { conn }) => {
 
-const handler = async (message, { conn, isAdmin, isGroup }) => {
-
-  // 🔐 SOLO ADMIN E SOLO NEI GRUPPI
-  if (!isGroup) {
-    return message.reply('❌ *Questo comando può essere usato solo nei gruppi*')
-  }
-
-  if (!isAdmin) {
-    return message.reply('❌ *Questo comando è riservato agli admin del gruppo*')
+  if (global.conn.user.jid !== conn.user.jid) {
+    return conn.sendMessage(message.chat, {
+      text: "*🚨 𝐔𝐭𝐢𝐥𝐢𝐳𝐳𝐚 𝐪𝐮𝐞𝐬𝐭𝐨 𝐜𝐨𝐦𝐚𝐧𝐝𝐨 𝐝𝐢𝐫𝐞𝐭𝐭𝐚𝐦𝐞𝐧𝐭𝐞 𝐧𝐞𝐥 𝐧𝐮𝐦𝐞𝐫𝐨 𝐝𝐞𝐥 𝐛𝐨𝐭.*"
+    }, { quoted: message });
   }
 
   try {
-    const sessionFolder = './sessioni/'
+    const sessionFolder = "./sessioni/";
 
     if (!existsSync(sessionFolder)) {
-      return conn.sendMessage(
-        message.chat,
-        { text: '❗ *Non c’erano sessioni da eliminare.*' },
-        { quoted: message }
-      )
+      return await conn.sendMessage(message.chat, {
+        text: "*❌ 𝐋𝐚 𝐜𝐚𝐫𝐭𝐞𝐥𝐥𝐚 𝐝𝐞𝐥𝐥𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢 𝐞̀ 𝐯𝐮𝐨𝐭𝐚 𝐨𝐩𝐩𝐮𝐫𝐞 𝐧𝐨𝐧 𝐞𝐬𝐢𝐬𝐭𝐞.*"
+      }, { quoted: message });
     }
 
-    const files = await fsPromises.readdir(sessionFolder)
-    let deleted = 0
+    const sessionFiles = await fsPromises.readdir(sessionFolder);
+    let deletedCount = 0;
 
-    for (const file of files) {
-      if (file !== 'creds.json') {
-        await fsPromises.unlink(path.join(sessionFolder, file))
-        deleted++
+    for (const file of sessionFiles) {
+      if (file !== "creds.json") {
+        await fsPromises.unlink(path.join(sessionFolder, file));
+        deletedCount++;
       }
     }
+
+    const responseText = deletedCount === 0
+      ? "❗ 𝐋𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢 𝐬𝐨𝐧𝐨 𝐯𝐮𝐨𝐭𝐞"
+      : `*🔥 𝐒𝐨𝐧𝐨 𝐬𝐭𝐚𝐭𝐢 𝐞𝐥𝐢𝐦𝐢𝐦𝐚𝐧𝐢 ${deletedCount} 𝐚𝐫𝐜𝐡𝐢𝐯𝐢 𝐝𝐚𝐥𝐥𝐞 𝐬𝐞𝐬𝐬𝐢𝐨𝐧𝐢, 𝐆𝐫𝐚𝐳𝐢𝐞 𝐩𝐞𝐫 𝐚𝐯𝐞𝐫𝐦𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐨!*`;
+
+    // 🔘 Bottoni aggiunti
+    const buttons = [
+      { buttonId: ".ds", buttonText: { displayText: "🔄 𝐒𝐯𝐮𝐨𝐭𝐚 𝐝𝐢 𝐧𝐮𝐨𝐯𝐨" }, type: 1 },
+      { buttonId: ".ping", buttonText: { displayText: "📊 𝐏𝐢𝐧𝐠" }, type: 1 }
+    ];
 
     await conn.sendMessage(
       message.chat,
       {
-        text:
-          deleted === 0
-            ? '❗ *Non c’erano sessioni da eliminare.*'
-            : `🔥 *Eliminati ${deleted} file di sessione!*`
+        text: responseText,
+        buttons,
+        headerType: 1
       },
       { quoted: message }
-    )
+    );
 
-  } catch (e) {
-    console.error(e)
-    message.reply('❌ *Errore durante l’eliminazione delle sessioni*')
+  } catch (error) {
+    console.error('Errore:', error);
+    await conn.sendMessage(message.chat, { text: "❌ Errore di eliminazione!" }, { quoted: message });
   }
-}
+};
 
-handler.help = ['ds']
-handler.tags = ['admin']
-handler.command = ['ds', 'deletesession', 'svuotasessioni']
-handler.group = true
-handler.admin = true
+handler.help = ['del_reg_in_session_owner'];
+handler.tags = ["owner"];
+handler.command = ["ds", "deletesession", "svuotasessioni"];
+handler.admin = true;
 
-export default handler
+export default handler;
