@@ -1,107 +1,122 @@
 const challenges = {};
 
-let handler = async (m, { conn, command, text, args, usedPrefix }) => {
+let handler = async (m, { conn, command, usedPrefix }) => {
   const users = global.db.data.users;
-  const senderId = m.sender;
+  const sender = m.sender;
 
-  switch (command) {
-    case 'fight':
-      await handleFight(m, users[senderId], users, text, usedPrefix, conn);
-      break;
-  }
-};
+  if (command !== 'fight') return;
 
-const handleFight = async (m, user, users, text, usedPrefix, conn) => {
-  const opponentId = m.mentionedJid && m.mentionedJid[0]
-    ? m.mentionedJid[0]
-    : (m.quoted ? m.quoted.sender : null);
+  const opponent =
+    m.mentionedJid && m.mentionedJid[0]
+      ? m.mentionedJid[0]
+      : m.quoted
+      ? m.quoted.sender
+      : null;
 
-  if (!opponentId)
-    throw `Tagga la persona con cui vuoi combattere!\nEsempio: ${usedPrefix}fight @tag`;
-
-  if (opponentId === m.sender)
-    throw "Non puoi sfidare te stesso!";
-
-  const opponent = users[opponentId];
   if (!opponent)
-    throw "L'avversario non è presente nel sistema.";
+    return m.reply(`Tagga qualcuno da sfidare!\nEsempio: ${usedPrefix}fight @utente`);
 
-  if (challenges[m.sender] || challenges[opponentId])
-    throw "C'è già una sfida in corso per uno dei due.";
+  if (opponent === sender)
+    return m.reply('❌ Non puoi sfidare te stesso.');
 
-  challenges[opponentId] = { from: m.sender, timeout: null };
-  challenges[m.sender] = { to: opponentId, timeout: null };
+  if (!users[opponent])
+    return m.reply("❌ L'avversario non esiste nel database.");
 
-  const promptText = `⚔️ *Sfida al Combattimento!* ⚔️\n\n@${opponentId.split('@')[0]}: vuoi combattere con @${m.sender.split('@')[0]}?\nRispondi con "si" per accettare o "no" per rifiutare.\nHai 60 secondi per rispondere.`;
-  await conn.sendMessage(m.chat, { text: promptText, mentions: [opponentId, m.sender] }, { quoted: m });
+  if (challenges[sender] || challenges[opponent])
+    return m.reply('⚠️ Uno dei due è già in una sfida.');
 
-  const timeoutCallback = () => {
-    if (challenges[opponentId]) {
-      const cancelText = `La sfida tra @${m.sender.split('@')[0]} e @${opponentId.split('@')[0]} è stata annullata per mancata risposta.`;
-      conn.sendMessage(m.chat, { text: cancelText, mentions: [m.sender, opponentId] });
-      delete challenges[opponentId];
-      delete challenges[m.sender];
+  challenges[opponent] = { from: sender };
+  challenges[sender] = { to: opponent };
+
+  await conn.sendMessage(
+    m.chat,
+    {
+      text:
+        `⚔️ *SFIDA!* ⚔️\n\n` +
+        `@${sender.split('@')[0]} sfida @${opponent.split('@')[0]}!\n\n` +
+        `Scrivi *si* per accettare o *no* per rifiutare.\n⏱️ Hai 60 secondi.`,
+      mentions: [sender, opponent],
+    },
+    { quoted: m }
+  );
+
+  challenges[opponent].timeout = setTimeout(() => {
+    if (challenges[opponent]) {
+      conn.sendMessage(m.chat, {
+        text: '⏱️ Sfida annullata per mancata risposta.',
+        mentions: [sender, opponent],
+      });
+      delete challenges[sender];
+      delete challenges[opponent];
     }
-  };
-  challenges[opponentId].timeout = setTimeout(timeoutCallback, 60000);
-  challenges[m.sender].timeout = challenges[opponentId].timeout;
+  }, 60000);
 };
 
-handler.before = async (m) => {
+handler.before = async (m, { conn }) => {
   if (!m.text) return;
+
   const challenge = challenges[m.sender];
   if (!challenge) return;
 
-  clearTimeout(challenge.timeout);
+  const text = m.text.trim().toLowerCase();
 
-  if (/^no$/i.test(m.text.trim())) {
-    const fromUser = challenge.from || m.sender;
-    delete challenges[fromUser];
+  // RIFIUTO
+  if (text === 'no') {
+    const from = challenge.from;
     delete challenges[m.sender];
-    return m.reply(`❌ Sfida rifiutata.`);
+    delete challenges[from];
+    return m.reply('❌ Sfida rifiutata.');
   }
 
-  if (/^si$/i.test(m.text.trim())) {
-    const fromUser = challenge.from;
-    const toUser = m.sender;
-    let healthFrom = 100;
-    let healthTo = 100;
-    let battleLog = '';
+  // ACCETTA
+  if (text === 'si') {
+    const from = challenge.from;
+    const to = m.sender;
 
-    // Invia un unico messaggio iniziale che poi aggiorneremo
-    let sentMsg = await conn.sendMessage(m.chat, { text: `⚔️ *Inizio Combattimento!* ⚔️\n\n` , mentions: [fromUser, toUser] });
-    // Presupponiamo che la risposta contenga l'id del messaggio
-    const battleMessageId = sentMsg.key ? sentMsg.key.id : null;
+    delete challenges[from];
+    delete challenges[to];
 
-    // Funzione per aggiornare il messaggio di battaglia
-    const updateBattleMessage = async (msg) => {
-      battleLog += msg + '\n';
-      // Utilizza la funzione di modifica del messaggio (deve essere supportata dalla tua API)
-      await conn.editMessage(m.chat, { text: battleLog, mentions: [fromUser, toUser] }, { messageId: battleMessageId });
-    };
+    let hpFrom = 100;
+    let hpTo = 100;
 
-    // Simulazione del combattimento aggiornando il messaggio ogni 2 secondi
-    while (healthFrom > 0 && healthTo > 0) {
-      let damage = Math.floor(Math.random() * 20) + 5;
-      healthTo -= damage;
-      if (healthTo < 0) healthTo = 0;
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await updateBattleMessage(`@${fromUser.split('@')[0]} attacca @${toUser.split('@')[0]} infliggendo ${damage} danni. (Vita rimanente: ${healthTo})`);
-      if (healthTo <= 0) break;
+    await conn.sendMessage(m.chat, {
+      text: `⚔️ *COMBATTIMENTO INIZIATO!*\n\n@${from.split('@')[0]} VS @${to.split('@')[0]}`,
+      mentions: [from, to],
+    });
 
-      let counterDamage = Math.floor(Math.random() * 20) + 5;
-      healthFrom -= counterDamage;
-      if (healthFrom < 0) healthFrom = 0;
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await updateBattleMessage(`@${toUser.split('@')[0]} contrattacca infliggendo ${counterDamage} danni. (Vita rimanente: ${healthFrom})`);
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    while (hpFrom > 0 && hpTo > 0) {
+      let dmg = Math.floor(Math.random() * 20) + 5;
+      hpTo -= dmg;
+      if (hpTo < 0) hpTo = 0;
+
+      await delay(1500);
+      await conn.sendMessage(m.chat, {
+        text: `💥 @${from.split('@')[0]} colpisce @${to.split('@')[0]} per ${dmg} danni\n❤️ Vita: ${hpTo}`,
+        mentions: [from, to],
+      });
+
+      if (hpTo <= 0) break;
+
+      let counter = Math.floor(Math.random() * 20) + 5;
+      hpFrom -= counter;
+      if (hpFrom < 0) hpFrom = 0;
+
+      await delay(1500);
+      await conn.sendMessage(m.chat, {
+        text: `💥 @${to.split('@')[0]} contrattacca per ${counter} danni\n❤️ Vita: ${hpFrom}`,
+        mentions: [from, to],
+      });
     }
 
-    const winner = healthFrom > 0 ? fromUser : toUser;
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    await updateBattleMessage(`🏆 *Il vincitore è: @${winner.split('@')[0]}!*`);
+    const winner = hpFrom > 0 ? from : to;
 
-    delete challenges[fromUser];
-    delete challenges[toUser];
+    await delay(1000);
+    await conn.sendMessage(m.chat, {
+      text: `🏆 *VINCITORE:* @${winner.split('@')[0]}`,
+      mentions: [winner],
+    });
   }
 };
 
