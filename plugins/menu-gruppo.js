@@ -29,12 +29,13 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Bandiera 🏳️
 
 👤 *TAG & INTERAZIONI*
-➤ Bonk 🫢
+➤ Bonk [@]
 ➤ Hornycard [@]
 ➤ Stupido/a [@]
 ➤ Wanted [@]
 ➤ Nokia [@]
 ➤ Carcere [@]
+➤ Fight [@]
 ➤ Sbirro [@]
 ➤ Teletrasporto [@]
 ➤ Rincoglionito [@]
