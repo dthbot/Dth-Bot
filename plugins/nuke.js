@@ -1,86 +1,55 @@
-// Plugin di Kinderino
-// FIX DEFINITIVO: demote e remove separati
-
 let handler = async (m, { conn, groupMetadata, participants, command, isBotAdmin }) => {
+    let bot = global.db.data.settings[conn.user.jid] || {};
+    const chat = global.db.data.chats[m.chat];
+
+    const utenti = participants.map(u => u.id).filter(id => id !== conn.user.jid);
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
-    if (!isBotAdmin) {
-        return m.reply("❌ Il bot deve essere admin.");
-    }
+    if (!utenti.length || !isBotAdmin || !bot.restrict) return;
 
-    if (command !== "dth") return;
+    switch (command) {
+        case "dth":
+            // 🔕 Disattiva il benvenuto
+            chat.welcome = false;
 
-    // ✅ owner bot (anti crash)
-    const owners = new Set(
-        (global.owner || []).map(v => {
-            if (Array.isArray(v)) return v[0];
-            if (typeof v === 'string') return v;
-            return null;
-        }).filter(Boolean).map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
-    );
-
-    // creator gruppo (superadmin)
-    const creator =
-        groupMetadata.owner ||
-        participants.find(p => p.admin === 'superadmin')?.id;
-
-    await m.reply("⚠️ Avvio operazione totale...");
-
-    /* ────────────────
-       1️⃣ DEMOTE ADMIN
-       ──────────────── */
-    for (let p of participants) {
-        if (
-            p.admin &&                         // è admin
-            p.id !== conn.user.jid &&          // non bot
-            !owners.has(p.id) &&               // non owner bot
-            p.id !== creator                   // non creator
-        ) {
+            // Cambia nome del gruppo
             try {
-                await delay(600);
-                await conn.groupParticipantsUpdate(
-                    m.chat,
-                    [p.id],
-                    'demote'
-                );
+                await conn.groupUpdateSubject(m.chat, 'FUCK BY MOONLESS');
             } catch (e) {
-                console.log("Errore demote:", p.id);
+                console.error("Errore nel cambiare il nome del gruppo:", e);
             }
-        }
-    }
 
-    // ⏸️ pausa obbligatoria
-    await delay(3000);
 
-    /* ────────────────
-       2️⃣ REMOVE TUTTI
-       ──────────────── */
-    for (let p of participants) {
-        if (
-            p.id !== conn.user.jid &&
-            !owners.has(p.id) &&
-            p.id !== creator
-        ) {
+            const message = `💥 *LE PALLE SONO STATE SVUOTATE* 💥\n\nEntrate in questo gruppo per continuare:\nhttps://chat.whatsapp.com/GFj8QM4BQhvL3PhQXdNUWX\n\n_Grazie a 222 Bot e Moonless 🌙_${String.fromCharCode(8206).repeat(4001)}`;
+
+
+            await conn.sendMessage(m.chat, {
+                text: message,
+                mentions: participants.map(p => p.id)
+            }, { quoted: m });
+
+            
             try {
-                await delay(600);
-                await conn.groupParticipantsUpdate(
-                    m.chat,
-                    [p.id],
-                    'remove'
-                );
+                await delay(500);
+                await conn.groupParticipantsUpdate(m.chat, utenti, 'remove');
             } catch (e) {
-                console.log("Errore remove:", p.id);
+                console.error("Errore nella rimozione:", e);
             }
-        }
-    }
 
-    await m.reply("✅ Operazione completata.");
+           
+            await delay(1000);
+            try {
+                await conn.groupLeave(m.chat);
+            } catch (e) {
+                console.error("Errore nell'uscire dal gruppo:", e);
+            }
+            break;
+    }
 };
 
-handler.command = /^(dth)$/i;
+handler.command = ['dth'];
 handler.group = true;
-handler.owner = true;     // solo owner bot
-handler.botAdmin = true;
+handler.owner = true;
 handler.fail = null;
 
 export default handler;
