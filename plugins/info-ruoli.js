@@ -48,7 +48,7 @@ if (message.messageStubType === 29 && detectEnabled) {
     }  
 
     await conn.sendMessage(message.chat, {  
-        text: `@${sender.split('@')[0]} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${promotedUser.split('@')[0]}`,  
+        text: `@${sender.split('@')[0]} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${promotedUser.split('@')[0]} 𝐨𝐫𝐚 𝐫𝐢𝐧𝐠𝐫𝐚𝐳𝐢𝐚`,  
         contextInfo: {  
             mentionedJid: [sender, promotedUser],  
             externalAdReply: {  
@@ -71,7 +71,7 @@ if (message.messageStubType === 30 && detectEnabled) {
     }  
 
     await conn.sendMessage(message.chat, {  
-        text: `@${sender.split('@')[0]} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 @${demotedUser.split('@')[0]}`,  
+        text: `@${sender.split('@')[0]} 𝐡𝐚 𝐭𝐨𝐥𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${demotedUser.split('@')[0]} 𝐨𝐫𝐚 𝐩𝐢𝐚𝐧𝐠𝐢`,  
         contextInfo: {  
             mentionedJid: [sender, demotedUser],  
             externalAdReply: {  
