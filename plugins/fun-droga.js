@@ -1,27 +1,24 @@
-// intercetta i bottoni e le liste
+// droga.js
 export async function before(m, { conn }) {
-  // recupera l'ID del bottone o della riga selezionata
   const btnId =
     m.message?.buttonsResponseMessage?.selectedButtonId ||
     m.message?.templateButtonReplyMessage?.selectedId ||
     m.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
-    m.msg?.selectedButtonId   // fallback per alcune versioni di Baileys
+    m.msg?.selectedButtonId
 
-  if (!btnId) return true   // nessun bottone, passa al prossimo handler
+  if (!btnId) return true
 
-  // se è uno dei bottoni del comando .droga
   const droghe = ['Oppio', 'Fumo', 'Erba', 'Cocaina']
   if (droghe.includes(btnId)) {
     await conn.sendMessage(m.chat, {
       text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${btnId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
     }, { quoted: m })
-    return true   // blocca ulteriori elaborazioni
+    return true
   }
 
   return true
 }
 
-// comando .droga
 let handler = async (m, { conn }) => {
   const buttons = [
     { buttonId: 'Oppio',   buttonText: { displayText: '⚗️ Oppio'   }, type: 1 },
@@ -32,14 +29,26 @@ let handler = async (m, { conn }) => {
 
   await conn.sendMessage(m.chat, {
     text: `🤔 *Che droga vuoi prendere?*`,
-    footer: 'Seleziona una sostanza',
-    buttons: buttons,
+    footer: 'Scegli una voce',
+    buttons,
     headerType: 1
   }, { quoted: m })
 }
 
+// singoli comandi .oppio .fumo .erba .cocaina
+const single = (drug) => async (m, { conn }) => {
+  await conn.sendMessage(m.chat, {
+    text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${drug}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+  }, { quoted: m })
+}
+
 handler.command = ['droga']
-handler.tags    = ['fun']
-handler.help    = ['droga']
+handler.tags = ['fun']
+handler.help = ['droga']
 
 export default handler
+
+export const oppio = single('Oppio')
+export const fumo = single('Fumo')
+export const erba = single('Erba')
+export const cocaina = single('Cocaina')
