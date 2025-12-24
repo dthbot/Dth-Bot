@@ -1,44 +1,17 @@
 // droga.js
-export async function before(m, { conn }) {
-  const btnId =
-    m.message?.buttonsResponseMessage?.selectedButtonId ||
-    m.message?.templateButtonReplyMessage?.selectedId ||
-    m.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
-    m.msg?.selectedButtonId
-
-  if (!btnId) return true
-
-  const droghe = ['Oppio', 'Fumo', 'Erba', 'Cocaina']
-  if (droghe.includes(btnId)) {
-    await conn.sendMessage(m.chat, {
-      text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${btnId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
-    }, { quoted: m })
-    return true
-  }
-
-  return true
-}
-
 let handler = async (m, { conn }) => {
-  const buttons = [
-    { buttonId: 'Oppio',   buttonText: { displayText: '⚗️ Oppio'   }, type: 1 },
-    { buttonId: 'Fumo',    buttonText: { displayText: '🍫 Fumo'    }, type: 1 },
-    { buttonId: 'Erba',    buttonText: { displayText: '🌿 Erba'    }, type: 1 },
-    { buttonId: 'Cocaina', buttonText: { displayText: '💨 Cocaina' }, type: 1 }
+  const btns = [
+    { buttonId: '.oppio',   buttonText: { displayText: '⚗️ Oppio'   }, type: 1 },
+    { buttonId: '.fumo',    buttonText: { displayText: '🍫 Fumo'    }, type: 1 },
+    { buttonId: '.erba',    buttonText: { displayText: '🌿 Erba'    }, type: 1 },
+    { buttonId: '.cocaina', buttonText: { displayText: '💨 Cocaina' }, type: 1 }
   ]
 
   await conn.sendMessage(m.chat, {
     text: `🤔 *Che droga vuoi prendere?*`,
     footer: 'Scegli una voce',
-    buttons,
+    buttons: btns,
     headerType: 1
-  }, { quoted: m })
-}
-
-// singoli comandi .oppio .fumo .erba .cocaina
-const single = (drug) => async (m, { conn }) => {
-  await conn.sendMessage(m.chat, {
-    text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${drug}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
   }, { quoted: m })
 }
 
@@ -48,7 +21,19 @@ handler.help = ['droga']
 
 export default handler
 
-export const oppio = single('Oppio')
-export const fumo = single('Fumo')
-export const erba = single('Erba')
-export const cocaina = single('Cocaina')
+// singoli comandi
+export const oppio = (m, { conn }) => conn.sendMessage(m.chat, {
+  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Oppio*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+}, { quoted: m })
+
+export const fumo = (m, { conn }) => conn.sendMessage(m.chat, {
+  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Fumo*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+}, { quoted: m })
+
+export const erba = (m, { conn }) => conn.sendMessage(m.chat, {
+  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Erba*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+}, { quoted: m })
+
+export const cocaina = (m, { conn }) => conn.sendMessage(m.chat, {
+  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Cocaina*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+}, { quoted: m })
