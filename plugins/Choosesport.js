@@ -31,7 +31,7 @@ let handler = async (m, { conn }) => {
   }, { quoted: m });
 };
 
-handler.command = /^chooseSport$/i;
+handler.command = /^sport$/i;
 handler.help = ['chooseSport'];
 handler.tags = ['settings'];
 export default handler;
