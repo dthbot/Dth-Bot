@@ -58,5 +58,6 @@ let handler = async (m, { conn }) => {
 handler.help = ["status", "uptime"]
 handler.tags = ["info"]
 handler.command = /^status|uptime|ping$/i
+handler.admin = true
 
 export default handler
