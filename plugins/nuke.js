@@ -1,63 +1,76 @@
 // Plugin di Kinderino
-// FIX definitivo rimozione membri
+// FIX owner crash + rimozione admin (demote -> remove)
 
 let handler = async (m, { conn, groupMetadata, participants, command, isBotAdmin }) => {
     const delay = ms => new Promise(res => setTimeout(res, ms));
 
     if (!isBotAdmin) {
-        return m.reply("❌ Devo essere admin per usare questo comando.");
+        return m.reply("❌ Il bot deve essere admin.");
     }
 
-    // Owner globali
+    // ✅ OWNER FIX (ANTI CRASH)
     const owners = new Set(
-        (global.owner || [])
-            .flatMap(v => typeof v === 'string' ? [v] : v)
-            .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
+        (global.owner || []).map(v => {
+            if (Array.isArray(v)) return v[0];
+            if (typeof v === 'string') return v;
+            return null;
+        })
+        .filter(Boolean)
+        .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
     );
 
-    if (command === "dth") {
+    if (command !== "dth") return;
 
-        // Cambia nome gruppo
-        const oldSubject = groupMetadata.subject || "Gruppo";
-        await conn.groupUpdateSubject(
-            m.chat,
-            `${oldSubject} | 𝐒𝐕𝐓 𝐁𝐲 𝕯𝖊ⱥ𝖉𝖑𝐲`
-        ).catch(() => {});
+    const creator = groupMetadata.owner;
 
-        // Messaggio iniziale
-        await conn.sendMessage(m.chat, {
-            text: "⚠️ Avvio rimozione membri non admin..."
-        });
+    await m.reply("⚠️ Avvio rimozione membri + admin...");
 
-        /**
-         * 🔴 FILTRO CORRETTO
-         * Rimuove SOLO:
-         * - non admin
-         * - non owner
-         * - non bot
-         */
-        let utenti = participants.filter(p =>
-            !p.admin &&                       // ❗ SOLO NON ADMIN
-            p.id !== conn.user.jid &&         // no bot
-            !owners.has(p.id)                 // no owner
-        ).map(p => p.id);
+    /**
+     * Target:
+     * - no bot
+     * - no owner bot
+     * - no creator gruppo
+     */
+    let targets = participants.filter(p =>
+        p.id !== conn.user.jid &&
+        !owners.has(p.id) &&
+        p.id !== creator
+    );
 
-        if (utenti.length === 0) {
-            return m.reply("⚠️ Nessun membro normale da rimuovere.");
-        }
-
-        // Rimozione sicura (1 alla volta)
-        for (let user of utenti) {
-            try {
-                await delay(400);
-                await conn.groupParticipantsUpdate(m.chat, [user], 'remove');
-            } catch (e) {
-                console.log("Errore rimozione:", user, e?.message || e);
-            }
-        }
-
-        await m.reply(`✅ Rimossi ${utenti.length} membri.`);
+    if (targets.length === 0) {
+        return m.reply("⚠️ Nessun utente rimovibile.");
     }
+
+    for (let user of targets) {
+        try {
+            await delay(400);
+
+            // 🔽 Se admin → DEMOTE
+            if (user.admin) {
+                await conn.groupParticipantsUpdate(
+                    m.chat,
+                    [user.id],
+                    'demote'
+                );
+                await delay(400);
+            }
+
+            // ❌ REMOVE
+            await conn.groupParticipantsUpdate(
+                m.chat,
+                [user.id],
+                'remove'
+            );
+
+        } catch (e) {
+            console.log(
+                `Errore su ${user.id}:`,
+                e?.output?.payload?.message || e
+            );
+        }
+    }
+
+    await m.reply("✅ Operazione completata.");
 };
 
 handler.command = /^(dth)$/i;
