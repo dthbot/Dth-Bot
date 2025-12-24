@@ -1,45 +1,40 @@
-import axios from "axios"
+import fetch from 'node-fetch'
 
 export default {
   command: ['ttsc'],
   tags: ['downloader'],
   help: ['ttsc <link tiktok>'],
-  
+
   async run(m, { conn, args }) {
-    if (!args[0]) {
-      return m.reply('❌ Inserisci un link TikTok\n\nEsempio:\n.ttsc https://www.tiktok.com/...')
-    }
+    if (!args[0]) return m.reply('❌ Inserisci un link TikTok')
 
     const url = args[0]
-    if (!url.includes('tiktok.com')) {
-      return m.reply('❌ Link non valido')
-    }
+    if (!url.includes('tiktok.com')) return m.reply('❌ Link TikTok non valido')
 
     try {
-      m.reply('⏳ Scaricando il video...')
+      await m.reply('⏳ Attendi, scarico il video...')
 
-      // API pubblica (semplice e veloce)
-      const api = `https://tikwm.com/api/?url=${encodeURIComponent(url)}`
-      const res = await axios.get(api)
+      const res = await fetch(
+        `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`
+      )
+      const json = await res.json()
 
-      if (!res.data || !res.data.data) {
-        return m.reply('❌ Errore nel download')
+      if (!json.video || !json.video.noWatermark) {
+        return m.reply('❌ Download fallito')
       }
-
-      const videoUrl = res.data.data.play
 
       await conn.sendMessage(
         m.chat,
         {
-          video: { url: videoUrl },
-          caption: '✅ Video TikTok scaricato'
+          video: { url: json.video.noWatermark },
+          caption: '✅ TikTok scaricato'
         },
         { quoted: m }
       )
 
-    } catch (err) {
-      console.error(err)
-      m.reply('❌ Errore durante il download del video')
+    } catch (e) {
+      console.log(e)
+      m.reply('❌ Errore durante il download')
     }
   }
 }
