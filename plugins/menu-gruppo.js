@@ -82,6 +82,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 
 🔞 *NSFW*
 ➤ Tette [@]
+➤ Incinta [@]
 ➤ Pene
 ➤ Sega
 ➤ Scopa
