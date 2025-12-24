@@ -1,22 +1,21 @@
-// intercetta la risposta testuale
+// intercetta i bottoni e le liste
 export async function before(m, { conn }) {
-  if (!m.text || !m.quoted || !m.quoted.text) return true
+  // recupera l'ID del bottone o della riga selezionata
+  const btnId =
+    m.message?.buttonsResponseMessage?.selectedButtonId ||
+    m.message?.templateButtonReplyMessage?.selectedId ||
+    m.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
+    m.msg?.selectedButtonId   // fallback per alcune versioni di Baileys
 
-  // Verifica se l'utente sta rispondendo al messaggio del catalogo droga
-  if (!m.quoted.text.includes('🏪 DROGA SHOP')) return true
+  if (!btnId) return true   // nessun bottone, passa al prossimo handler
 
-  const scelta = m.text.toLowerCase().trim()
-  let prodotto = ''
-
-  if (scelta === '1') prodotto = 'Oppio'
-  if (scelta === '2') prodotto = 'Fumo'
-  if (scelta === '3') prodotto = 'Erba'
-  if (scelta === '4') prodotto = 'Cocaina'
-
-  if (prodotto) {
+  // se è uno dei bottoni del comando .droga
+  const droghe = ['Oppio', 'Fumo', 'Erba', 'Cocaina']
+  if (droghe.includes(btnId)) {
     await conn.sendMessage(m.chat, {
-      text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${prodotto}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+      text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${btnId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
     }, { quoted: m })
+    return true   // blocca ulteriori elaborazioni
   }
 
   return true
@@ -24,22 +23,23 @@ export async function before(m, { conn }) {
 
 // comando .droga
 let handler = async (m, { conn }) => {
-  const menu = `🏪 *DROGA SHOP* 🏪\n
-🤔 *Che droga vuoi prendere?*
-_Rispondi a questo messaggio con il numero corrispondente:_
+  const buttons = [
+    { buttonId: 'Oppio',   buttonText: { displayText: '⚗️ Oppio'   }, type: 1 },
+    { buttonId: 'Fumo',    buttonText: { displayText: '🍫 Fumo'    }, type: 1 },
+    { buttonId: 'Erba',    buttonText: { displayText: '🌿 Erba'    }, type: 1 },
+    { buttonId: 'Cocaina', buttonText: { displayText: '💨 Cocaina' }, type: 1 }
+  ]
 
-1. ⚗️ *Oppio*
-2. 🍫 *Fumo*
-3. 🌿 *Erba*
-4. 💨 *Cocaina*
-
-💪 _Scegli bene!_`
-
-  await conn.sendMessage(m.chat, { text: menu }, { quoted: m })
+  await conn.sendMessage(m.chat, {
+    text: `🤔 *Che droga vuoi prendere?*`,
+    footer: 'Seleziona una sostanza',
+    buttons: buttons,
+    headerType: 1
+  }, { quoted: m })
 }
 
 handler.command = ['droga']
-handler.tags = ['fun']
-handler.help = ['droga']
+handler.tags    = ['fun']
+handler.help    = ['droga']
 
 export default handler
