@@ -1,19 +1,18 @@
-// intercetta i bottoni e le liste
+// intercetta la selezione dalla lista
 export async function before(m, { conn }) {
-  // Verifica se il messaggio è una risposta a un bottone o a una lista
-  const btnId = 
-    m.message?.buttonsResponseMessage?.selectedButtonId || 
-    m.message?.templateButtonReplyMessage?.selectedId || 
+  // Cattura l'ID sia dai bottoni che dalle liste
+  let selectedId = 
     m.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
-    m.msg?.selectedButtonId // Copre alcune versioni recenti di Baileys
+    m.message?.buttonsResponseMessage?.selectedButtonId ||
+    m.message?.templateButtonReplyMessage?.selectedId
 
-  if (!btnId) return true
+  if (!selectedId) return true
 
-  // Verifica se è uno dei bottoni del plugin droga (opzionale, per evitare conflitti)
   const droghe = ['Oppio', 'Fumo', 'Erba', 'Cocaina']
-  if (droghe.includes(btnId)) {
+  
+  if (droghe.includes(selectedId)) {
     await conn.sendMessage(m.chat, {
-      text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${btnId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+      text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${selectedId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
     }, { quoted: m })
   }
 
@@ -22,22 +21,27 @@ export async function before(m, { conn }) {
 
 // comando .droga
 let handler = async (m, { conn }) => {
-  // Nota: Molti client WhatsApp ora richiedono l'invio come 'buttons' 
-  // ma con una struttura leggermente diversa o l'uso di 'list'
-  
-  const buttons = [
-    { buttonId: 'Oppio', buttonText: { displayText: '⚗️ Oppio' }, type: 1 },
-    { buttonId: 'Fumo', buttonText: { displayText: '🍫 Fumo' }, type: 1 },
-    { buttonId: 'Erba', buttonText: { displayText: '🌿 Erba' }, type: 1 },
-    { buttonId: 'Cocaina', buttonText: { displayText: '💨 Cocaina' }, type: 1 }
+  const sections = [
+    {
+      title: "Sostanze Disponibili",
+      rows: [
+        { title: "⚗️ Oppio", rowId: "Oppio", description: "Qualità extra" },
+        { title: "🍫 Fumo", rowId: "Fumo", description: "Direttamente dal Marocco" },
+        { title: "🌿 Erba", rowId: "Erba", description: "Naturale 100%" },
+        { title: "💨 Cocaina", rowId: "Cocaina", description: "Pura al 99%" }
+      ]
+    }
   ]
 
-  await conn.sendMessage(m.chat, {
-    text: `🤔 *Che droga vuoi prendere?*`,
-    footer: 'Seleziona una sostanza',
-    buttons: buttons,
-    headerType: 1
-  }, { quoted: m })
+  const listMessage = {
+    text: "🤔 *Che droga vuoi prendere?*",
+    footer: "Clicca il bottone qui sotto",
+    title: "🏪 DROGA SHOP",
+    buttonText: "Scegli la sostanza",
+    sections
+  }
+
+  await conn.sendMessage(m.chat, listMessage, { quoted: m })
 }
 
 handler.command = ['droga']
