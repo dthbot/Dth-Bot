@@ -1,39 +1,38 @@
 // droga.js
-let handler = async (m, { conn }) => {
-  const btns = [
-    { buttonId: '.oppio',   buttonText: { displayText: '⚗️ Oppio'   }, type: 1 },
-    { buttonId: '.fumo',    buttonText: { displayText: '🍫 Fumo'    }, type: 1 },
-    { buttonId: '.erba',    buttonText: { displayText: '🌿 Erba'    }, type: 1 },
-    { buttonId: '.cocaina', buttonText: { displayText: '💨 Cocaina' }, type: 1 }
-  ]
+export default {
+  name: 'droga',
+  command: ['droga'],
+  tags: ['fun'],
+  help: ['droga'],
+  async exec({ conn, msg }) {
+    const buttons = [
+      { id: 'Oppio',   text: '⚗️ Oppio' },
+      { id: 'Fumo',    text: '🍫 Fumo' },
+      { id: 'Erba',    text: '🌿 Erba' },
+      { id: 'Cocaina', text: '💨 Cocaina' }
+    ]
 
-  await conn.sendMessage(m.chat, {
-    text: `🤔 *Che droga vuoi prendere?*`,
-    footer: 'Scegli una voce',
-    buttons: btns,
-    headerType: 1
-  }, { quoted: m })
+    await conn.sendMessage(msg.chat, {
+      text: `🤔 *Che droga vuoi prendere?*`,
+      footer: 'Scegli una voce',
+      buttons,
+      headerType: 1
+    }, { quoted: msg })
+  }
 }
 
-handler.command = ['droga']
-handler.tags = ['fun']
-handler.help = ['droga']
+// listener che cattura i click sui bottoni
+export const button = {
+  async exec({ conn, msg, data }) {
+    const btnId = data?.selected?.id   // ChatUnity passa l'ID del bottone così
 
-export default handler
+    if (!btnId) return
 
-// singoli comandi
-export const oppio = (m, { conn }) => conn.sendMessage(m.chat, {
-  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Oppio*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
-}, { quoted: m })
-
-export const fumo = (m, { conn }) => conn.sendMessage(m.chat, {
-  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Fumo*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
-}, { quoted: m })
-
-export const erba = (m, { conn }) => conn.sendMessage(m.chat, {
-  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Erba*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
-}, { quoted: m })
-
-export const cocaina = (m, { conn }) => conn.sendMessage(m.chat, {
-  text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *Cocaina*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
-}, { quoted: m })
+    const droghe = ['Oppio', 'Fumo', 'Erba', 'Cocaina']
+    if (droghe.includes(btnId)) {
+      await conn.sendMessage(msg.chat, {
+        text: `✅ *VENDUTO*\n\n🚬 Hai selezionato: *${btnId}*\n\n🤪 *GODITELA*\n\n💪 SI alle droghe`
+      }, { quoted: msg })
+    }
+  }
+}
