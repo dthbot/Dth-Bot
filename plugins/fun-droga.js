@@ -1,24 +1,29 @@
-let handler = async (m, { conn }) => {
+// intercetta SEMPRE i bottoni
+export async function before(m, { conn }) {
 
-  // 👉 RISPOSTA AI BOTTONI (FIX)
   let btnId =
     m.message?.templateButtonReplyMessage?.selectedId ||
     m.message?.buttonsResponseMessage?.selectedButtonId
 
-  if (btnId) {
-    return conn.sendMessage(m.chat, {
-      text:
+  if (!btnId) return true
+
+  // risposta al bottone
+  await conn.sendMessage(m.chat, {
+    text:
 `✅ VENDUTO
 
-🚬 "${scelta}" È la tua scelta? Bene ne hai comprato 5 Grammi
+🚬 Hai selezionato: *${btnId}*
 
-🤪 GODITELI
+🤪 *GODITELA*
 
 💪 SI alle droghe`
-    }, { quoted: m })
-  }
+  }, { quoted: m })
 
-  // 👉 COMANDO .droga
+  return true
+}
+
+// comando .droga → mostra bottoni
+let handler = async (m, { conn }) => {
   await conn.sendMessage(m.chat, {
     text: `🤔 *Che droga vuoi prendere?*`,
     buttons: [
