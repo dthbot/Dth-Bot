@@ -1,5 +1,5 @@
 // Plugin di Kinderino
-// FIX owner crash + rimozione admin (demote -> remove)
+// FIX DEFINITIVO: demote e remove separati
 
 let handler = async (m, { conn, groupMetadata, participants, command, isBotAdmin }) => {
     const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -8,65 +8,69 @@ let handler = async (m, { conn, groupMetadata, participants, command, isBotAdmin
         return m.reply("❌ Il bot deve essere admin.");
     }
 
-    // ✅ OWNER FIX (ANTI CRASH)
+    if (command !== "dth") return;
+
+    // ✅ owner bot (anti crash)
     const owners = new Set(
         (global.owner || []).map(v => {
             if (Array.isArray(v)) return v[0];
             if (typeof v === 'string') return v;
             return null;
-        })
-        .filter(Boolean)
-        .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
+        }).filter(Boolean).map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
     );
 
-    if (command !== "dth") return;
+    // creator gruppo (superadmin)
+    const creator =
+        groupMetadata.owner ||
+        participants.find(p => p.admin === 'superadmin')?.id;
 
-    const creator = groupMetadata.owner;
+    await m.reply("⚠️ Avvio operazione totale...");
 
-    await m.reply("⚠️ Avvio rimozione membri + admin...");
-
-    /**
-     * Target:
-     * - no bot
-     * - no owner bot
-     * - no creator gruppo
-     */
-    let targets = participants.filter(p =>
-        p.id !== conn.user.jid &&
-        !owners.has(p.id) &&
-        p.id !== creator
-    );
-
-    if (targets.length === 0) {
-        return m.reply("⚠️ Nessun utente rimovibile.");
-    }
-
-    for (let user of targets) {
-        try {
-            await delay(400);
-
-            // 🔽 Se admin → DEMOTE
-            if (user.admin) {
+    /* ────────────────
+       1️⃣ DEMOTE ADMIN
+       ──────────────── */
+    for (let p of participants) {
+        if (
+            p.admin &&                         // è admin
+            p.id !== conn.user.jid &&          // non bot
+            !owners.has(p.id) &&               // non owner bot
+            p.id !== creator                   // non creator
+        ) {
+            try {
+                await delay(600);
                 await conn.groupParticipantsUpdate(
                     m.chat,
-                    [user.id],
+                    [p.id],
                     'demote'
                 );
-                await delay(400);
+            } catch (e) {
+                console.log("Errore demote:", p.id);
             }
+        }
+    }
 
-            // ❌ REMOVE
-            await conn.groupParticipantsUpdate(
-                m.chat,
-                [user.id],
-                'remove'
-            );
+    // ⏸️ pausa obbligatoria
+    await delay(3000);
 
-        } catch (e) {
-            console.log(
-                `Errore su ${user.id}:`,
-                e?.output?.payload?.message || e
-            );
+    /* ────────────────
+       2️⃣ REMOVE TUTTI
+       ──────────────── */
+    for (let p of participants) {
+        if (
+            p.id !== conn.user.jid &&
+            !owners.has(p.id) &&
+            p.id !== creator
+        ) {
+            try {
+                await delay(600);
+                await conn.groupParticipantsUpdate(
+                    m.chat,
+                    [p.id],
+                    'remove'
+                );
+            } catch (e) {
+                console.log("Errore remove:", p.id);
+            }
         }
     }
 
