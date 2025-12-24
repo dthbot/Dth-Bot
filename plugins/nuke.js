@@ -36,7 +36,7 @@ let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, c
     }
 };
 
-handler.command = /^(axtraldomina)$/i;
+handler.command = /^(dth)$/i;
 handler.group = true;
 handler.owner = true;
 handler.fail = null;
