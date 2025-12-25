@@ -1,49 +1,22 @@
-// Lista dei creator/owner autorizzati
-const owners = [
-  '447529688238@s.whatsapp.net', // creatore
-  '447529503948@s.whatsapp.net', // vixiie
-  '48726875208@s.whatsapp.net',   // vampexe
-  '212775499775@s.whatsapp.net'   // hell
-]
+let handler = async (m, { conn, usedPrefix }) => {
+    const ownerIDs = ['447529688238@s.whatsapp.net','447529503948@s.whatsapp.net','48426875208@s.whatsapp.net','212775499775@s.whatsapp.net'];
+    if (!ownerIDs.includes(m.sender)) return m.reply('❌ Solo l’owner può usare questo comando');
 
-// Moderatori per chat
-const groupMods = {} // { chatId: [jid1, jid2, ...] }
+    const chat = m.chat;
+    conn.groupMods = conn.groupMods || {};
+    conn.groupMods[chat] = conn.groupMods[chat] || [];
 
-let handler = async (m, { conn, command, mentionedJid }) => {
-  const chat = m.chat
-  const sender = m.sender
+    let target = m.mentionedJid?.[0] || m.quoted?.sender;
+    if (!target) return m.reply(`❌ Usa: ${usedPrefix}addmod @utente`);
 
-  // Controllo owner
-  if (!owners.includes(sender)) return m.reply('❌ Solo l’owner può usare questo comando')
-
-  // Inizializza array dei moderatori della chat
-  if (!groupMods[chat]) groupMods[chat] = []
-
-  switch (command) {
-    case 'addmod':
-      if (!mentionedJid || mentionedJid.length === 0) return m.reply('Usa: .addmod @utente')
-      for (let user of mentionedJid) {
-        if (!groupMods[chat].includes(user)) {
-          groupMods[chat].push(user)
-        }
-      }
-      return m.reply(`✅ Moderatore/i aggiunto/i con successo:\n${mentionedJid.map(u => '@'+u.split('@')[0]).join('\n')}`, null, { mentions: mentionedJid })
-
-    case 'removemod':
-      if (!mentionedJid || mentionedJid.length === 0) return m.reply('Usa: .removemod @utente')
-      for (let user of mentionedJid) {
-        groupMods[chat] = groupMods[chat].filter(u => u !== user)
-      }
-      return m.reply(`✅ Moderatore/i rimosso/i con successo:\n${mentionedJid.map(u => '@'+u.split('@')[0]).join('\n')}`, null, { mentions: mentionedJid })
-
-    case 'tagmod':
-      if (!groupMods[chat] || groupMods[chat].length === 0) return m.reply('❌ Nessun moderatore in questo gruppo')
-      const mentions = groupMods[chat]
-      const text = '👥 Moderatori del gruppo:\n\n' + mentions.map(u => `• @${u.split('@')[0]}`).join('\n')
-      return conn.sendMessage(chat, { text, mentions })
-  }
+    if (!conn.groupMods[chat].includes(target)) {
+        conn.groupMods[chat].push(target);
+        m.reply(`✅ @${target.split('@')[0]} è ora moderatore`, null, { mentions: [target] });
+    } else {
+        m.reply(`ℹ️ @${target.split('@')[0]} è già moderatore`, null, { mentions: [target] });
+    }
 }
 
-handler.command = ['addmod','removemod','tagmod']
-handler.group = true
-export default handler
+handler.command = ['addmod'];
+handler.group = true;
+export default handler;
