@@ -50,45 +50,65 @@ let handler = async (m, { conn, command }) => {
   let chat = m.chat;
   let user = m.sender;
 
-  // CLASSIFICA
   if (command === 'classificabandiera') {
     if (!leaderboard[chat]) return m.reply('📉 Nessun dato per questo gruppo');
+
     let rank = Object.entries(leaderboard[chat])
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10);
+
     let text = `🏆 *CLASSIFICA BANDIERE* 🏆\n\n`;
-    rank.forEach(([u, p], i) => text += `${i + 1}. @${u.split('@')[0]} → *${p}* punti\n`);
+    rank.forEach(([u, p], i) => {
+      text += `${i + 1}. @${u.split('@')[0]} → *${p}* punti\n`;
+    });
+
     return conn.sendMessage(chat, { text, mentions: rank.map(r => r[0]) });
   }
 
-  // AVVIO GIOCO
   if (command === 'bandiera') {
     let flag = flags[Math.floor(Math.random() * flags.length)];
+    game[chat] = { flag: flag, answered: false, msgId: null };
+
     let sent = await conn.sendMessage(chat, {
-      text: `🌍 *INDOVINA LA BANDIERA!* 🌍\n\n${flag.emoji}\n\n📩 *Rispondi a questo messaggio con il nome dello Stato*`
+      text:
+`🌍 *INDOVINA LA BANDIERA!* 🌍
+
+${flag.emoji}
+
+📩 *Rispondi a questo messaggio con il nome dello Stato*`
     });
-    game[chat] = { flag, answered: false, msgId: sent.key.id };
+
+    game[chat].msgId = sent.key.id;
   }
 
-  // SALTA PARTITA
   if (command === 'skipbandiera') {
     if (!game[chat]) return m.reply('❌ Nessuna partita in corso da saltare.');
+
     delete game[chat];
 
     let flag = flags[Math.floor(Math.random() * flags.length)];
+    game[chat] = { flag: flag, answered: false, msgId: null };
+
     let sent = await conn.sendMessage(chat, {
-      text: `⏩ *Partita saltata! Nuova bandiera!*\n\n🌍 ${flag.emoji}\n\n📩 *Rispondi a questo messaggio con il nome dello Stato*`
+      text:
+`⏩ *Partita saltata! Nuova bandiera!*
+
+🌍 ${flag.emoji}
+
+📩 *Rispondi a questo messaggio con il nome dello Stato*`
     });
-    game[chat] = { flag, answered: false, msgId: sent.key.id };
+
+    game[chat].msgId = sent.key.id;
   }
 };
 
 // RISPOSTE
 handler.before = async (m, { conn }) => {
-  if (!game[m.chat]) return;
-  let data = game[m.chat];
+  let chat = m.chat;
+  if (!game[chat]) return;
+  let data = game[chat];
 
-  // controlla che il messaggio sia una risposta al messaggio del bot
+  // Risponde solo al messaggio del bot
   if (!m.quoted || m.quoted.key.id !== data.msgId) return;
 
   if (data.answered) return;
@@ -97,10 +117,11 @@ handler.before = async (m, { conn }) => {
   let risposta = m.text.toLowerCase().trim();
   if (data.flag.answers.includes(risposta)) {
     data.answered = true;
-    leaderboard[m.chat] ??= {};
-    leaderboard[m.chat][m.sender] = (leaderboard[m.chat][m.sender] || 0) + 1;
 
-    await conn.sendMessage(m.chat, {
+    if (!leaderboard[chat]) leaderboard[chat] = {};
+    leaderboard[chat][m.sender] = (leaderboard[chat][m.sender] || 0) + 1;
+
+    await conn.sendMessage(chat, {
       text:
 `🏆✨ *RISPOSTA CORRETTA!* ✨🏆
 
@@ -109,20 +130,26 @@ handler.before = async (m, { conn }) => {
 
 👏 @${m.sender.split('@')[0]}
 🔥 Punto guadagnato!
-📊 Totale punti: *${leaderboard[m.chat][m.sender]}*`,
+📊 Totale punti: *${leaderboard[chat][m.sender]}*`,
       mentions: [m.sender]
     });
-    delete game[m.chat];
+
+    delete game[chat];
   } else {
-    await conn.sendMessage(m.chat, {
-      text: `❌ *RISPOSTA SBAGLIATA!*\n\n🌍 Bandiera: ${data.flag.emoji}\n\n✍️ Scrivi un altro tentativo rispondendo al messaggio del bot`
+    await conn.sendMessage(chat, {
+      text:
+`❌ *RISPOSTA SBAGLIATA!*
+
+🌍 Bandiera: ${data.flag.emoji}
+
+✍️ Rispondi di nuovo al messaggio del bot!`
     });
   }
 };
 
-handler.command = ['bandiera', 'skipbandiera', 'classificabandiera'];
+handler.command = ['bandiera', 'classificabandiera', 'skipbandiera'];
 handler.tags = ['game'];
-handler.help = ['bandiera', 'skipbandiera', 'classificabandiera'];
+handler.help = ['bandiera', 'classificabandiera', 'skipbandiera'];
 handler.group = true;
 
 export default handler;
