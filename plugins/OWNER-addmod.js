@@ -9,7 +9,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
     if (!target) throw `Usa: ${usedPrefix}addmod @utente`
 
     const chat = m.chat
-    groupMods[chat] ??= []
+    if (!groupMods[chat]) groupMods[chat] = []
 
     if (groupMods[chat].includes(target)) {
         return m.reply('❌ Questo utente è già moderatore')
