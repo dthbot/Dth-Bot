@@ -61,7 +61,8 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Sposa 💍
 ➤ Divorzia 💔
 ➤ Adotta 👶🏻
-➤ Famiglia 👩‍❤️‍💋‍👨
+➤ Famiglia 🙍🏻
+➤ Coppie 👩‍❤️‍💋‍👨
 
 💰 *ECONOMIA*
 ➤ Wallet 👛
