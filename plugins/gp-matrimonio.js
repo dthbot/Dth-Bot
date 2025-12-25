@@ -1,7 +1,7 @@
 const proposals = {}
 const adoptions = {}
 
-let handler = async (m, { conn, command, usedPrefix }) => {
+let handler = async (m, { conn, command, usedPrefix, participants }) => {
     const users = global.db.data.users
     if (!users[m.sender]) users[m.sender] = {}
 
@@ -14,11 +14,12 @@ let handler = async (m, { conn, command, usedPrefix }) => {
             return adotta(m, conn, users, usedPrefix)
         case 'famiglia':
             return famiglia(m, users)
+        case 'coppie':
+            return coppie(m, users, participants)
     }
 }
 
 /* ================= 💍 MATRIMONIO ================= */
-
 async function sposa(m, conn, users, usedPrefix) {
     const sender = m.sender
     const target = m.mentionedJid?.[0] || m.quoted?.sender
@@ -55,7 +56,6 @@ Rispondi con *SI* o *NO*.`,
 }
 
 /* ================= 👨‍👩‍👧 ADOZIONE ================= */
-
 async function adotta(m, conn, users, usedPrefix) {
     const sender = m.sender
     const target = m.mentionedJid?.[0] || m.quoted?.sender
@@ -88,7 +88,6 @@ Rispondi con *SI* o *NO*.`,
 }
 
 /* ================= 📜 FAMIGLIA ================= */
-
 function famiglia(m, users) {
     const user = users[m.sender]
     let txt = `👨‍👩‍👧 *FAMIGLIA DI @${m.sender.split('@')[0]}*\n\n`
@@ -114,7 +113,6 @@ function famiglia(m, users) {
 }
 
 /* ================= 💔 DIVORZIO ================= */
-
 function divorzia(m, users) {
     const user = users[m.sender]
     if (!user.sposato) throw 'Non sei sposato'
@@ -129,7 +127,6 @@ function divorzia(m, users) {
 }
 
 /* ================= 🔒 CONFERME TESTO ================= */
-
 handler.before = async (m, { conn }) => {
     if (!m.text) return
     const txt = m.text.toLowerCase().trim()
@@ -195,7 +192,29 @@ handler.before = async (m, { conn }) => {
     }
 }
 
-handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia']
+/* ================= 💑 COPPIE ================= */
+function coppie(m, users, participants) {
+    let txt = '💖 *COPPIE SPOSATE NEL GRUPPO*\n\n'
+    let found = false
+    const mentions = []
+
+    for (let userId of participants.map(p => p.id)) {
+        const user = users[userId]
+        if (user && user.sposato && user.coniuge && participants.find(p => p.id === user.coniuge)) {
+            if (mentions.includes(user.coniuge) || mentions.includes(userId)) continue
+            txt += `• @${userId.split('@')[0]} + @${user.coniuge.split('@')[0]}\n`
+            mentions.push(userId)
+            mentions.push(user.coniuge)
+            found = true
+        }
+    }
+
+    if (!found) txt += 'Nessuna coppia al momento'
+    m.reply(txt, null, { mentions })
+}
+
+/* ================= COMANDI ================= */
+handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia', 'coppie']
 handler.group = true
 
 export default handler
