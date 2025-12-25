@@ -21,11 +21,7 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 
 async function sposa(m, conn, users, usedPrefix) {
     const sender = m.sender
-    const target = m.mentionedJid && m.mentionedJid[0]
-        ? m.mentionedJid[0]
-        : m.quoted
-        ? m.quoted.sender
-        : null
+    const target = m.mentionedJid?.[0] || m.quoted?.sender
 
     if (!target) throw `Usa: ${usedPrefix}sposa @utente`
     if (target === sender) throw 'Non puoi sposarti da solo'
@@ -45,13 +41,8 @@ async function sposa(m, conn, users, usedPrefix) {
 
 @${sender.split('@')[0]} vuole sposarti 💖
 
-Rispondi con:
-👉 *SI*  oppure  *NO*`,
-        mentions: [sender, target],
-        buttons: [
-            { buttonId: 'si', buttonText: { displayText: '💍 SI' }, type: 1 },
-            { buttonId: 'no', buttonText: { displayText: '❌ NO' }, type: 1 }
-        ]
+Rispondi con *SI* o *NO*.`,
+        mentions: [sender, target]
     })
 
     setTimeout(() => {
@@ -67,11 +58,7 @@ Rispondi con:
 
 async function adotta(m, conn, users, usedPrefix) {
     const sender = m.sender
-    const target = m.mentionedJid && m.mentionedJid[0]
-        ? m.mentionedJid[0]
-        : m.quoted
-        ? m.quoted.sender
-        : null
+    const target = m.mentionedJid?.[0] || m.quoted?.sender
 
     if (!target) throw `Usa: ${usedPrefix}adotta @utente`
     if (target === sender) throw 'Non puoi adottare te stesso'
@@ -88,13 +75,8 @@ async function adotta(m, conn, users, usedPrefix) {
 
 @${sender.split('@')[0]} vuole adottarti 💖
 
-Rispondi con:
-👉 *SI*  oppure  *NO*`,
-        mentions: [sender, target],
-        buttons: [
-            { buttonId: 'si', buttonText: { displayText: '✅ SI' }, type: 1 },
-            { buttonId: 'no', buttonText: { displayText: '❌ NO' }, type: 1 }
-        ]
+Rispondi con *SI* o *NO*.`,
+        mentions: [sender, target]
     })
 
     setTimeout(() => {
