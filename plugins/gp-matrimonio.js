@@ -16,6 +16,8 @@ let handler = async (m, { conn, command, usedPrefix, participants }) => {
             return famiglia(m, users)
         case 'coppie':
             return coppie(m, users, participants)
+        case 'toglifiglio':
+            return togliFiglio(m, users, usedPrefix)
     }
 }
 
@@ -28,8 +30,8 @@ async function sposa(m, conn, users, usedPrefix) {
     if (target === sender) throw 'Non puoi sposarti da solo'
     if (!users[target]) users[target] = {}
 
-    if (users[sender].sposato) throw 'Sei già sposato'
-    if (users[target].sposato) throw 'Questa persona è già sposata'
+    if (users[sender].sposato) throw `Sei già sposato con @${users[sender].coniuge?.split('@')[0] || 'sconosciuto'}`
+    if (users[target].sposato) throw `Questa persona è già sposata con @${users[target].coniuge?.split('@')[0] || 'sconosciuto'}`
     if (proposals[sender] || proposals[target])
         throw 'C’è già una proposta in corso'
 
@@ -40,7 +42,7 @@ async function sposa(m, conn, users, usedPrefix) {
         text:
 `💍 *PROPOSTA DI MATRIMONIO*
 
-@${sender.split('@')[0]} vuole sposarti 💖
+@${sender.split('@')[0]} ha chiesto di sposare @${target.split('@')[0]} 💖
 
 Rispondi con *SI* o *NO*.`,
         mentions: [sender, target]
@@ -73,7 +75,7 @@ async function adotta(m, conn, users, usedPrefix) {
         text:
 `👨‍👩‍👧 *RICHIESTA DI ADOZIONE*
 
-@${sender.split('@')[0]} vuole adottarti 💖
+@${sender.split('@')[0]} ha chiesto di adottare @${target.split('@')[0]} 💖
 
 Rispondi con *SI* o *NO*.`,
         mentions: [sender, target]
@@ -93,7 +95,13 @@ function famiglia(m, users) {
     let txt = `👨‍👩‍👧 *FAMIGLIA DI @${m.sender.split('@')[0]}*\n\n`
     let mentions = []
 
-    txt += '👤 Genitori:\n'
+    txt += '💑 Coniuge:\n'
+    if (user.coniuge) {
+        txt += `• @${user.coniuge.split('@')[0]}\n`
+        mentions.push(user.coniuge)
+    } else txt += 'Nessuno\n'
+
+    txt += '\n👤 Genitori:\n'
     if (user.genitori && user.genitori.length) {
         for (let g of user.genitori) {
             txt += `• @${g.split('@')[0]}\n`
@@ -120,8 +128,10 @@ function divorzia(m, users) {
     const ex = users[user.coniuge]
     user.sposato = false
     user.coniuge = null
-    ex.sposato = false
-    ex.coniuge = null
+    if (ex) {
+        ex.sposato = false
+        ex.coniuge = null
+    }
 
     m.reply('💔 Siete ufficialmente divorziati')
 }
@@ -192,7 +202,7 @@ handler.before = async (m, { conn }) => {
     }
 }
 
-/* ================= 💑 COPPIE ================= */
+/* ================= 💖 COPPIE ================= */
 function coppie(m, users, participants) {
     let txt = '💖 *COPPIE SPOSATE NEL GRUPPO*\n\n'
     let found = false
@@ -213,8 +223,23 @@ function coppie(m, users, participants) {
     m.reply(txt, null, { mentions })
 }
 
+/* ================= 🧒 TOGLI FIGLIO ================= */
+function togliFiglio(m, users, usedPrefix) {
+    const sender = m.sender
+    const target = m.mentionedJid?.[0] || m.quoted?.sender
+    if (!target) throw `Usa: ${usedPrefix}toglifiglio @utente`
+    if (!users[sender] || !users[sender].figli || !users[sender].figli.includes(target))
+        throw 'Non hai questo figlio'
+
+    users[sender].figli = users[sender].figli.filter(f => f !== target)
+    if (users[target].genitori)
+        users[target].genitori = users[target].genitori.filter(g => g !== sender)
+
+    m.reply(`🧒 @${target.split('@')[0]} è stato rimosso dai tuoi figli`, null, { mentions: [target] })
+}
+
 /* ================= COMANDI ================= */
-handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia', 'coppie']
+handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia', 'coppie', 'toglifiglio']
 handler.group = true
 
 export default handler
