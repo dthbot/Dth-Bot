@@ -1,26 +1,28 @@
-// Assicurati di avere la lista dei moderatori come nel plugin precedente
-const groupMods = {} // { "groupId": ["jid1@s.whatsapp.net", ...] }
+let handler = async (m, { conn, text }) => {
+    const chat = m.chat;
+    conn.groupMods = conn.groupMods || {};
+    const mods = conn.groupMods[chat] || [];
 
-let handler = async (m, { conn }) => {
-    const chat = m.chat
+    if (!mods.length) return m.reply('❌ Nessun moderatore in questo gruppo.');
 
-    // Controllo se ci sono moderatori nel gruppo
-    if (!groupMods[chat] || groupMods[chat].length === 0) {
-        return m.reply('❌ Nessun moderatore in questo gruppo.')
+    // Controllo se chi manda il comando è moderatore
+    if (!mods.includes(m.sender)) return m.reply('❌ Solo i moderatori possono usare questo comando.');
+
+    // Messaggio personalizzato
+    const msgText = text ? text : '👋 Attenzione ai moderatori:';
+
+    // Crea array di menzioni
+    const mentions = mods;
+
+    // Genera il testo con i tag visibili
+    let txt = msgText + '\n\n';
+    for (let mod of mods) {
+        txt += `• @${mod.split('@')[0]}\n`;
     }
 
-    // Testo da inviare e mentions
-    let text = '👥 Moderatori del gruppo:\n\n'
-    const mentions = []
-
-    groupMods[chat].forEach((mod, i) => {
-        text += `• @${mod.split('@')[0]}\n`
-        mentions.push(mod)
-    })
-
-    await conn.sendMessage(chat, { text, mentions })
+    await conn.sendMessage(chat, { text: txt, mentions });
 }
 
-handler.command = ['tagmod']
-handler.group = true
-export default handler
+handler.command = ['tagmod'];
+handler.group = true;
+export default handler;
