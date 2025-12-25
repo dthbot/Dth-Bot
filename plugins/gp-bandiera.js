@@ -47,8 +47,23 @@ let handler = async (m, { conn, command }) => {
     }, { quoted: m })
   }
 
-  // RISPOSTA
-  if (m.quoted && game[chat]) {
+  // AVVIO GIOCO
+  if (command === 'bandiera') {
+    let flag = flags[Math.floor(Math.random() * flags.length)]
+    game[chat] = flag
+
+    return conn.sendMessage(chat, {
+      text:
+`🌍 *INDOVINA LA BANDIERA!* 🌍
+
+${flag.emoji}
+
+📩 *Scrivi il nome dello Stato*`
+    }, { quoted: m })
+  }
+
+  // CONTROLLA RISPOSTA (qualsiasi testo in chat)
+  if (game[chat]) {
     let risposta = m.text.toLowerCase().trim()
     let data = game[chat]
 
@@ -71,42 +86,21 @@ let handler = async (m, { conn, command }) => {
 
       delete game[chat]
       return
-    }
-
-    // ❌ RISPOSTA SBAGLIATA → BOTTONE
-    await conn.sendMessage(chat, {
-      text:
+    } else if (m.text.length > 0) {
+      await conn.sendMessage(chat, {
+        text:
 `❌ *RISPOSTA SBAGLIATA!*
 
 🌍 Bandiera: ${data.emoji}
 📌 Risposta corretta: *${data.answers[0].toUpperCase()}*
 
-🔁 Vuoi riprovare subito?`,
-      buttons: [
-        { buttonId: '.bandiera', buttonText: { displayText: '🔁 Riprova' }, type: 1 }
-      ],
-      headerType: 1
-    }, { quoted: m })
-
-    delete game[chat]
-    return
+🔁 Scrivi un altro tentativo se vuoi riprovare!`
+      }, { quoted: m })
+    }
   }
-
-  // AVVIO GIOCO
-  let flag = flags[Math.floor(Math.random() * flags.length)]
-  game[chat] = flag
-
-  await conn.sendMessage(chat, {
-    text:
-`🌍 *INDOVINA LA BANDIERA!* 🌍
-
-${flag.emoji}
-
-📩 *Rispondi a questo messaggio*
-✍️ Scrivi il nome dello Stato`
-  }, { quoted: m })
 }
 
+handler.all = true
 handler.command = ['bandiera', 'classificabandiera']
 handler.tags = ['game']
 handler.help = ['bandiera', 'classificabandiera']
