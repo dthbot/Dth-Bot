@@ -1,11 +1,16 @@
-const handler = async (m, { conn, text, participants, isAdmin, isOwner }) => {
+const handler = async (m, { conn, text, participants }) => {
   try {
-    // 🔐 Permessi: admin O owner del bot
-    if (!isAdmin && !isOwner) {
-      return m.reply('❌ *Solo admin o owner del bot possono usare questo comando*');
+    // Lista moderatori per il gruppo
+    conn.groupMods = conn.groupMods || {};
+    const mods = conn.groupMods[m.chat] || [];
+
+    // Controllo permessi
+    if (!mods.includes(m.sender)) {
+      return m.reply('❌ Solo i moderatori possono usare questo comando.');
     }
 
-    const users = participants.map(u => conn.decodeJid(u.id));
+    // Lista utenti da menzionare: tutti i moderatori
+    const users = mods;
 
     if (m.quoted) {
       const quoted = m.quoted;
@@ -65,18 +70,18 @@ const handler = async (m, { conn, text, participants, isAdmin, isOwner }) => {
       }, { quoted: m });
 
     } else {
-      return m.reply('❌ *Inserisci un testo o rispondi a un messaggio/media*');
+      return m.reply('❌ Inserisci un testo o rispondi a un messaggio/media');
     }
 
   } catch (e) {
-    console.error('Errore hidetag/tag:', e);
+    console.error('Errore tagmod:', e);
     m.reply(global.errore || '❌ Si è verificato un errore');
   }
 };
 
-handler.help = ['hidetag', 'totag', 'tag'];
+handler.help = ['tagmod'];
 handler.tags = ['gruppo'];
-handler.command = /^(\.?hidetag|totag|tag)$/i;
+handler.command = /^\.tagmod$/i;
 handler.group = true;
 
 export default handler;
