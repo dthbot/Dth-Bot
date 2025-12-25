@@ -1,25 +1,69 @@
-handler.before = async (m, { conn }) => {
-  conn.impiccato = conn.impiccato || {};
-  let game = conn.impiccato[m.chat];
-  if (!game) return;
+let hangmanGames = {}; // Salva i giochi attivi per chat
 
-  // Solo chi ha iniziato può rispondere
-  if (m.sender !== game.starter) return;
+let words = [
+  "javascript", "python", "telegram", "whatsapp", "programmazione",
+  "chatbot", "nodejs", "computer", "internet", "database"
+];
+
+let handler = async (m, { conn, command }) => {
+  let chat = m.chat;
+  let user = m.sender;
+
+  if (command === 'impiccato') {
+    if (hangmanGames[chat]) return m.reply('❌ Gioco già in corso in questa chat!');
+
+    let word = words[Math.floor(Math.random() * words.length)].toLowerCase();
+    hangmanGames[chat] = {
+      word,
+      guessed: Array(word.length).fill('_'),
+      wrong: [],
+      attempts: 6,
+      starter: user
+    };
+
+    return conn.sendMessage(chat, {
+      text:
+`🎮 *IMPIICCATO* 🎮
+
+${hangmanGames[chat].guessed.join(' ')}
+
+❤️ Tentativi: ${hangmanGames[chat].attempts}
+❌ Errori: Nessuno
+
+📩 Scrivi una lettera o prova a indovinare la parola intera!`
+    });
+  }
+
+  if (command === 'skipimpiccato') {
+    if (!hangmanGames[chat]) return m.reply('❌ Nessuna partita in corso da saltare.');
+    delete hangmanGames[chat];
+    return m.reply('⏩ Partita saltata! Usa .impiccato per iniziare una nuova partita.');
+  }
+};
+
+// Gestione risposte
+handler.before = async (m, { conn }) => {
+  let chat = m.chat;
+  let user = m.sender;
+
+  let game = hangmanGames[chat];
+  if (!game) return;
+  if (user !== game.starter) return; // Solo chi ha iniziato può rispondere
+  if (!m.text) return;
 
   let input = m.text.toLowerCase().trim();
-  if (!input) return;
 
-  // Tentativo parola intera
+  // Parola intera
   if (input.length > 1) {
     if (input === game.word) {
-      delete conn.impiccato[m.chat];
-      return conn.reply(m.chat, `🎉 *HAI VINTO!*\nLa parola era *${game.word}*`);
+      delete hangmanGames[chat];
+      return conn.reply(chat, `🎉 *HAI VINTO!* La parola era *${game.word}*`);
     } else {
       game.attempts--;
     }
   } else {
-    // Tentativo lettera
-    if (game.wrong.includes(input) || game.guessed.includes(input)) {
+    // Lettera singola
+    if (game.guessed.includes(input) || game.wrong.includes(input)) {
       return m.reply('❌ Lettera già usata!');
     }
 
@@ -35,29 +79,32 @@ handler.before = async (m, { conn }) => {
 
   // Controllo vittoria
   if (game.guessed.join('') === game.word) {
-    delete conn.impiccato[m.chat];
-    return conn.reply(m.chat, `🎉 *HAI VINTO!*\nLa parola era *${game.word}*`);
+    delete hangmanGames[chat];
+    return conn.reply(chat, `🎉 *HAI VINTO!* La parola era *${game.word}*`);
   }
 
   // Controllo sconfitta
   if (game.attempts <= 0) {
-    delete conn.impiccato[m.chat];
-    return conn.reply(m.chat, `💀 *HAI PERSO!*\nLa parola era *${game.word}*`);
+    delete hangmanGames[chat];
+    return conn.reply(chat, `💀 *HAI PERSO!* La parola era *${game.word}*`);
   }
 
-  // Aggiorna lo stato
-  let update =
-`🎮 *IMPICCATO* 🎮
+  // Aggiornamento stato
+  await conn.sendMessage(chat, {
+    text:
+`🎮 *IMPIICCATO* 🎮
 
 ${game.guessed.join(' ')}
 
 ❤️ Tentativi: ${game.attempts}
 ❌ Errori: ${game.wrong.join(', ') || 'Nessuno'}
 
-📩 Rispondi a questo messaggio (o a qualsiasi messaggio della partita)`;
-
-  // Invia aggiornamento
-  let sent = await conn.reply(m.chat, update);
-  // Salva l'ultimo ID del messaggio per eventuali riferimenti futuri
-  game.msgId = sent.key.id;
+📩 Scrivi una lettera o prova a indovinare la parola intera!`
+  });
 };
+
+handler.command = ['impiccato', 'skipimpiccato'];
+handler.tags = ['game'];
+handler.help = ['impiccato', 'skipimpiccato'];
+
+export default handler;
