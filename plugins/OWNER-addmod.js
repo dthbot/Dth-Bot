@@ -1,51 +1,49 @@
-// Database globale dei moderatori
-const groupMods = {} // { "groupId": ["jid1@s.whatsapp.net", ...] }
-
-// Lista degli owner autorizzati
-const authorizedOwners = [
-    '447529688238@s.whatsapp.net', // creatore
-    '447529503948@s.whatsapp.net', // vixiie
-    '48726875208@s.whatsapp.net',  // vampexe
-    '212775499775@s.whatsapp.net'  // hell
+// Lista dei creator/owner autorizzati
+const owners = [
+  '447529688238@s.whatsapp.net', // creatore
+  '447529503948@s.whatsapp.net', // vixiie
+  '48726875208@s.whatsapp.net',   // vampexe
+  '212775499775@s.whatsapp.net'   // hell
 ]
 
-let handler = async (m, { conn, command, usedPrefix }) => {
-    // Controllo se chi invia è autorizzato
-    if (!authorizedOwners.includes(m.sender)) 
-        throw '❌ Solo gli owner autorizzati possono usare questo comando'
+// Moderatori per chat
+const groupMods = {} // { chatId: [jid1, jid2, ...] }
 
-    const target = m.mentionedJid?.[0] || m.quoted?.sender
-    if (!target) throw `Usa: ${usedPrefix}addmod @utente`
+let handler = async (m, { conn, command, mentionedJid }) => {
+  const chat = m.chat
+  const sender = m.sender
 
-    const chat = m.chat
-    if (!groupMods[chat]) groupMods[chat] = []
+  // Controllo owner
+  if (!owners.includes(sender)) return m.reply('❌ Solo l’owner può usare questo comando')
 
-    if (groupMods[chat].includes(target)) {
-        return m.reply('❌ Questo utente è già moderatore')
-    }
+  // Inizializza array dei moderatori della chat
+  if (!groupMods[chat]) groupMods[chat] = []
 
-    groupMods[chat].push(target)
-    m.reply(`✅ @${target.split('@')[0]} è stato aggiunto come moderatore del gruppo`, null, { mentions: [target] })
+  switch (command) {
+    case 'addmod':
+      if (!mentionedJid || mentionedJid.length === 0) return m.reply('Usa: .addmod @utente')
+      for (let user of mentionedJid) {
+        if (!groupMods[chat].includes(user)) {
+          groupMods[chat].push(user)
+        }
+      }
+      return m.reply(`✅ Moderatore/i aggiunto/i con successo:\n${mentionedJid.map(u => '@'+u.split('@')[0]).join('\n')}`, null, { mentions: mentionedJid })
+
+    case 'removemod':
+      if (!mentionedJid || mentionedJid.length === 0) return m.reply('Usa: .removemod @utente')
+      for (let user of mentionedJid) {
+        groupMods[chat] = groupMods[chat].filter(u => u !== user)
+      }
+      return m.reply(`✅ Moderatore/i rimosso/i con successo:\n${mentionedJid.map(u => '@'+u.split('@')[0]).join('\n')}`, null, { mentions: mentionedJid })
+
+    case 'tagmod':
+      if (!groupMods[chat] || groupMods[chat].length === 0) return m.reply('❌ Nessun moderatore in questo gruppo')
+      const mentions = groupMods[chat]
+      const text = '👥 Moderatori del gruppo:\n\n' + mentions.map(u => `• @${u.split('@')[0]}`).join('\n')
+      return conn.sendMessage(chat, { text, mentions })
+  }
 }
 
-// Funzione helper per rimuovere un moderatore
-handler.removemod = async (m, { conn, usedPrefix }) => {
-    if (!authorizedOwners.includes(m.sender)) 
-        throw '❌ Solo gli owner autorizzati possono usare questo comando'
-
-    const target = m.mentionedJid?.[0] || m.quoted?.sender
-    if (!target) throw `Usa: ${usedPrefix}removemod @utente`
-
-    const chat = m.chat
-    if (!groupMods[chat] || !groupMods[chat].includes(target)) 
-        return m.reply('❌ Questo utente non è moderatore')
-
-    groupMods[chat] = groupMods[chat].filter(u => u !== target)
-    m.reply(`✅ @${target.split('@')[0]} è stato rimosso dai moderatori`, null, { mentions: [target] })
-}
-
-// Comando del bot
-handler.command = ['addmod']
+handler.command = ['addmod','removemod','tagmod']
 handler.group = true
-handler.owner = true // solo owner può usare
 export default handler
