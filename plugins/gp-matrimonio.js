@@ -23,9 +23,14 @@ async function sposa(m, conn, users, usedPrefix) {
     const sender = m.sender
     const user = users[sender]
 
-    const target = m.mentionedJid?.[0] || m.quoted?.sender
+    const target = m.mentionedJid && m.mentionedJid[0]
+        ? m.mentionedJid[0]
+        : m.quoted
+        ? m.quoted.sender
+        : null
+
     if (!target)
-        throw `Usa: ${usedPrefix}sposa @utente`
+        throw 'Usa: ' + usedPrefix + 'sposa @utente'
     if (target === sender)
         throw 'Non puoi sposarti da solo'
 
@@ -44,9 +49,7 @@ async function sposa(m, conn, users, usedPrefix) {
             header: { title: '💍 PROPOSTA DI MATRIMONIO' },
             body: {
                 text:
-`@${sender.split('@')[0]} vuole sposarti 💖
-
-Accetti la proposta?`
+'@' + sender.split('@')[0] + ' vuole sposarti 💖\n\nAccetti la proposta?'
             },
             footer: { text: 'Hai 60 secondi per rispondere' },
             nativeFlowMessage: {
@@ -55,14 +58,14 @@ Accetti la proposta?`
                         name: 'quick_reply',
                         buttonParamsJson: JSON.stringify({
                             display_text: '💍 SÌ',
-                            id: `sposa_si|${sender}`
+                            id: 'sposa_si|' + sender
                         })
                     },
                     {
                         name: 'quick_reply',
                         buttonParamsJson: JSON.stringify({
                             display_text: '❌ NO',
-                            id: `sposa_no|${sender}`
+                            id: 'sposa_no|' + sender
                         })
                     }
                 ]
@@ -86,16 +89,20 @@ Accetti la proposta?`
 
 async function adotta(m, conn, users, usedPrefix) {
     const sender = m.sender
-    const target = m.mentionedJid?.[0] || m.quoted?.sender
+    const target = m.mentionedJid && m.mentionedJid[0]
+        ? m.mentionedJid[0]
+        : m.quoted
+        ? m.quoted.sender
+        : null
 
     if (!target)
-        throw `Usa: ${usedPrefix}adotta @utente`
+        throw 'Usa: ' + usedPrefix + 'adotta @utente'
     if (target === sender)
         throw 'Non puoi adottare te stesso'
 
     if (!users[target]) users[target] = {}
 
-    if (users[target].genitori?.length)
+    if (users[target].genitori && users[target].genitori.length)
         throw 'Questa persona ha già dei genitori'
 
     adoptions[target] = { from: sender }
@@ -105,9 +112,7 @@ async function adotta(m, conn, users, usedPrefix) {
             header: { title: '👨‍👩‍👧 RICHIESTA DI ADOZIONE' },
             body: {
                 text:
-`@${sender.split('@')[0]} vuole adottarti 💖
-
-Accetti di entrare nella sua famiglia?`
+'@' + sender.split('@')[0] + ' vuole adottarti 💖\n\nAccetti di entrare nella sua famiglia?'
             },
             footer: { text: 'Hai 60 secondi per rispondere' },
             nativeFlowMessage: {
@@ -116,14 +121,14 @@ Accetti di entrare nella sua famiglia?`
                         name: 'quick_reply',
                         buttonParamsJson: JSON.stringify({
                             display_text: '✅ SÌ',
-                            id: `adotta_si|${sender}`
+                            id: 'adotta_si|' + sender
                         })
                     },
                     {
                         name: 'quick_reply',
                         buttonParamsJson: JSON.stringify({
                             display_text: '❌ NO',
-                            id: `adotta_no|${sender}`
+                            id: 'adotta_no|' + sender
                         })
                     }
                 ]
@@ -146,26 +151,28 @@ Accetti di entrare nella sua famiglia?`
 
 function famiglia(m, users) {
     const user = users[m.sender]
-    let text = `👨‍👩‍👧 *FAMIGLIA DI @${m.sender.split('@')[0]}*\n\n`
+    let text = '👨‍👩‍👧 *FAMIGLIA DI @' + m.sender.split('@')[0] + '*\n\n'
     let mentions = []
 
     text += '👤 *Genitori:*\n'
-    if (user.genitori?.length) {
-        for (let g of user.genitori) {
-            text += `• @${g.split('@')[0]}\n`
+    if (user.genitori && user.genitori.length) {
+        for (let i = 0; i < user.genitori.length; i++) {
+            let g = user.genitori[i]
+            text += '• @' + g.split('@')[0] + '\n'
             mentions.push(g)
         }
     } else text += 'Nessuno\n'
 
     text += '\n👶 *Figli:*\n'
-    if (user.figli?.length) {
-        for (let f of user.figli) {
-            text += `• @${f.split('@')[0]}\n`
+    if (user.figli && user.figli.length) {
+        for (let i = 0; i < user.figli.length; i++) {
+            let f = user.figli[i]
+            text += '• @' + f.split('@')[0] + '\n'
             mentions.push(f)
         }
     } else text += 'Nessuno'
 
-    m.reply(text, null, { mentions })
+    m.reply(text, null, { mentions: mentions })
 }
 
 /* ================= 💔 DIVORZIO ================= */
@@ -186,19 +193,20 @@ function divorzia(m, users) {
 /* ================= 🔘 RISPOSTE BOTTONI ================= */
 
 handler.before = async (m, { conn }) => {
-    if (!m.message?.interactiveResponseMessage) return
+    if (!m.message || !m.message.interactiveResponseMessage) return
 
-    const params =
+    const response =
         m.message.interactiveResponseMessage
-            .nativeFlowResponseMessage?.paramsJson
+            .nativeFlowResponseMessage
+    if (!response) return
 
-    if (!params) return
-
-    const { id } = JSON.parse(params)
-    if (!id) return
+    const params = JSON.parse(response.paramsJson)
+    if (!params || !params.id) return
 
     const users = global.db.data.users
-    const [action, from] = id.split('|')
+    const data = params.id.split('|')
+    const action = data[0]
+    const from = data[1]
     const to = m.sender
 
     /* MATRIMONIO */
@@ -208,14 +216,16 @@ handler.before = async (m, { conn }) => {
         users[to].sposato = true
         users[to].coniuge = from
 
-        // condividi figli
-        users[from].figli ||= []
-        users[to].figli ||= []
+        if (!users[from].figli) users[from].figli = []
+        if (!users[to].figli) users[to].figli = []
 
-        for (let f of users[from].figli) {
-            if (!users[to].figli.includes(f)) {
+        for (let i = 0; i < users[from].figli.length; i++) {
+            let f = users[from].figli[i]
+            if (users[to].figli.indexOf(f) === -1) {
                 users[to].figli.push(f)
-                users[f].genitori.push(to)
+                if (!users[f].genitori) users[f].genitori = []
+                if (users[f].genitori.indexOf(to) === -1)
+                    users[f].genitori.push(to)
             }
         }
 
@@ -223,7 +233,8 @@ handler.before = async (m, { conn }) => {
         delete proposals[to]
 
         return conn.sendMessage(m.chat, {
-            text: `💍 @${from.split('@')[0]} e @${to.split('@')[0]} ora sono sposati!`,
+            text:
+'💍 @' + from.split('@')[0] + ' e @' + to.split('@')[0] + ' ora sono sposati!',
             mentions: [from, to]
         })
     }
@@ -237,13 +248,13 @@ handler.before = async (m, { conn }) => {
     /* ADOZIONE */
     if (action === 'adotta_si') {
         users[to].genitori = [from]
-        users[from].figli ||= []
+
+        if (!users[from].figli) users[from].figli = []
         users[from].figli.push(to)
 
-        // coniuge diventa genitore
         if (users[from].sposato && users[from].coniuge) {
             const partner = users[from].coniuge
-            users[partner].figli ||= []
+            if (!users[partner].figli) users[partner].figli = []
             users[partner].figli.push(to)
             users[to].genitori.push(partner)
         }
@@ -251,7 +262,8 @@ handler.before = async (m, { conn }) => {
         delete adoptions[to]
 
         return conn.sendMessage(m.chat, {
-            text: `👨‍👩‍👧 @${from.split('@')[0]} ha adottato @${to.split('@')[0]}`,
+            text:
+'👨‍👩‍👧 @' + from.split('@')[0] + ' ha adottato @' + to.split('@')[0],
             mentions: [from, to]
         })
     }
@@ -264,4 +276,5 @@ handler.before = async (m, { conn }) => {
 
 handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia']
 handler.group = true
+
 export default handler
