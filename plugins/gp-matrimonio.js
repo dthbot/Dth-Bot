@@ -1,133 +1,267 @@
-const proposals = {};
+const proposals = {}
+const adoptions = {}
 
-let handler = async (m, { conn, participants, command, text, args, usedPrefix }) => {
-    let users = global.db.data.users;
-    let user = users[m.sender];
+let handler = async (m, { conn, command, usedPrefix }) => {
+    const users = global.db.data.users
+    if (!users[m.sender]) users[m.sender] = {}
 
     switch (command) {
         case 'sposa':
-            await handleSposa(m, user, users, text, usedPrefix, conn);
-            break;
+            return sposa(m, conn, users, usedPrefix)
         case 'divorzia':
-            handleDivorzia(m, user, users);
-            break;
+            return divorzia(m, users)
+        case 'adotta':
+            return adotta(m, conn, users, usedPrefix)
+        case 'famiglia':
+            return famiglia(m, users)
     }
-};
+}
 
-const handleSposa = async (m, user, users, text, usedPrefix, conn) => {
-    let mention = (m.mentionedJid && m.mentionedJid[0]) ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
-    if (!mention || typeof mention !== 'string' || !mention.endsWith('@s.whatsapp.net')) 
-        throw `𝐓𝐚𝐠𝐠𝐚 𝐥𝐚 𝐩𝐞𝐫𝐬𝐨𝐧𝐚 𝐚 𝐜𝐮𝐢 𝐯𝐮𝐨𝐢 𝐢𝐧𝐯𝐢𝐚𝐫𝐞 𝐥𝐚 𝐩𝐫𝐨𝐩𝐨𝐬𝐭𝐚 𝐝𝐢 𝐦𝐚𝐭𝐫𝐢𝐦𝐨𝐧𝐢𝐨!\n𝐄𝐬𝐞𝐦𝐩𝐢𝐨: ${usedPrefix}sposa @tag`;
+/* ================= 💍 MATRIMONIO ================= */
 
-    if (mention === m.sender) throw '𝐍𝐨𝐧 𝐩𝐮𝐨𝐢 𝐬𝐩𝐨𝐬𝐚𝐫𝐭𝐢 𝐝𝐚 𝐬𝐨𝐥𝐨!';
-    let destinatario = users[mention];
-    if (!destinatario) throw '𝐏𝐞𝐫𝐬𝐨𝐧𝐚 𝐧𝐨𝐧 𝐩𝐫𝐞𝐬𝐞𝐧𝐭𝐞 𝐧𝐞𝐥 𝐬𝐢𝐬𝐭𝐞𝐦𝐚';
-    if (user.sposato) {
-        let testo = `𝐡𝐚𝐢 𝐠𝐢𝐚̀ 𝐮𝐧 𝐜𝐨𝐧𝐢𝐮𝐠𝐞...\n\n@${user.coniuge?.split('@')[0] || 'sconosciuto'} 𝐭𝐫𝐚𝐝𝐢𝐦𝐞𝐧𝐭𝐨!!! 😡😡😡`;
-        m.reply(testo, null, { mentions: user.coniuge ? [user.coniuge] : [] });
-        return;
-    }
-    if (destinatario.sposato) {
-        let testo = `@${mention.split('@')[0]} è 𝐠𝐢à 𝐬𝐩𝐨𝐬𝐚𝐭𝐨/𝐚`;
-        m.reply(testo, null, { mentions: [mention] });
-        return;
-    }
-    if (proposals[m.sender] || proposals[mention]) throw `𝐔𝐧𝐚 𝐩𝐫𝐨𝐩𝐨𝐬𝐭𝐚 𝐝𝐢 𝐦𝐚𝐭𝐫𝐢𝐦𝐨𝐧𝐢𝐨 è 𝐠𝐢à 𝐢𝐧 𝐜𝐨𝐫𝐬𝐨. 𝐀𝐭𝐭𝐞𝐧𝐝𝐢 𝐥𝐚 𝐫𝐢𝐬𝐩𝐨𝐬𝐭𝐚 𝐨 𝐥'𝐚𝐧𝐧𝐮𝐥𝐥𝐚𝐦𝐞𝐧𝐭𝐨.`;
+async function sposa(m, conn, users, usedPrefix) {
+    const sender = m.sender
+    const user = users[sender]
 
-    proposals[mention] = { from: m.sender, timeout: null };
-    proposals[m.sender] = { to: mention, timeout: null };
+    const target = m.mentionedJid?.[0] || m.quoted?.sender
+    if (!target)
+        throw `Usa: ${usedPrefix}sposa @utente`
+    if (target === sender)
+        throw 'Non puoi sposarti da solo'
 
-    let testo = `💍 𝐑𝐢𝐜𝐡𝐢𝐞𝐬𝐭𝐚 𝐝𝐢 𝐦𝐚𝐭𝐫𝐢𝐦𝐨𝐧𝐢𝐨 𝐢𝐧 𝐜𝐨𝐫𝐬𝐨...\n\n𝐕𝐮𝐨𝐢 𝐭𝐮 @${mention.split('@')[0]} 𝐩𝐫𝐞𝐧𝐝𝐞𝐫𝐞 𝐢𝐧 𝐬𝐩𝐨𝐬𝐨/𝐚 @${m.sender.split('@')[0]}?\n\n𝐒𝐜𝐞𝐠𝐥𝐢 𝐮𝐧𝐚 𝐨𝐩𝐳𝐢𝐨𝐧𝐞 sotto.\n> ⏳ 𝐇𝐚𝐢 𝟔𝟎 𝐬𝐞𝐜𝐨𝐧𝐝𝐢 𝐩𝐞𝐫 𝐫𝐢𝐬𝐩𝐨𝐧𝐝𝐞𝐫𝐞.`;
+    if (!users[target]) users[target] = {}
+
+    if (user.sposato) throw 'Sei già sposato'
+    if (users[target].sposato) throw 'Questa persona è già sposata'
+    if (proposals[sender] || proposals[target])
+        throw 'C’è già una proposta in corso'
+
+    proposals[target] = { from: sender }
+    proposals[sender] = { to: target }
 
     await conn.sendMessage(m.chat, {
-        text: testo,
-        mentions: [mention, m.sender],
-        buttons: [
-            { buttonId: "Si", buttonText: { displayText: "💍 Si" }, type: 1 },
-            { buttonId: "No", buttonText: { displayText: "❌ No" }, type: 1 }
-        ],
-        viewOnce: true,
-        headerType: 4
-    }, { quoted: m });
+        interactiveMessage: {
+            header: { title: '💍 PROPOSTA DI MATRIMONIO' },
+            body: {
+                text:
+`@${sender.split('@')[0]} vuole sposarti 💖
 
-    let timeoutCallback = () => {
-        if (proposals[mention]) {
-            let annullamento = `𝐏𝐫𝐨𝐩𝐨𝐬𝐭𝐚 𝐝𝐢 𝐦𝐚𝐭𝐫𝐢𝐦𝐨𝐧𝐢𝐨 𝐚𝐧𝐧𝐮𝐥𝐥𝐚𝐭𝐚: @${m.sender.split('@')[0]} 𝐞 @${mention.split('@')[0]} 𝐧𝐨𝐧 𝐡𝐚𝐧𝐧𝐨 𝐫𝐢𝐬𝐩𝐨𝐬𝐭𝐨 𝐞𝐧𝐭𝐫𝐨 𝐢𝐥 𝐭𝐞𝐦𝐩𝐨 𝐥𝐢𝐦𝐢𝐭𝐞.`;
-            conn.sendMessage(m.chat, { text: annullamento, mentions: [m.sender, mention] });
-            delete proposals[mention];
-            delete proposals[m.sender];
+Accetti la proposta?`
+            },
+            footer: { text: 'Hai 60 secondi per rispondere' },
+            nativeFlowMessage: {
+                buttons: [
+                    {
+                        name: 'quick_reply',
+                        buttonParamsJson: JSON.stringify({
+                            display_text: '💍 SÌ',
+                            id: `sposa_si|${sender}`
+                        })
+                    },
+                    {
+                        name: 'quick_reply',
+                        buttonParamsJson: JSON.stringify({
+                            display_text: '❌ NO',
+                            id: `sposa_no|${sender}`
+                        })
+                    }
+                ]
+            }
+        },
+        mentions: [sender, target]
+    })
+
+    setTimeout(() => {
+        if (proposals[target]) {
+            delete proposals[target]
+            delete proposals[sender]
+            conn.sendMessage(m.chat, {
+                text: '⏳ Proposta di matrimonio scaduta.'
+            })
         }
-    };
+    }, 60000)
+}
 
-    proposals[mention].timeout = setTimeout(timeoutCallback, 60000); 
-    proposals[m.sender].timeout = proposals[mention].timeout;
-};
+/* ================= 👨‍👩‍👧 ADOZIONE ================= */
 
-handler.before = async (m) => {
-    if (!m.text) return;
+async function adotta(m, conn, users, usedPrefix) {
+    const sender = m.sender
+    const target = m.mentionedJid?.[0] || m.quoted?.sender
 
-    let user = proposals[m.sender];
-    if (!user) return;
+    if (!target)
+        throw `Usa: ${usedPrefix}adotta @utente`
+    if (target === sender)
+        throw 'Non puoi adottare te stesso'
 
-    clearTimeout(user.timeout);
+    if (!users[target]) users[target] = {}
 
-    if (/^No|no$/i.test(m.text)) {
-        let fromUser = proposals[m.sender].from || m.sender;
-        delete proposals[fromUser];
-        delete proposals[m.sender];
-        return m.reply(`❌ 𝐏𝐫𝐨𝐩𝐨𝐬𝐭𝐚 𝐝𝐢 𝐦𝐚𝐭𝐫𝐢𝐦𝐨𝐧𝐢𝐨 𝐫𝐢𝐟𝐢𝐮𝐭𝐚𝐭𝐚.`, null, { mentions: [fromUser] });
+    if (users[target].genitori?.length)
+        throw 'Questa persona ha già dei genitori'
+
+    adoptions[target] = { from: sender }
+
+    await conn.sendMessage(m.chat, {
+        interactiveMessage: {
+            header: { title: '👨‍👩‍👧 RICHIESTA DI ADOZIONE' },
+            body: {
+                text:
+`@${sender.split('@')[0]} vuole adottarti 💖
+
+Accetti di entrare nella sua famiglia?`
+            },
+            footer: { text: 'Hai 60 secondi per rispondere' },
+            nativeFlowMessage: {
+                buttons: [
+                    {
+                        name: 'quick_reply',
+                        buttonParamsJson: JSON.stringify({
+                            display_text: '✅ SÌ',
+                            id: `adotta_si|${sender}`
+                        })
+                    },
+                    {
+                        name: 'quick_reply',
+                        buttonParamsJson: JSON.stringify({
+                            display_text: '❌ NO',
+                            id: `adotta_no|${sender}`
+                        })
+                    }
+                ]
+            }
+        },
+        mentions: [sender, target]
+    })
+
+    setTimeout(() => {
+        if (adoptions[target]) {
+            delete adoptions[target]
+            conn.sendMessage(m.chat, {
+                text: '⏳ Richiesta di adozione scaduta.'
+            })
+        }
+    }, 60000)
+}
+
+/* ================= 📜 FAMIGLIA ================= */
+
+function famiglia(m, users) {
+    const user = users[m.sender]
+    let text = `👨‍👩‍👧 *FAMIGLIA DI @${m.sender.split('@')[0]}*\n\n`
+    let mentions = []
+
+    text += '👤 *Genitori:*\n'
+    if (user.genitori?.length) {
+        for (let g of user.genitori) {
+            text += `• @${g.split('@')[0]}\n`
+            mentions.push(g)
+        }
+    } else text += 'Nessuno\n'
+
+    text += '\n👶 *Figli:*\n'
+    if (user.figli?.length) {
+        for (let f of user.figli) {
+            text += `• @${f.split('@')[0]}\n`
+            mentions.push(f)
+        }
+    } else text += 'Nessuno'
+
+    m.reply(text, null, { mentions })
+}
+
+/* ================= 💔 DIVORZIO ================= */
+
+function divorzia(m, users) {
+    const user = users[m.sender]
+    if (!user.sposato) throw 'Non sei sposato'
+
+    const ex = users[user.coniuge]
+    user.sposato = false
+    user.coniuge = null
+    ex.sposato = false
+    ex.coniuge = null
+
+    m.reply('💔 Siete ufficialmente divorziati')
+}
+
+/* ================= 🔘 RISPOSTE BOTTONI ================= */
+
+handler.before = async (m, { conn }) => {
+    if (!m.message?.interactiveResponseMessage) return
+
+    const params =
+        m.message.interactiveResponseMessage
+            .nativeFlowResponseMessage?.paramsJson
+
+    if (!params) return
+
+    const { id } = JSON.parse(params)
+    if (!id) return
+
+    const users = global.db.data.users
+    const [action, from] = id.split('|')
+    const to = m.sender
+
+    /* MATRIMONIO */
+    if (action === 'sposa_si') {
+        users[from].sposato = true
+        users[from].coniuge = to
+        users[to].sposato = true
+        users[to].coniuge = from
+
+        // condividi figli
+        users[from].figli ||= []
+        users[to].figli ||= []
+
+        for (let f of users[from].figli) {
+            if (!users[to].figli.includes(f)) {
+                users[to].figli.push(f)
+                users[f].genitori.push(to)
+            }
+        }
+
+        delete proposals[from]
+        delete proposals[to]
+
+        return conn.sendMessage(m.chat, {
+            text: `💍 @${from.split('@')[0]} e @${to.split('@')[0]} ora sono sposati!`,
+            mentions: [from, to]
+        })
     }
 
-    if (/^Si|si$/i.test(m.text)) {
-        let fromUser = proposals[m.sender].from;
-        let toUser = m.sender;
+    if (action === 'sposa_no') {
+        delete proposals[from]
+        delete proposals[to]
+        return m.reply('❌ Proposta rifiutata')
+    }
 
-        // Controlla che entrambi gli utenti esistano nel database
-        let senderUser = global.db.data.users[fromUser];
-        let receiverUser = global.db.data.users[toUser];
-        if (!senderUser || !receiverUser) {
-            delete proposals[fromUser];
-            delete proposals[toUser];
-            return m.reply('❌ Uno degli utenti non è più presente nel database.');
+    /* ADOZIONE */
+    if (action === 'adotta_si') {
+        users[to].genitori = [from]
+        users[from].figli ||= []
+        users[from].figli.push(to)
+
+        // coniuge diventa genitore
+        if (users[from].sposato && users[from].coniuge) {
+            const partner = users[from].coniuge
+            users[partner].figli ||= []
+            users[partner].figli.push(to)
+            users[to].genitori.push(partner)
         }
 
-        senderUser.sposato = true;
-        senderUser.coniuge = toUser;
-        senderUser.primoMatrimonio = true; 
-        receiverUser.sposato = true;
-        receiverUser.coniuge = fromUser;
-        receiverUser.primoMatrimonio = true;
+        delete adoptions[to]
 
-        let testo = `𝐃𝐢𝐜𝐡𝐢𝐚𝐫𝐨 𝐮𝐟𝐟𝐢𝐜𝐢𝐚𝐥𝐦𝐞𝐧𝐭𝐞 𝐬𝐩𝐨𝐬𝐚𝐭𝐢 @${m.sender.split('@')[0]} e  @${fromUser.split('@')[0]} 𝐟𝐢𝐧𝐜𝐡𝐞́ 𝐜𝐨𝐧𝐧𝐞𝐬𝐬𝐢𝐨𝐧𝐞 𝐧𝐨𝐧 𝐯𝐢 𝐬𝐞𝐩𝐚𝐫𝐢`;
-        await m.reply(testo, null, { mentions: [m.sender, fromUser] });
-
-        delete proposals[fromUser];
-        delete proposals[toUser];
+        return conn.sendMessage(m.chat, {
+            text: `👨‍👩‍👧 @${from.split('@')[0]} ha adottato @${to.split('@')[0]}`,
+            mentions: [from, to]
+        })
     }
-};
 
-const handleDivorzia = (m, user, users) => {
-    if (!user.sposato) throw '𝐏𝐫𝐢𝐦𝐚 𝐬𝐩𝐨𝐬𝐚𝐭𝐢, 𝐬𝐨𝐥𝐨 𝐝𝐨𝐩𝐨 𝐩𝐨𝐭𝐫𝐚𝐢 𝐝𝐢𝐯𝐨𝐫𝐳𝐢𝐚𝐫𝐞';
+    if (action === 'adotta_no') {
+        delete adoptions[to]
+        return m.reply('❌ Adozione rifiutata')
+    }
+}
 
-    let ex = users[user.coniuge];
-    if (!ex) throw 'Coniuge non trovato nel sistema';
-
-    if (!Array.isArray(user.ex)) user.ex = [];
-    if (!user.ex.includes(user.coniuge)) user.ex.push(user.coniuge);
-
-    if (!Array.isArray(ex.ex)) ex.ex = [];
-    if (!ex.ex.includes(m.sender)) ex.ex.push(m.sender);
-
-    user.sposato = false;
-    let exConiuge = user.coniuge; // Salva il coniuge prima di cancellarlo
-    user.coniuge = '';
-    ex.sposato = false;
-    ex.coniuge = '';
-
-    let testo = `𝐭𝐮 𝐞 @${exConiuge?.split('@')[0] || 'sconosciuto'} 𝐬𝐢𝐞𝐭𝐞 𝐨𝐫𝐚 𝐝𝐢𝐯𝐨𝐫𝐳𝐢𝐚𝐭𝐢.\n\n𝐭𝐚𝐧𝐭𝐨 𝐞𝐫𝐚𝐯𝐚𝐭𝐞 𝐮𝐧𝐚 𝐜𝐨𝐩𝐩𝐢𝐚 𝐨𝐫𝐫𝐢𝐛𝐢𝐥𝐞`;
-    m.reply(testo, null, { mentions: exConiuge ? [exConiuge] : [] });
-};
-
-handler.group = true;
-handler.command = ['sposa', 'divorzia'];
-export default handler;
+handler.command = ['sposa', 'divorzia', 'adotta', 'famiglia']
+handler.group = true
+export default handler
