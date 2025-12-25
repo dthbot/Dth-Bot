@@ -67,16 +67,18 @@ let handler = async (m, { conn, command }) => {
 
   if (command === 'bandiera') {
     let flag = flags[Math.floor(Math.random() * flags.length)];
-    game[chat] = { flag: flag, answered: false };
+    game[chat] = { flag: flag, answered: false, msgId: null };
 
-    return conn.sendMessage(chat, {
+    let sent = await conn.sendMessage(chat, {
       text:
 `🌍 *INDOVINA LA BANDIERA!* 🌍
 
 ${flag.emoji}
 
-📩 *Scrivi il nome dello Stato*`
+📩 *Rispondi a questo messaggio con il nome dello Stato*`
     });
+
+    game[chat].msgId = sent.key.id;
   }
 
   if (command === 'skipbandiera') {
@@ -85,16 +87,18 @@ ${flag.emoji}
     delete game[chat];
 
     let flag = flags[Math.floor(Math.random() * flags.length)];
-    game[chat] = { flag: flag, answered: false };
+    game[chat] = { flag: flag, answered: false, msgId: null };
 
-    return conn.sendMessage(chat, {
+    let sent = await conn.sendMessage(chat, {
       text:
 `⏩ *Partita saltata! Nuova bandiera!*
 
 🌍 ${flag.emoji}
 
-📩 *Scrivi il nome dello Stato*`
+📩 *Rispondi a questo messaggio con il nome dello Stato*`
     });
+
+    game[chat].msgId = sent.key.id;
   }
 };
 
@@ -104,10 +108,12 @@ handler.before = async (m, { conn }) => {
   let user = m.sender;
 
   if (!game[chat]) return;
-
   let data = game[chat];
   if (data.answered) return;
   if (!m.text) return;
+
+  // Risposta valida solo se è una risposta al messaggio del bot
+  if (!m.quoted || m.quoted.key.id !== data.msgId) return;
 
   let risposta = m.text.toLowerCase().trim();
   if (data.flag.answers.includes(risposta)) {
@@ -138,7 +144,7 @@ handler.before = async (m, { conn }) => {
 
 🌍 Bandiera: ${data.flag.emoji}
 
-✍️ Scrivi un altro tentativo!`
+✍️ Rispondi di nuovo al messaggio del bot con il tuo tentativo!`
     });
   }
 };
