@@ -47,7 +47,7 @@ let handler = async (m, { conn, command }) => {
   // NUOVA PARTITA
   if (command === 'bandiera') {
     let flag = flags[Math.floor(Math.random() * flags.length)]
-    game[chat] = { flag, answered: false }
+    game[chat] = { flag: flag, answered: false }
 
     return conn.sendMessage(chat, {
       text:
@@ -72,8 +72,9 @@ handler.all = async (m, { conn }) => {
   let risposta = m.text.toLowerCase().trim()
   if (data.flag.answers.includes(risposta)) {
     data.answered = true
-    leaderboard[chat] ??= {}
-    leaderboard[chat][user] = (leaderboard[chat][user] || 0) + 1
+    if (!leaderboard[chat]) leaderboard[chat] = {}
+    if (!leaderboard[chat][user]) leaderboard[chat][user] = 0
+    leaderboard[chat][user] += 1
 
     await conn.sendMessage(chat, {
       text:
