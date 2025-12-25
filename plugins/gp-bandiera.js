@@ -21,14 +21,14 @@ let flags = [
   { emoji: "🇳🇱", answers: ["olanda", "paesi bassi"] }
 ]
 
-let game = {}
-let leaderboard = {} // CLASSIFICA PER GRUPPO
+let game = {} // partita attiva per chat
+let leaderboard = {} // punti per chat
 
 let handler = async (m, { conn, command }) => {
   let chat = m.chat
   let user = m.sender
 
-  // MOSTRA CLASSIFICA
+  // CLASSIFICA
   if (command === 'classificabandiera') {
     if (!leaderboard[chat]) return m.reply('📉 Nessun dato per questo gruppo')
 
@@ -41,16 +41,13 @@ let handler = async (m, { conn, command }) => {
       text += `${i + 1}. @${u.split('@')[0]} → *${p}* punti\n`
     })
 
-    return conn.sendMessage(chat, {
-      text,
-      mentions: rank.map(r => r[0])
-    }, { quoted: m })
+    return conn.sendMessage(chat, { text, mentions: rank.map(r => r[0]) })
   }
 
-  // AVVIO GIOCO
+  // NUOVA PARTITA
   if (command === 'bandiera') {
     let flag = flags[Math.floor(Math.random() * flags.length)]
-    game[chat] = flag
+    game[chat] = { flag, answered: false }
 
     return conn.sendMessage(chat, {
       text:
@@ -59,48 +56,51 @@ let handler = async (m, { conn, command }) => {
 ${flag.emoji}
 
 📩 *Scrivi il nome dello Stato*`
-    }, { quoted: m })
+    })
   }
+}
 
-  // CONTROLLA RISPOSTA (qualsiasi testo in chat)
-  if (game[chat]) {
-    let risposta = m.text.toLowerCase().trim()
-    let data = game[chat]
+// RISPOSTE
+handler.all = async (m, { conn }) => {
+  let chat = m.chat
+  let user = m.sender
+  if (!game[chat]) return
 
-    if (data.answers.includes(risposta)) {
-      leaderboard[chat] ??= {}
-      leaderboard[chat][user] = (leaderboard[chat][user] || 0) + 1
+  let data = game[chat]
+  if (data.answered) return // già risposto
 
-      await conn.sendMessage(chat, {
-        text:
+  let risposta = m.text.toLowerCase().trim()
+  if (data.flag.answers.includes(risposta)) {
+    data.answered = true
+    leaderboard[chat] ??= {}
+    leaderboard[chat][user] = (leaderboard[chat][user] || 0) + 1
+
+    await conn.sendMessage(chat, {
+      text:
 `🏆✨ *RISPOSTA CORRETTA!* ✨🏆
 
-🌍 Bandiera: ${data.emoji}
-🎯 Stato: *${data.answers[0].toUpperCase()}*
+🌍 Bandiera: ${data.flag.emoji}
+🎯 Stato: *${data.flag.answers[0].toUpperCase()}*
 
 👏 @${user.split('@')[0]}
 🔥 Punto guadagnato!
 📊 Totale punti: *${leaderboard[chat][user]}*`,
-        mentions: [user]
-      }, { quoted: m })
+      mentions: [user]
+    })
 
-      delete game[chat]
-      return
-    } else if (m.text.length > 0) {
-      await conn.sendMessage(chat, {
-        text:
+    delete game[chat]
+  } else {
+    await conn.sendMessage(chat, {
+      text:
 `❌ *RISPOSTA SBAGLIATA!*
 
-🌍 Bandiera: ${data.emoji}
-📌 Risposta corretta: *${data.answers[0].toUpperCase()}*
+🌍 Bandiera: ${data.flag.emoji}
 
-🔁 Scrivi un altro tentativo se vuoi riprovare!`
-      }, { quoted: m })
-    }
+✍️ Scrivi un altro tentativo!`
+    })
   }
 }
 
-handler.all = true
 handler.command = ['bandiera', 'classificabandiera']
 handler.tags = ['game']
 handler.help = ['bandiera', 'classificabandiera']
