@@ -27,6 +27,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Dado 🎲
 ➤ Slot 🎰
 ➤ Bandiera 🏳️
+➤ Classificabandiera 🚩
 ➤ Impiccato 👤
 
 👤 *TAG & INTERAZIONI*
