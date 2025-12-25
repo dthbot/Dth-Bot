@@ -18,7 +18,29 @@ let flags = [
   { emoji: "🇿🇦", answers: ["sudafrica"] },
   { emoji: "🇪🇬", answers: ["egitto"] },
   { emoji: "🇵🇹", answers: ["portogallo"] },
-  { emoji: "🇳🇱", answers: ["olanda", "paesi bassi"] }
+  { emoji: "🇳🇱", answers: ["olanda", "paesi bassi"] },
+  { emoji: "🇹🇷", answers: ["turchia"] },
+  { emoji: "🇸🇪", answers: ["svezia"] },
+  { emoji: "🇳🇴", answers: ["norvegia"] },
+  { emoji: "🇫🇮", answers: ["finlandia"] },
+  { emoji: "🇩🇰", answers: ["danimarca"] },
+  { emoji: "🇧🇪", answers: ["belgio"] },
+  { emoji: "🇨🇭", answers: ["svizzera"] },
+  { emoji: "🇦🇹", answers: ["austria"] },
+  { emoji: "🇵🇭", answers: ["filippine"] },
+  { emoji: "🇮🇩", answers: ["indonesia"] },
+  { emoji: "🇻🇳", answers: ["vietnam"] },
+  { emoji: "🇹🇭", answers: ["tailandia"] },
+  { emoji: "🇲🇾", answers: ["malesia"] },
+  { emoji: "🇳🇬", answers: ["nigeria"] },
+  { emoji: "🇰🇪", answers: ["kenya"] },
+  { emoji: "🇺🇬", answers: ["uganda"] },
+  { emoji: "🇨🇴", answers: ["colombia"] },
+  { emoji: "🇨🇱", answers: ["cile"] },
+  { emoji: "🇵🇪", answers: ["perù"] },
+  { emoji: "🇻🇪", answers: ["venezuela"] },
+  { emoji: "🇨🇺", answers: ["cuba"] },
+  { emoji: "🇯🇲", answers: ["jamaica"] }
 ];
 
 let game = {};
@@ -56,19 +78,36 @@ ${flag.emoji}
 📩 *Scrivi il nome dello Stato*`
     });
   }
+
+  if (command === 'skipbandiera') {
+    if (!game[chat]) return m.reply('❌ Nessuna partita in corso da saltare.');
+
+    delete game[chat];
+
+    let flag = flags[Math.floor(Math.random() * flags.length)];
+    game[chat] = { flag: flag, answered: false };
+
+    return conn.sendMessage(chat, {
+      text:
+`⏩ *Partita saltata! Nuova bandiera!*
+
+🌍 ${flag.emoji}
+
+📩 *Scrivi il nome dello Stato*`
+    });
+  }
 };
 
-// INTERCETTA TUTTE LE RISPOSTE
+// RISPOSTE
 handler.before = async (m, { conn }) => {
   let chat = m.chat;
   let user = m.sender;
 
-  if (!game[chat]) return; // nessuna partita attiva
+  if (!game[chat]) return;
 
   let data = game[chat];
-  if (data.answered) return; // già risposto
-
-  if (!m.text) return; // solo messaggi di testo
+  if (data.answered) return;
+  if (!m.text) return;
 
   let risposta = m.text.toLowerCase().trim();
   if (data.flag.answers.includes(risposta)) {
@@ -104,8 +143,8 @@ handler.before = async (m, { conn }) => {
   }
 };
 
-handler.command = ['bandiera', 'classificabandiera'];
+handler.command = ['bandiera', 'classificabandiera', 'skipbandiera'];
 handler.tags = ['game'];
-handler.help = ['bandiera', 'classificabandiera'];
+handler.help = ['bandiera', 'classificabandiera', 'skipbandiera'];
 
 export default handler;
