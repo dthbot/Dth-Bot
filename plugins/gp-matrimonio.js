@@ -7,22 +7,22 @@ let handler = async (m, { conn, command, usedPrefix, participants }) => {
 
     switch (command) {
         case 'sposa':
-            return sposa(m, conn, users, usedPrefix)
+            return sposa(m, conn, users, usedPrefix, participants)
         case 'divorzia':
-            return divorzia(m, users)
+            return divorzia(m, users, participants)
         case 'adotta':
-            return adotta(m, conn, users, usedPrefix)
+            return adotta(m, conn, users, usedPrefix, participants)
         case 'famiglia':
             return famiglia(m, users, participants)
         case 'coppie':
             return coppie(m, users, participants)
         case 'toglifiglio':
-            return togliFiglio(m, users)
+            return togliFiglio(m, users, participants)
     }
 }
 
 /* ================= 💍 MATRIMONIO ================= */
-async function sposa(m, conn, users, usedPrefix) {
+async function sposa(m, conn, users, usedPrefix, participants) {
     const sender = m.sender
     const target = m.mentionedJid?.[0] || m.quoted?.sender
 
@@ -58,7 +58,7 @@ Rispondi con *SI* o *NO*.`,
 }
 
 /* ================= 👨‍👩‍👧 ADOZIONE ================= */
-async function adotta(m, conn, users, usedPrefix) {
+async function adotta(m, conn, users, usedPrefix, participants) {
     const sender = m.sender
     const target = m.mentionedJid?.[0] || m.quoted?.sender
 
@@ -121,7 +121,7 @@ function famiglia(m, users, participants) {
 }
 
 /* ================= 💔 DIVORZIO ================= */
-function divorzia(m, users) {
+function divorzia(m, users, participants) {
     const user = users[m.sender]
     if (!user.sposato) throw 'Non sei sposato'
 
@@ -228,7 +228,7 @@ function coppie(m, users, participants) {
 }
 
 /* ================= ❌ TOGLI FIGLIO ================= */
-function togliFiglio(m, users) {
+function togliFiglio(m, users, participants) {
     const user = users[m.sender]
     const target = m.mentionedJid?.[0] || m.quoted?.sender
     if (!target) throw 'Usa: .toglifiglio @utente'
@@ -241,7 +241,7 @@ function togliFiglio(m, users) {
         child.genitori = child.genitori.filter(g => g !== m.sender)
     }
 
-    m.reply(`✅ Hai rimosso ${getName(target, [])} dai tuoi figli`)
+    m.reply(`✅ Hai rimosso ${getName(target, participants)} dai tuoi figli`)
 }
 
 /* ================= Helper per nome ================= */
