@@ -1,66 +1,80 @@
+
+const time = async (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {
-  let war = 2 // <-- numero di warning prima del ban
-
-  let who
-  if (m.isGroup) {
-    who = m.mentionedJid?.[0] || m.quoted?.sender
-  } else {
-    who = m.chat
-  }
-
-  if (!who) return m.reply("𝐃𝐞𝐯𝐢 𝐦𝐞𝐧𝐳𝐢𝐨𝐧𝐚𝐫𝐞 𝐮𝐧 𝐮𝐭𝐞𝐧𝐭𝐞 𝐨 𝐫𝐢𝐬𝐩𝐨𝐧𝐝𝐞𝐫𝐞 𝐚 𝐮𝐧 𝐬𝐮𝐨 𝐦𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨 𝐟𝐫𝐨𝐜𝐢𝐨")
-
-  // 🔒 BLOCCA AVVERTIMENTI AL BOT
-  if (who === conn.user.jid) {
-    return m.reply("𝐍𝐨𝐧 𝐩𝐮𝐨𝐢 𝐰𝐚𝐫𝐧𝐚𝐫𝐞 𝐢𝐥 𝐛𝐨𝐭 𝐝𝐨𝐰𝐧")
-  }
-
-  if (!(who in global.db.data.users)) {
-    return m.reply("𝙉𝙤𝙣 𝙝𝙤 𝙩𝙧𝙤𝙫𝙖𝙩𝙤 𝙞𝙡 𝙘𝙖𝙯𝙯𝙤 𝙙𝙞 𝙪𝙩𝙚𝙣𝙩𝙚")
-  }
-
-  let user = global.db.data.users[who]
-  let warn = user.warn || 0
-  let nomeDelBot = global.db.data.nomedelbot || `𝔻𝕋ℍ-𝔹𝕆𝕋`
-
-  const messageOptions = {
-    contextInfo: {
-      mentionedJid: [who],
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: '',
-        serverMessageId: '',
-        newsletterName: `${nomeDelBot}`
-      }
+if (command == 'warn' || command == "ammonisci") {
+    let war = '2'
+    let who;
+if (m.isGroup) who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : true;
+else who = m.chat;
+if (!who) return;
+if (!(who in global.db.data.users)) {
+global.db.data.users[who] = { warn: 0 };
+}
+let warn = global.db.data.users[who].warn;
+    let user = global.db.data.users[who];
+ let prova = {
+      "key": {
+        "participants": "0@s.whatsapp.net",
+        "fromMe": false,
+        "id": "Halo"
+      },
+      "message": {
+        "locationMessage": {
+          name: '𝐀𝐭𝐭𝐞𝐧𝐳𝐢𝐨𝐧𝐞',
+          "jpegThumbnail": await(await fetch('https://qu.ax/fmHdc.png')).buffer(),
+          vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+        }
+      },
+      "participant": "0@s.whatsapp.net"
+    };
+    const reason = text ? '❓ » ' + text.replace(m.sender, '') : ''
+if (warn < war) {
+      global.db.data.users[who].warn += 1;
+      conn.reply(m.chat, `👤 » @${who.split('@')[0]}\n⚠️ » *${user.warn} / 3*\n${reason.capitalize()}`, prova, { mentions: [who]});
+    } else if (warn == war) {
+      global.db.data.users[who].warn = 0;
+     conn.reply(m.chat,`𝐔𝐭𝐞𝐧𝐭𝐞 𝐫𝐢𝐦𝐨𝐬𝐬𝐨 𝐝𝐨𝐩𝐨 𝟑 𝐚𝐯𝐯𝐞𝐫𝐭𝐢𝐦𝐞𝐧𝐭𝐢`, prova);
+      await time(1000);
+      await conn.groupParticipantsUpdate(m.chat, [who], 'remove');
     }
   }
-
-  if (warn < war) {
-    user.warn += 1
-    await conn.sendMessage(m.chat, {
-      text: `⚠️ 𝐀𝐕𝐕𝐄𝐑𝐓𝐈𝐌𝐄𝐍𝐓𝐎 ${user.warn}/𝟑 (𝟑 𝐰𝐚𝐫𝐧=𝐛𝐚𝐧)`,
-      ...messageOptions
-    })
-  } else if (warn >= war) {
-    user.warn = 0
-    await conn.sendMessage(m.chat, {
-      text: `⛔ 𝐔𝐓𝐄𝐍𝐓𝐄 𝐑𝐈𝐌𝐎𝐒𝐒𝐎 𝐃𝐎𝐏𝐎 3 𝐀𝐕𝐕𝐄𝐑𝐓𝐈𝐌𝐄𝐍𝐓𝐈 (𝐀𝐯𝐞𝐯𝐚 𝐫𝐨𝐭𝐭𝐨 𝐢𝐥 𝐜𝐚𝐳𝐳𝐨)`,
-      ...messageOptions
-    })
-    await sleep(1000)
-    await conn.groupParticipantsUpdate(m.chat, [who], 'remove')
+if (command == 'unwarn' || command == "delwarn") {
+    let who;
+if (m.isGroup) who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : false;
+    else who = m.chat;
+if (!who) return;
+if (!(who in global.db.data.users)) {
+global.db.data.users[who] = { warn: 0 };
+    }
+let warn = global.db.data.users[who].warn;
+if (warn > 0) {
+      global.db.data.users[who].warn -= 1;
+      let user = global.db.data.users[who];
+      let prova = {
+        "key": {
+          "participants": "0@s.whatsapp.net",
+          "fromMe": false,
+          "id": "Halo"
+        },
+        "message": {
+          "locationMessage": {
+            name: '𝐀𝐭𝐭𝐞𝐧𝐳𝐢𝐨𝐧𝐞',
+            "jpegThumbnail": await(await fetch('https://qu.ax/fmHdc.png')).buffer(),
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+          }
+        },
+        "participant": "0@s.whatsapp.net"
+      };
+      conn.reply(m.chat, `👤 » @${who.split('@')[0]}\n⚠️ » *${user.warn} / 3*`, prova, { mentions: [who] });
+    } else if (warn === 0) {
+      m.reply("𝐋’𝐮𝐭𝐞𝐧𝐭𝐞 𝐦𝐞𝐧𝐳𝐢𝐨𝐧𝐚𝐭𝐨 𝐧𝐨𝐧 𝐡𝐚 𝐚𝐯𝐯𝐞𝐫𝐭𝐢𝐦𝐞𝐧𝐭𝐢.");
+    }
   }
 }
-
-handler.help = ['warn @user']
-handler.tags = ['group']
-handler.command = /^(ammonisci|avvertimento|warn|warning)$/i
-handler.group = true
-handler.admin = true
-handler.botAdmin = true
-
-export default handler
-
-// Funzione di attesa
-const sleep = async (ms) => new Promise(resolve => 
+handler.help = handler.command = ['warn', 'ammonisci', 'unwarn', 'delwarn'];
+handler.group = true;
+handler.admin = true;
+handler.botAdmin = true;
+export default handler;
