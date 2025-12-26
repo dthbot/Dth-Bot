@@ -2,34 +2,35 @@ const time = async (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// thumbnail (fix fetch)
+// thumbnail (fetch FIX)
 const getThumb = async () =>
   Buffer.from(
     await (await fetch('https://qu.ax/fmHdc.png')).arrayBuffer()
   )
 
-let handler = async (m, { conn, text, args, command }) => {
+let handler = async (m, { conn, text, command }) => {
+
+  // ================= UTENTE =================
+  let who
+  if (m.isGroup)
+    who = m.mentionedJid[0]
+      ? m.mentionedJid[0]
+      : m.quoted
+      ? m.quoted.sender
+      : null
+  else who = m.chat
+
+  if (!who) return
+
+  if (!global.db.data.users[who]) {
+    global.db.data.users[who] = { warn: 0 }
+  }
+
+  let user = global.db.data.users[who]
 
   // ================= WARN =================
   if (command === 'warn' || command === 'ammonisci') {
-    let maxWarn = 3
-    let who
-
-    if (m.isGroup)
-      who = m.mentionedJid[0]
-        ? m.mentionedJid[0]
-        : m.quoted
-        ? m.quoted.sender
-        : null
-    else who = m.chat
-
-    if (!who) return
-
-    if (!global.db.data.users[who]) {
-      global.db.data.users[who] = { warn: 0 }
-    }
-
-    let user = global.db.data.users[who]
+    const maxWarn = 3
 
     const prova = {
       key: {
@@ -77,24 +78,6 @@ END:VCARD`
 
   // ================= UNWARN =================
   if (command === 'unwarn' || command === 'delwarn') {
-    let who
-
-    if (m.isGroup)
-      who = m.mentionedJid[0]
-        ? m.mentionedJid[0]
-        : m.quoted
-        ? m.quoted.sender
-        : null
-    else who = m.chat
-
-    if (!who) return
-
-    if (!global.db.data.users[who]) {
-      global.db.data.users[who] = { warn: 0 }
-    }
-
-    let user = global.db.data.users[who]
-
     if (user.warn > 0) {
       user.warn--
 
@@ -130,10 +113,26 @@ END:VCARD`
       m.reply('𝐋’𝐮𝐭𝐞𝐧𝐭𝐞 𝐦𝐞𝐧𝐳𝐢𝐨𝐧𝐚𝐭𝐨 𝐧𝐨𝐧 𝐡𝐚 𝐚𝐯𝐯𝐞𝐫𝐭𝐢𝐦𝐞𝐧𝐭𝐢.')
     }
   }
+
+  // ================= RESETWARN =================
+  if (command === 'resetwarn') {
+    if (user.warn === 0) {
+      return m.reply('ℹ️ L’utente non ha warn da resettare.')
+    }
+
+    user.warn = 0
+
+    await conn.reply(
+      m.chat,
+      `✅ Tutti i warn di @${who.split('@')[0]} sono stati *resettati*`,
+      m,
+      { mentions: [who] }
+    )
+  }
 }
 
-handler.help = ['warn', 'ammonisci', 'unwarn', 'delwarn']
-handler.command = ['warn', 'ammonisci', 'unwarn', 'delwarn']
+handler.help = ['warn', 'ammonisci', 'unwarn', 'delwarn', 'resetwarn']
+handler.command = ['warn', 'ammonisci', 'unwarn', 'delwarn', 'resetwarn']
 handler.group = true
 handler.admin = true
 handler.botAdmin = true
