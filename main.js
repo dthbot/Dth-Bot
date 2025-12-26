@@ -799,5 +799,3 @@ const mainWatcher = watch(filePath, async () => {
 });
 mainWatcher.setMaxListeners(20);
 
-
-
