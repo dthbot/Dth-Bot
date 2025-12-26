@@ -27,6 +27,8 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➤ AntiLink
 ➤ AntiTikTok
 ➤ AntiInsta
+➤ AntiTelegram on/off
+➤ AntiTag on/off
 
 👋 *BENVENUTO*
 ➤ Benvenuto
