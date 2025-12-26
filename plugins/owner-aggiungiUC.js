@@ -47,8 +47,8 @@ let handler = async (m, { conn, args, usedPrefix }) => {
         user.limit = (user.limit || 0) + amount;
 
         let message = who === m.sender
-            ? `✅ *Hai aggiunto ${amount} 💶 UnityCoins al tuo portafoglio*\nNuovo saldo: ${user.limit} 💶`
-            : `✅ *Hai aggiunto ${amount} 💶 UnityCoins a @${who.split('@')[0]}*\nNuovo saldo: ${user.limit} 💶`;
+            ? `✅ *Hai aggiunto ${amount} 💶 Euro al tuo portafoglio*\nNuovo saldo: ${user.limit} 💶`
+            : `✅ *Hai aggiunto ${amount} 💶 Euro a @${who.split('@')[0]}*\nNuovo saldo: ${user.limit} 💶`;
 
         await conn.sendMessage(
             m.chat, 
