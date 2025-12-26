@@ -29,7 +29,6 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 ➤ Muta
 ➤ Smuta
 ➤ Tag
-➤ Mossad
 
 🔒 *IMPOSTAZIONI GRUPPO*
 ➤ Aperto
