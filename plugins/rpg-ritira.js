@@ -6,12 +6,12 @@ let handler = async (m, { args }) => {
     user.limit = Number(user.limit) || 0;
 
     if (!args[0]) return conn.sendMessage(m.chat, { 
-        text: '🚩 Inserisci la quantità di *💶 UnityCoins* che vuoi prelevare.',
+        text: '🚩 Inserisci la quantità di *💶 Euro* che vuoi prelevare.',
         contextInfo: {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
@@ -21,12 +21,12 @@ let handler = async (m, { args }) => {
     if (args[0].toLowerCase() === 'all') {
        let count = Math.floor(user.bank);
        if (count <= 0) return conn.sendMessage(m.chat, { 
-           text: '🚩 Non hai *💶 UnityCoins* nel conto bancario.',
+           text: '🚩 Non hai *💶 Euro* nel conto bancario.',
            contextInfo: {
                forwardingScore: 99,
                isForwarded: true,
                forwardedNewsletterMessageInfo: {
-                   newsletterJid: '120363259442839354@newsletter',
+                   newsletterJid: '',
                    serverMessageId: '',
                    newsletterName: 'ChatUnity'
                }
@@ -35,12 +35,12 @@ let handler = async (m, { args }) => {
        user.bank -= count;
        user.limit += count;
        await conn.sendMessage(m.chat, { 
-           text: `✅ Hai prelevato *${count} 💶 UnityCoins* dalla banca.`,
+           text: `✅ Hai prelevato *${count} 💶 Euro* dalla banca.`,
            contextInfo: {
                forwardingScore: 99,
                isForwarded: true,
                forwardedNewsletterMessageInfo: {
-                   newsletterJid: '120363259442839354@newsletter',
+                   newsletterJid: '',
                    serverMessageId: '',
                    newsletterName: 'ChatUnity'
                }
@@ -55,7 +55,7 @@ let handler = async (m, { args }) => {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
@@ -69,7 +69,7 @@ let handler = async (m, { args }) => {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
@@ -77,12 +77,12 @@ let handler = async (m, { args }) => {
     }, { quoted: m });
 
     if (user.bank <= 0) return conn.sendMessage(m.chat, { 
-        text: '🚩 Non hai *💶 UnityCoins* nel conto bancario.',
+        text: '🚩 Non hai *💶 Euro* nel conto bancario.',
         contextInfo: {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
@@ -90,12 +90,12 @@ let handler = async (m, { args }) => {
     }, { quoted: m });
 
     if (user.bank < count) return conn.sendMessage(m.chat, { 
-        text: `🚩 Hai solo *${user.bank} 💶 UnityCoins* disponibili nel conto.`,
+        text: `🚩 Hai solo *${user.bank} 💶 Euro* disponibili nel conto.`,
         contextInfo: {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
@@ -105,12 +105,12 @@ let handler = async (m, { args }) => {
     user.bank -= count;
     user.limit += count;
     await conn.sendMessage(m.chat, { 
-        text: `✅ Hai prelevato *${count} 💶 UnityCoins* dalla banca e messi nel portafoglio.\n\nNuovo saldo bancario: ${user.bank} 💶`,
+        text: `✅ Hai prelevato *${count} 💶 Euro* dalla banca e messi nel portafoglio.\n\nNuovo saldo bancario: ${user.bank} 💶`,
         contextInfo: {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
