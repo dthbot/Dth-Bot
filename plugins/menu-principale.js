@@ -35,6 +35,7 @@ const handler = async (message, { conn, usedPrefix = '.', command }) => {
 ➤ 𝕯𝖊ⱥ𝖉𝖑𝐲
 ════════════════════
 ⚙️ *COMANDI*
+➤ Gruppidth 🤖
 ➤ Rsban 👾
 ➤ Ping 🚀
 ➤ Staff 🤖
