@@ -91,4 +91,3 @@ try {
 // METADATI CHATUNITY
 handler.command = ['pugnala'];
 handler.group = true;
-handler.fail = null;
