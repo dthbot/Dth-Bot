@@ -77,6 +77,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 🎭 *VARIE*
 ➤ Ic 🎼
 ➤ Auto 🚗
+➤ Cur 🎶
 ➤ Sigaretta 🚬
 ➤ StartBlast 🚦
 ➤ Mc 🍔
