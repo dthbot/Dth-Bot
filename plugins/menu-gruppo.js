@@ -82,6 +82,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Pizza 🍕 
 ➤ Winx 🧚🏿
 ➤ Gratta 🌟
+➤ Mossad
 ➤ Agejob [anni]
 
 🔞 *NSFW*
