@@ -14,6 +14,8 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Orario (città)
 ➤ Bus (città)
 ➤ Id (gruppo)
+➤ Pic [@]
+➤ Fp [numero]
 
 🖼️ *MEDIA & GRAFICA*
 ➤ S / Sticker
