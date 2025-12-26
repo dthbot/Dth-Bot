@@ -9,7 +9,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 
     if ((user.limit || 0) < bet) {
-        return conn.reply(m.chat, '🚫 UC insufficienti! Ti servono ' + bet + ' UC.', m)
+        return conn.reply(m.chat, '🚫 Euro insufficienti! Ti servono ' + bet + ' euro.', m)
     }
 
     if (cooldowns[m.sender] && Date.now() - cooldowns[m.sender] < 300000) {
@@ -33,7 +33,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         user.exp = (user.exp || 0) + 100
         resultMsg = '🎉 *Hai vinto!*\n'
         resultMsg += '┌──────────────\n'
-        resultMsg += '│ ➕ *800 UC*\n'
+        resultMsg += '│ ➕ *800 euro*\n'
         resultMsg += '│ ➕ *100 XP*\n'
         resultMsg += '└──────────────\n'
         gifFile = './media/perdita.gif'  // Cambiato in GIF
@@ -51,7 +51,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     resultMsg += '\n💎 *SALDO ATTUALE*\n'
     resultMsg += '┌──────────────\n'
-    resultMsg += '│ 👛 *UC: ' + (user.limit || 0) + '*\n'
+    resultMsg += '│ 👛 *euro: ' + (user.limit || 0) + '*\n'
     resultMsg += '│ ⭐ *XP: ' + (user.exp || 0) + '*\n'
     resultMsg += '│ 📊 *Progresso: ' + currentLevelXP + '/' + levelXP + ' XP*\n'
     resultMsg += '└──────────────\n'
