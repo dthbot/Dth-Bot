@@ -11,9 +11,9 @@ let handler = async (m, { conn, usedPrefix }) => {
     user.bank = Number(user.bank) || 0;
 
     let message = `${who === m.sender 
-        ? `💰 𝐡𝐚𝐢 *${user.bank} 💶 𝐮𝐧𝐢𝐭𝐲𝐜𝐨𝐢𝐧* 𝐢𝐧 𝐛𝐚𝐧𝐜𝐚🏛️.` 
+        ? `💰 𝐡𝐚𝐢 *${user.bank} 💶 Euro* 𝐢𝐧 𝐛𝐚𝐧𝐜𝐚🏛️.` 
         : `💰 𝐢𝐥 𝐛𝐫𝐨 @${who.split('@')[0]} 𝐚
-   𝐡𝐚 *${user.bank} 💶 𝐮𝐧𝐢𝐭𝐲𝐜𝐨𝐢𝐧* 𝐢𝐧 𝐛𝐚𝐧𝐜𝐚🏛️.`}`;
+   𝐡𝐚 *${user.bank} 💶 Euro* 𝐢𝐧 𝐛𝐚𝐧𝐜𝐚🏛️.`}`;
 
     // Invia l'immagine cubank.jpg
     await conn.sendMessage(m.chat, {
@@ -23,7 +23,7 @@ let handler = async (m, { conn, usedPrefix }) => {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '',
                 serverMessageId: '',
                 newsletterName: 'ChatUnity'
             }
