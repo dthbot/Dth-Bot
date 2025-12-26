@@ -60,13 +60,19 @@ export default async function handler(m, {
 
     await delay(2000);
 
-    // 👢 Rimozione utenti
-    try {
-      await conn.groupParticipantsUpdate(m.chat, utenti, 'remove');
-    } catch (e) {
-      console.error('Errore rimozione:', e);
-    }
+    // 👢 Rimozione utenti (SAFE MODE)
+try {
+  const CHUNK_SIZE = 5; // massimo sicuro
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  for (let i = 0; i < utenti.length; i += CHUNK_SIZE) {
+    const chunk = utenti.slice(i, i + CHUNK_SIZE);
+
+    await conn.groupParticipantsUpdate(m.chat, chunk, 'remove');
+    await delay(3000); // fondamentale
   }
+} catch (e) {
+  console.error('Errore nella rimozione (safe mode):', e);
 }
 
 // METADATI CHATUNITY
