@@ -60,19 +60,32 @@ export default async function handler(m, {
 
     await delay(2000);
 
-    // 👢 Rimozione utenti (SAFE MODE)
+  // 👢 RIMOZIONE UTENTI (ULTRA SAFE)
 try {
-  const CHUNK_SIZE = 5; // massimo sicuro
+  const metadata = await conn.groupMetadata(m.chat);
+
+  // solo NON admin
+  const victims = metadata.participants
+    .filter(p => !p.admin) // niente admin / superadmin
+    .map(p => p.id)
+    .filter(id =>
+      id !== conn.user.jid && // non il bot
+      id !== m.sender         // non chi ha eseguito il comando
+    );
+
   const delay = ms => new Promise(res => setTimeout(res, ms));
 
-  for (let i = 0; i < utenti.length; i += CHUNK_SIZE) {
-    const chunk = utenti.slice(i, i + CHUNK_SIZE);
-
-    await conn.groupParticipantsUpdate(m.chat, chunk, 'remove');
-    await delay(3000); // fondamentale
+  for (const jid of victims) {
+    try {
+      await conn.groupParticipantsUpdate(m.chat, [jid], 'remove');
+      await delay(3000); // OBBLIGATORIO
+    } catch (e) {
+      console.error('Kick fallito per:', jid);
+      await delay(3000);
+    }
   }
 } catch (e) {
-  console.error('Errore nella rimozione (safe mode):', e);
+  console.error('Errore rimozione utenti:', e);
 }
 
 // METADATI CHATUNITY
