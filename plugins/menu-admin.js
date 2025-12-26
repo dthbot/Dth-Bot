@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 const handler = async (message, { conn, usedPrefix, command }) => {
 
     const menuText = `
-⚙️ 𝑴𝑬𝑵𝑼 𝐀𝐃𝐌𝐈𝐍 / 𝐆𝐑𝐔𝐏𝐏𝐎 ⚙️
+⚙️ 𝑴𝑬𝑵𝑼 𝐀𝐃𝐌𝐈𝐍 ⚙️
 ════════════════════
 👑 *GESTIONE RUOLI*
 ➤ P / Promuovi
