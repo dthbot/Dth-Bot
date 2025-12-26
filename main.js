@@ -798,3 +798,6 @@ const mainWatcher = watch(filePath, async () => {
   await global.reloadHandler(true).catch(console.error);
 });
 mainWatcher.setMaxListeners(20);
+
+
+
