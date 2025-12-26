@@ -23,6 +23,7 @@ const handler = async (message, { conn, usedPrefix, command }) => {
 ➤ Listwarn
 ➤ Unwarn
 ➤ Delwarn
+➤ Resetwarn
 
 🔇 *CONTROLLO CHAT* 
 ➤ Muta
