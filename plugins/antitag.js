@@ -1,21 +1,63 @@
-let handler = m => m;
-
-handler.before = async function (m, { conn, participants, groupMetadata }) {
-    const groupAdmins = participants.filter(p => p.admin)
-    const owner = groupMetadata.owner || groupAdmins.find(p => p.admin === 'superadmin')?.id || m.chat.split`-`[0] + '@s.whatsapp.net'
-    const listAdmin = groupAdmins.map(v => `- @${v.id.split('@')[0]}`).join('\n')
-
-    if (m.mentionedJid.length >= 30) {
-        const senderIsBot = m.sender === conn.user.jid;
-        
-        if (!senderIsBot) {
-            await conn.reply(m.chat, `> ⚠️ 𝐀𝐧𝐭𝐢-𝐓𝐚𝐠\n> ⓘ 𝐋'𝐮𝐭𝐞𝐧𝐭𝐞 𝐜𝐨𝐧 𝐓𝐚𝐠-𝐀𝐥𝐥 𝐞' 𝐬𝐭𝐚𝐭𝐨 𝐫𝐢𝐦𝐨𝐬𝐬𝐨.\n${listAdmin}`, m, { mentions: [...groupAdmins.map(v => v.id), owner] });
-            await conn.groupParticipantsUpdate(m.chat, [m.sender], "remove");
-        }
+let handler = async (m, { conn, args }) => {
+    if (!args[0]) {
+        return conn.reply(
+            m.chat,
+            '⚠️ Usa:\n• `.antitag on`\n• `.antitag off`',
+            m
+        )
     }
-};
 
-export default handler;
+    let chat = global.db.data.chats[m.chat]
+    if (!chat) global.db.data.chats[m.chat] = {}
 
+    if (args[0].toLowerCase() === 'on') {
+        chat.antitag = true
+        await conn.reply(m.chat, '✅ Anti-Tag *ATTIVATO*', m)
+    } 
+    else if (args[0].toLowerCase() === 'off') {
+        chat.antitag = false
+        await conn.reply(m.chat, '❌ Anti-Tag *DISATTIVATO*', m)
+    } 
+    else {
+        await conn.reply(m.chat, '⚠️ Usa `.antitag on` o `.antitag off`', m)
+    }
+}
 
+// COMANDO
+handler.command = ['antitag']
+handler.admin = true
+handler.group = true
 
+// MIDDLEWARE AUTOMATICO
+handler.before = async function (m, { conn, participants }) {
+    if (!m.isGroup) return
+
+    let chat = global.db.data.chats[m.chat]
+    if (!chat?.antitag) return
+
+    if (!m.mentionedJid || m.mentionedJid.length < 30) return
+
+    const groupAdmins = participants
+        .filter(p => p.admin)
+        .map(p => p.id)
+
+    const isAdmin = groupAdmins.includes(m.sender)
+    const isBot = m.sender === conn.user.jid
+
+    if (isAdmin || isBot) return
+
+    let listAdmin = groupAdmins
+        .map(v => `- @${v.split('@')[0]}`)
+        .join('\n')
+
+    await conn.reply(
+        m.chat,
+        `> ⚠️ *ANTI-TAG*\n> L'utente ha fatto *Tag-All* ed è stato rimosso.\n\n👮 Admin:\n${listAdmin}`,
+        m,
+        { mentions: groupAdmins }
+    )
+
+    await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
+}
+
+export default handler
