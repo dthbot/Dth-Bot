@@ -14,8 +14,8 @@ let handler = async (m, { conn, args }) => {
             caption: `🖼 Foto profilo di *${args[0]}*`
         }, { quoted: m })
     } catch (e) {
-        // Foto non disponibile, manda immagine di default
-        const defaultImg = 'https://i.ibb.co/7S3xkZ0/default-profile.png' // immagine di default
+        // URL di default valido
+        const defaultImg = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
         await conn.sendMessage(m.chat, { 
             image: { url: defaultImg }, 
             caption: `❌ Non è stato possibile recuperare la foto profilo di *${args[0]}*.\nMostro immagine di default.` 
