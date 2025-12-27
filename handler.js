@@ -649,7 +649,7 @@ global.dfail = (type, m, conn) => {
                     previewType: 'PHOTO',
                     mediaType: 1,
                     renderLargerThumbnail: true,
-                    thumbnail: fs.readFileSync('./media/accessovietato.jpeg')
+                    thumbnail: fs.readFileSync('./media/accessonegato.jpeg')
                 }
             }
         },
