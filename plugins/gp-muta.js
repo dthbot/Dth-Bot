@@ -36,7 +36,7 @@ const handler = async (msg, { conn, command, text, isAdmin }) => {
     throw '╭━━━👑━━━╮\n 𝐂𝐑𝐄𝐀𝐓𝐎𝐑𝐄\n╰━━━👑━━━╯\n\n🚫 𝐈𝐥 𝐜𝐫𝐞𝐚𝐭𝐨𝐫𝐞 𝐝𝐞𝐥 𝐛𝐨𝐭 𝐞̀ 𝐢𝐧𝐭𝐨𝐜𝐜𝐚𝐛𝐢𝐥𝐞.\n⚡ 𝐀𝐮𝐭𝐨𝐫𝐢𝐭𝐚̀ 𝐬𝐮𝐩𝐫𝐞𝐦𝐚.';
 
   if (mentionedJid === botNumber)
-    throw '🤡 𝐏𝐞𝐧𝐬𝐚𝐯𝐢 𝐝𝐚𝐯𝐯𝐞𝐫𝐨 𝐝𝐢 𝐩𝐨𝐭𝐞𝐫𝐦𝐢 𝐦𝐮𝐭𝐚𝐫𝐞?';
+    throw '𝐍𝐨𝐧 𝐩𝐮𝐨𝐢 𝐦𝐮𝐭𝐚𝐫𝐞 𝐢𝐥 𝐛𝐨𝐭, 𝐜𝐡𝐞 𝐜𝐚𝐳𝐳𝐨 𝐟𝐚𝐢 𝐫𝐢𝐤𝐤𝐢𝐨𝐧𝐞';
 
   const user = global.db.data.users[mentionedJid];
   const isMute = command === 'muta';
@@ -54,7 +54,7 @@ const handler = async (msg, { conn, command, text, isAdmin }) => {
 
   // 🔇 MUTA
   if (isMute) {
-    if (user.muto) throw '⚠️ 𝐐𝐮𝐞𝐬𝐭𝐨 𝐮𝐭𝐞𝐧𝐭𝐞 𝐞̀ 𝐠𝐢𝐚̀ 𝐦𝐮𝐭𝐚𝐭𝐨.';
+    if (user.muto) throw '𝐒𝐭𝐨 𝐜𝐨𝐠𝐥𝐢𝐨𝐧𝐞 𝐞 𝐠𝐢à 𝐦𝐮𝐭𝐚𝐭𝐨 ⚠️';
     user.muto = true;
 
     return conn.sendMessage(
@@ -70,7 +70,7 @@ const handler = async (msg, { conn, command, text, isAdmin }) => {
 📵 𝐂𝐡𝐚𝐭: 𝐁𝐥𝐨𝐜𝐜𝐚𝐭𝐚
 ⏳ 𝐃𝐮𝐫𝐚𝐭𝐚: 𝐅𝐢𝐧𝐨 𝐚 .𝐬𝐦𝐮𝐭𝐚
 
-⚠️ 𝐑𝐢𝐬𝐩𝐞𝐭𝐭𝐚 𝐥𝐞 𝐫𝐞𝐠𝐨𝐥𝐞`,
+⚠️ 𝐂𝐨𝐬'è 𝐪𝐮𝐞𝐬𝐭𝐨 𝐩𝐢𝐚𝐠𝐧𝐮𝐜𝐨𝐥𝐢𝐧𝐨?`,
         mentions: [mentionedJid],
       },
       { quoted: fakeReply }
@@ -78,7 +78,7 @@ const handler = async (msg, { conn, command, text, isAdmin }) => {
   }
 
   // 🔊 SMUTA
-  if (!user.muto) throw '⚠️ 𝐐𝐮𝐞𝐬𝐭𝐨 𝐮𝐭𝐞𝐧𝐭𝐞 𝐧𝐨𝐧 𝐞̀ 𝐦𝐮𝐭𝐚𝐭𝐨.';
+  if (!user.muto) throw '𝐒𝐭𝐨 𝐜𝐨𝐠𝐥𝐢𝐨𝐧𝐞 𝐧𝐨𝐧 è 𝐦𝐮𝐭𝐚𝐭𝐨 ⚠️';
   user.muto = false;
 
   return conn.sendMessage(
@@ -93,7 +93,7 @@ const handler = async (msg, { conn, command, text, isAdmin }) => {
 🔓 𝐒𝐭𝐚𝐭𝐨: 𝐒𝐦𝐮𝐭𝐚𝐭𝐨
 💬 𝐂𝐡𝐚𝐭: 𝐑𝐢𝐬𝐭𝐚𝐛𝐢𝐥𝐢𝐭𝐚
 
-✅ 𝐒𝐞𝐜𝐨𝐧𝐝𝐚 𝐩𝐨𝐬𝐬𝐢𝐛𝐢𝐥𝐢𝐭𝐚̀`,
+✅ 𝐓𝐨𝐫𝐧𝐚 𝐚 𝐩𝐚𝐫𝐥𝐚𝐫𝐞 𝐩𝐥𝐞𝐛𝐞𝐨`,
       mentions: [mentionedJid],
     },
     { quoted: fakeReply }
