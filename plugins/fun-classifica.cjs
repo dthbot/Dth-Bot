@@ -1,71 +1,40 @@
-const fs = require('fs')
-
-const folderPath = './database'
-const filePath = './database/classifica.json'
-
-// CREA CARTELLA E FILE SE NON ESISTONO
-if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true })
-if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '{}')
-
-// FUNZIONI DI LETTURA/SALVATAGGIO CON PROTEZIONE
-const loadDB = () => {
-    try {
-        const data = fs.readFileSync(filePath, 'utf-8')
-        return data ? JSON.parse(data) : {}
-    } catch (e) {
-        return {}
-    }
-}
-
-const saveDB = (data) => fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
-
 module.exports = {
     command: ['classifica'],
     category: 'fun',
-    desc: 'Mostra la classifica del gruppo',
+    desc: 'Mostra una classifica finta del gruppo con grafica',
 
     before: async function({ m }) {
-        if (!m || !m.isGroup || m.isBot) return
-
-        const db = loadDB()
-        const groupId = m.chat
-        const userId = m.sender
-
-        if (!db[groupId]) db[groupId] = {}
-        if (!db[groupId][userId]) db[groupId][userId] = 0
-
-        db[groupId][userId]++
-        saveDB(db)
+        // niente da fare
     },
 
     run: async function({ sock, m }) {
         if (!m || !m.isGroup) return sock.sendMessage(m.chat, { text: '❌ Comando solo per gruppi' })
 
-        const db = loadDB()
-        const groupId = m.chat
+        // Membri finti e punteggi casuali
+        const members = ['Alice', 'Bob', 'Carol', 'Dave', 'Eve']
+        const scores = members.map(() => Math.floor(Math.random() * 100))
 
-        if (!db[groupId]) {
-            return sock.sendMessage(m.chat, { text: '📊 Nessun dato disponibile.' })
-        }
+        const sorted = members
+            .map((name, i) => ({ name, score: scores[i] }))
+            .sort((a, b) => b.score - a.score)
 
-        const sorted = Object.entries(db[groupId])
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-
-        let msg = '🏆 *CLASSIFICA DEL GRUPPO* 🏆\n\n'
+        // Costruzione del messaggio con linee e font Unicode
+        let msg = '═══════════════════\n'
+        msg += '🏆 𝐂𝐋𝐀𝐒𝐒𝐈𝐅𝐈𝐂𝐀 𝐃𝐄𝐋 𝐆𝐑𝐔𝐏𝐏𝐎 🏆\n'
+        msg += '═══════════════════\n\n'
 
         sorted.forEach((u, i) => {
             const medal =
                 i === 0 ? '🥇' :
                 i === 1 ? '🥈' :
-                i === 2 ? '🥉' : `${i + 1}.`
+                i === 2 ? '🥉' : `#${i + 1}`
 
-            msg += `${medal} @${u[0].split('@')[0]} — ${u[1]} msg\n`
+            msg += `✦ ${medal}  𝑵𝒐𝒎𝒆: ${u.name} — 𝑷𝒖𝒏𝒕𝒊: ${u.score}\n`
+            msg += '───────────────────\n'
         })
 
-        await sock.sendMessage(m.chat, {
-            text: msg,
-            mentions: sorted.map(u => u[0])
-        })
+        msg += '\n🎉 Complimenti ai partecipanti! 🎉'
+
+        await sock.sendMessage(m.chat, { text: msg })
     }
 }
