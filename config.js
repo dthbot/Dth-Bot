@@ -15,12 +15,12 @@ global.wait = 'ⓘ 𝐂𝐚𝐫𝐢𝐜𝐚𝐦𝐞𝐧𝐭𝐨 ...';
 
 
 global.owner = [
-  ['447529688238', '𝕯𝖊𝖉𝖑𝖞', true],
+  ['212785924420', '𝕯𝖊𝖉𝖑𝖞', true],
   ['212775499775', 'Hell', true], 
   ['447529503948', 'vixiie', true],
   ['48726875208', 'Vampexe', true],
   ['xxxxxxxxxx'],
-  ['xxxxxxxxxx']
+  ['xxxxxxxxxx'],
 ];
 global.mods = ['xxxxxxxxxx'];
 global.prems = ['xxxxxxxxxx', 'xxxxxxxxxx'];
