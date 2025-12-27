@@ -25,7 +25,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Rimuovisfondo (foto)
 
 🎮 *GIOCHI & RANDOM* 
-➤ Tris ⭕
+➤ Tris [@]
 ➤ Dado 🎲
 ➤ Slot 🎰
 ➤ Bandiera 🏳️
@@ -41,6 +41,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Carcere [@]
 ➤ Fight [@]
 ➤ Sbirro [@]
+➤ Ghost [@]
 ➤ Teletrasporto [@]
 ➤ Rincoglionito [@]
 ➤ Mira [@]
