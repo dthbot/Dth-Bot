@@ -3,7 +3,7 @@ import fs from 'fs'
 const folderPath = './database'
 const filePath = './database/classifica.json'
 
-// CREAZIONE CARTELLA E FILE SE NON ESISTONO
+// CREA CARTELLA E FILE SE NON ESISTONO
 if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true })
 if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '{}')
 
@@ -17,8 +17,10 @@ export const category = 'fun'
 export const desc = 'Mostra la classifica del gruppo'
 
 // CONTEGGIO AUTOMATICO DEI MESSAGGI
-export async function before({ m }) {
-    if (!m.isGroup || m.isBot) return
+export async function before(context) {
+    // supporta entrambe le versioni di handler
+    const m = context.m || context
+    if (!m || !m.isGroup || m.isBot) return
 
     const db = loadDB()
     const groupId = m.chat
@@ -32,10 +34,10 @@ export async function before({ m }) {
 }
 
 // COMANDO .classifica
-export async function run({ sock, m }) {
-    if (!m.isGroup) {
-        return sock.sendMessage(m.chat, { text: '❌ Comando solo per gruppi' })
-    }
+export async function run(context) {
+    const m = context.m || context
+    const sock = context.sock || context.client
+    if (!m || !m.isGroup) return sock.sendMessage(m.chat, { text: '❌ Comando solo per gruppi' })
 
     const db = loadDB()
     const groupId = m.chat
