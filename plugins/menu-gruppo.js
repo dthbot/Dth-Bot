@@ -40,6 +40,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Nokia [@]
 ➤ Carcere [@]
 ➤ Fight [@]
+➤ Ano [@]
 ➤ Sbirro [@]
 ➤ Ghost [@]
 ➤ Teletrasporto [@]
