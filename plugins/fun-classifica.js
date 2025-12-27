@@ -7,8 +7,16 @@ const filePath = './database/classifica.json'
 if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true })
 if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '{}')
 
-// FUNZIONI DI LETTURA/SALVATAGGIO
-const loadDB = () => JSON.parse(fs.readFileSync(filePath))
+// FUNZIONI DI LETTURA/SALVATAGGIO CON PROTEZIONE
+const loadDB = () => {
+    try {
+        const data = fs.readFileSync(filePath, 'utf-8')
+        return data ? JSON.parse(data) : {}
+    } catch (e) {
+        return {}  // se JSON invalido o vuoto, ritorna oggetto vuoto
+    }
+}
+
 const saveDB = (data) => fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
 
 // EXPORT DEL PLUGIN
@@ -18,7 +26,6 @@ export const desc = 'Mostra la classifica del gruppo'
 
 // CONTEGGIO AUTOMATICO DEI MESSAGGI
 export async function before(context) {
-    // supporta entrambe le versioni di handler
     const m = context.m || context
     if (!m || !m.isGroup || m.isBot) return
 
