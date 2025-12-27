@@ -24,7 +24,7 @@ let handler = async (m, { conn, usedPrefix }) => {
             turn: 0
         };
 
-        await sendBoard(chatId, m, games[chatId], `🎮 Partita iniziata!\n${'@' + player1.split('@')[0]} (❌) VS ${'@' + player2.split('@')[0]} (⭕)\nTocca a @${games[chatId].players[0].split('@')[0]}`);
+        await sendBoard(chatId, m, games[chatId], `🎮 Partita iniziata!\n${'@' + player1.split('@')[0]} (❌) VS ${'@' + player2.split('@')[0]} (⭕)\nTocca a @${games[chatId].players[0].split('@')[0]} *comando: .putris (numero)*`);
     }
 
     else if (text.startsWith(usedPrefix + 'putris')) {
@@ -32,7 +32,15 @@ let handler = async (m, { conn, usedPrefix }) => {
         if (!game) return conn.sendMessage(chatId, { text: '❌ Nessuna partita in corso! Usa .tris @utente per iniziare' }, { quoted: m });
 
         const player = m.sender;
-        if (player !== game.players[game.turn]) return conn.sendMessage(chatId, { text: '❌ Non è il tuo turno!' }, { quoted: m });
+        const currentPlayer = game.players[game.turn];
+
+        // controllo turno robusto
+        if (!player.includes(currentPlayer)) {
+            return conn.sendMessage(chatId, { 
+                text: `❌ Non è il tuo turno! Tocca a @${currentPlayer.split('@')[0]}`, 
+                mentions: [currentPlayer] 
+            }, { quoted: m });
+        }
 
         const args = text.split(' ').slice(1);
         if (args.length === 0) return conn.sendMessage(chatId, { text: '⚠️ Devi specificare la posizione (es: A1, B2...)' }, { quoted: m });
@@ -90,6 +98,7 @@ async function sendBoard(chatId, m, game, msg) {
     }, { quoted: m });
 }
 
+// funzione per controllare se c'è un vincitore
 function checkWinner(b) {
     for (let r=0;r<3;r++) if (['❌','⭕'].includes(b[r][0]) && b[r][0]===b[r][1] && b[r][1]===b[r][2]) return true;
     for (let c=0;c<3;c++) if (['❌','⭕'].includes(b[0][c]) && b[0][c]===b[1][c] && b[1][c]===b[2][c]) return true;
