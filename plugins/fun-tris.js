@@ -16,9 +16,9 @@ let handler = async (m, { conn, usedPrefix }) => {
         // inizializza partita con coordinate nelle celle
         games[chatId] = {
             board: [
-                ['a1','a2','a3'],
-                ['b1','b2','b3'],
-                ['c1','c2','c3']
+                ['A1','A2','A3'],
+                ['B1','B2','B3'],
+                ['C1','C2','C3']
             ],
             players: [player1, player2],
             turn: 0
@@ -35,14 +35,14 @@ let handler = async (m, { conn, usedPrefix }) => {
         if (player !== game.players[game.turn]) return conn.sendMessage(chatId, { text: '❌ Non è il tuo turno!' }, { quoted: m });
 
         const args = text.split(' ').slice(1);
-        if (args.length === 0) return conn.sendMessage(chatId, { text: '⚠️ Devi specificare la posizione (es: a1, b2...)' }, { quoted: m });
+        if (args.length === 0) return conn.sendMessage(chatId, { text: '⚠️ Devi specificare la posizione (es: A1, B2...)' }, { quoted: m });
 
-        const pos = args[0].toLowerCase();
-        const map = { a:0, b:1, c:2 };
+        const pos = args[0].toUpperCase();
+        const map = { A:0, B:1, C:2 };
         const row = map[pos[0]];
         const col = parseInt(pos[1])-1;
 
-        if (row === undefined || col < 0 || col > 2) return conn.sendMessage(chatId, { text: '⚠️ Posizione non valida! (a1-c3)' }, { quoted: m });
+        if (row === undefined || col < 0 || col > 2) return conn.sendMessage(chatId, { text: '⚠️ Posizione non valida! (A1-C3)' }, { quoted: m });
         if (['❌','⭕'].includes(game.board[row][col])) return conn.sendMessage(chatId, { text: '❌ Casella già occupata!' }, { quoted: m });
 
         const symbol = game.turn === 0 ? '❌' : '⭕';
@@ -79,10 +79,10 @@ let handler = async (m, { conn, usedPrefix }) => {
     }
 };
 
-// funzione per mostrare il tabellone con linee
+// funzione per mostrare il tabellone con linee e coordinate
 async function sendBoard(chatId, m, game, msg) {
-    let rows = game.board.map(r => r.map(c => ['❌','⭕'].includes(c)?c:'⬜').join(' | '));
-    let boardVisual = rows.join('\n---------\n');
+    let rows = game.board.map(r => r.map(c => ['❌','⭕'].includes(c)?c:`${c}`).join(' | '));
+    let boardVisual = '     1   2   3\n' + rows.map((r,i)=>String.fromCharCode(65+i)+'  '+r).join('\n   -----------\n');
 
     await m.conn.sendMessage(chatId, { 
         text: `${boardVisual}\n\n${msg}`, 
