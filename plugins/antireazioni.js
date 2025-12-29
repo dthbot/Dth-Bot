@@ -1,4 +1,4 @@
-// Plugin fatto da Deadly 
+// Plugin fatto da Deadly
 
 let handler = async (m, { conn, args }) => {
     if (!args[0]) {
@@ -41,11 +41,11 @@ handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
     if (!isBotAdmin) return true
 
     // controllo reazione
-    let isReaction =
+    let reaction =
         m.mtype === 'reactionMessage' ||
         m.message?.reactionMessage
 
-    if (!isReaction) return true
+    if (!reaction) return true
 
     let user = global.db.data.users[m.sender]
     if (!user.warn) user.warn = 0
@@ -53,6 +53,16 @@ handler.before = async function (m, { conn, isAdmin, isBotAdmin }) {
 
     user.warn++
     user.warnReasons.push('reazione')
+
+    // elimina la reazione
+    await conn.sendMessage(m.chat, {
+        delete: {
+            remoteJid: m.chat,
+            fromMe: false,
+            id: m.key.id,
+            participant: m.key.participant
+        }
+    })
 
     if (user.warn < 3) {
         await conn.sendMessage(m.chat, {
