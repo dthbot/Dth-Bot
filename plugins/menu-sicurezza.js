@@ -28,6 +28,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➤ AntiTikTok
 ➤ AntiInsta
 ➤ AntiAudio on/off
+➤ AntiReazioni on/off
 ➤ AntiTelegram on/off
 ➤ AntiTag on/off
 
