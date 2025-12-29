@@ -14,7 +14,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➤ .attiva (funzione)
 ➤ .disattiva (funzione)
 
-🛡️ *PROTEZIONIz 
+🛡️ *PROTEZIONI*
 ➤ AntiSpam
 ➤ AntiTrava
 ➤ AntiNuke
@@ -27,6 +27,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➤ AntiLink
 ➤ AntiTikTok
 ➤ AntiInsta
+➤ AntiAudio on/off
 ➤ AntiTelegram on/off
 ➤ AntiTag on/off
 
