@@ -82,28 +82,14 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
     if (!m.isGroup) return false;
 
     const chat = global.db.data.chats[m.chat];
-    const delet = m.key.participant;
-    const bang = m.key.id;
-    const user = `@${m.sender.split('@')[0]}`;
-    const unv = {
-        key: {
-            participants: "0@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-            fromMe: false,
-            id: "Halo"
-        },
-        message: {
-            contactMessage: {
-                vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Cellulare\nEND:VCARD`
-            }
-        },
-        participant: "0@s.whatsapp.net"
-    };
-    const bot = global.db.data.settings[this.user.jid] || {};
+    const userTag = `@${m.sender.split('@')[0]}`;
 
-    const { text: messageText, urls: extractedUrls } = extractTextAndUrlsFromMessage(m.message || {});
-    const grupoPrefix = `https://chat.whatsapp.com`;
-    let containsGroupLink = !!linkRegex.exec(messageText) || extractedUrls.some(url => linkRegex.exec(url));
+    const { text: messageText, urls: extractedUrls } =
+        extractTextAndUrlsFromMessage(m.message || {});
+
+    let containsGroupLink =
+        !!linkRegex.exec(messageText) ||
+        extractedUrls.some(url => linkRegex.exec(url));
 
     let qrLinkDetected = false;
     if (!containsGroupLink) {
@@ -118,33 +104,45 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
         }
     }
 
-    if (isAdmin && chat.antiLink && (messageText.includes(grupoPrefix) || containsGroupLink)) return;
+    if (!chat?.antiLink) return true;
+    if (isAdmin) return true;
+    if (!containsGroupLink) return true;
 
-    if (chat.antiLink && containsGroupLink && !isAdmin) {
-        if (isBotAdmin) {
-            const linkThisGroup = `https://chat.whatsapp.com/${await this.groupInviteCode(m.chat)}`;
-            if (messageText.includes(linkThisGroup) || extractedUrls.includes(linkThisGroup)) return true;
-        }
+    let user = global.db.data.users[m.sender];
+    if (!user.warn) user.warn = 0;
+    if (!user.warnReasons) user.warnReasons = [];
 
-        if (!isBotAdmin) {
-            return m.reply('*𝐩𝐞𝐫 𝐪𝐮𝐞𝐬𝐭𝐚 𝐯𝐨𝐥𝐭𝐚 𝐭𝐢 𝐬𝐞𝐢 𝐬𝐚𝐥𝐯𝐚𝐭𝐨, 𝐧𝐨𝐧 𝐬𝐨𝐧𝐨 𝐚𝐝𝐦𝐢𝐧 𝐞 𝐧𝐨𝐧 𝐩𝐨𝐬𝐬𝐨 𝐟𝐚𝐫𝐞 𝐧𝐢𝐞𝐧𝐭𝐞*');
-        }
+    user.warn++;
+    user.warnReasons.push('link');
 
+    if (user.warn < 3) {
         await conn.sendMessage(m.chat, {
-            text: `*「 𝐀𝐍𝐓𝐈-𝐋𝐈𝐍𝐊 𝐀𝐓𝐓𝐈𝐕𝐀𝐓𝐎 」*\n\n${user}🤨 𝐇𝐚𝐢 𝐢𝐧𝐟𝐫𝐚𝐧𝐭𝐨 𝐥𝐞 𝐫𝐞𝐠𝐨𝐥𝐞 𝐝𝐞𝐥 𝐠𝐫𝐮𝐩𝐩𝐨${qrLinkDetected ? ', 𝐭𝐢 𝐩𝐚𝐫𝐞 𝐜𝐡𝐞 𝐧𝐨𝐧 𝐯𝐞𝐝𝐨 𝐢 𝐪𝐫?😂' : '.'}`,
+            text:
+`⚠️ *ANTI-LINK ATTIVO*
+
+👤 Utente: ${userTag}
+📌 Avvertimento: *${user.warn}/3*
+${qrLinkDetected ? '📷 Link rilevato da QR' : ''}
+
+⛔ Alla terza violazione verrai rimosso`,
             mentions: [m.sender]
-        }, { quoted: unv, ephemeralExpiration: 24 * 60 * 100, disappearingMessagesInChat: 24 * 60 * 100 });
+        });
+    } else {
+        user.warn = 0;
+        user.warnReasons = [];
+
+        if (!isBotAdmin) return true;
 
         await conn.sendMessage(m.chat, {
-            delete: { remoteJid: m.chat, fromMe: false, id: bang, participant: delet }
+            text:
+`⛔ *UTENTE RIMOSSO*
+
+👤 ${userTag}
+📌 Motivo: *Link WhatsApp*`,
+            mentions: [m.sender]
         });
 
-        const responseb = await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
-        if (responseb[0].status === "404") return;
-
-        if (!bot.restrict) {
-            return m.reply('*𝐂𝐎𝐍𝐓𝐀𝐓𝐓𝐀 𝐈𝐋 𝐏𝐑𝐎𝐏𝐑𝐈𝐄𝐓𝐀𝐑𝐈𝐎 𝐃𝐄𝐋 𝐁𝐎𝐓 𝐏𝐄𝐑 𝐀𝐓𝐓𝐈𝐕𝐀𝐑𝐄 𝐈𝐋 𝐑𝐄𝐒𝐓𝐑𝐈𝐂𝐓*');
-        }
+        await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
     }
 
     return true;
