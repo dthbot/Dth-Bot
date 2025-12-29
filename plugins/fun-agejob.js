@@ -1,3 +1,5 @@
+//Plugin fatto da Deadly
+
 let handler = async (m, { conn, args }) => {
     if (!args[0]) return m.reply("❓ Devi scrivere la tua età!\n\nEsempio:\n.agejob 15")
 
