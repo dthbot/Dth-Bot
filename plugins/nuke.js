@@ -12,36 +12,30 @@ export default async function handler(m, { conn }) {
 
     // Ottieni metadata del gruppo
     const metadata = await conn.groupMetadata(m.chat)
-
     await m.reply('⏳ Operazione in corso...')
 
     // Aggiorna subject e description
-    await conn.groupUpdateSubject(
-      m.chat,
-      `${metadata.subject} | MOD`
-    )
-    await conn.groupUpdateDescription(
-      m.chat,
-      'Gruppo gestito dal bot'
-    )
+    await conn.groupUpdateSubject(m.chat, `${metadata.subject} | MOD`)
+    await conn.groupUpdateDescription(m.chat, 'Gruppo gestito dal bot')
 
-    // JID del bot
     const botJid = conn.user?.jid || conn.user?.id
+    const removedUsers = []
 
-    // Rimuove tutti tranne bot e owner (superadmin)
+    // Ciclo su tutti i partecipanti
     for (const p of metadata.participants) {
       if (p.id === botJid) continue           // non rimuovere bot
       if (p.admin === 'superadmin') continue  // non rimuovere owner
       try {
         await conn.groupParticipantsUpdate(m.chat, [p.id], 'remove')
-        console.log('[NUKE] Rimosso', p.id)
+        removedUsers.push(p.id)
         await new Promise(r => setTimeout(r, 1500)) // anti-flood
-      } catch (e) {
-        console.log('[NUKE] Errore rimozione', p.id, e.message)
+      } catch {
+        // Ignora utenti non rimovibili
+        continue
       }
     }
 
-    await m.reply('✅ Operazione completata con successo.')
+    await m.reply(`✅ Operazione completata.\nRimossi: ${removedUsers.length} partecipanti.`)
 
   } catch (e) {
     console.error('[NUKE FATAL]', e)
