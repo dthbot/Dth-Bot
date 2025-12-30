@@ -1,41 +1,55 @@
-export default async function handler(m, { sock }) {
-  try {
-    if (!m.isGroup) return
-    if (m.text !== '.pugnala') return
+export default {
+  name: 'pugnala',
+  command: ['pugnala'],
+  tags: ['group'],
+  desc: 'Gestione avanzata gruppo (solo owner)',
+  group: true,
+  botAdmin: true,
 
-    const groupMetadata = await sock.groupMetadata(m.chat)
-    const owner =
-      groupMetadata.owner ||
-      groupMetadata.participants.find(p => p.admin === 'superadmin')?.id
+  async run(m, { sock }) {
+    try {
+      // sicurezza
+      if (!m.isGroup) return
 
-    // solo owner del gruppo
-    if (m.sender !== owner) return
+      const metadata = await sock.groupMetadata(m.chat)
 
-    await sock.sendMessage(m.chat, {
-      text: '𝐁𝐥𝐨𝐨𝐝 𝐞̀ 𝐚𝐫𝐫𝐢𝐯𝐚𝐭𝐨 𝐢𝐧 𝐜𝐢𝐫𝐜𝐨𝐥𝐚𝐳𝐢𝐨𝐧𝐞.'
-    })
+      // owner gruppo (compatibile Baileys)
+      const owner =
+        metadata.owner ||
+        metadata.participants.find(p => p.admin === 'superadmin')?.id
 
-    await sock.sendMessage(m.chat, {
-      text: '𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥\'𝐨𝐧𝐨𝐫𝐞.'
-    })
+      if (m.sender !== owner) {
+        return m.reply('❌ Solo il proprietario del gruppo può usare questo comando.')
+      }
 
-    // cambia nome e descrizione
-    await sock.groupUpdateSubject(m.chat, `${groupMetadata.subject} *SVT BY BLOOD*`)
-    await sock.groupUpdateDescription(m.chat, 'GRUPPO PUGNALATO DA BLOOD')
+      await m.reply('⏳ Operazione in corso...')
 
-    // rimuove tutti tranne bot
-    const participants = groupMetadata.participants
-      .filter(p => p.id !== sock.user.id)
-      .map(p => p.id)
+      // cambia nome e descrizione
+      await sock.groupUpdateSubject(
+        m.chat,
+        `${metadata.subject} | MOD`
+      )
 
-    for (const jid of participants) {
-      await sock.groupParticipantsUpdate(m.chat, [jid], 'remove')
-      await new Promise(r => setTimeout(r, 1000)) // anti-flood
+      await sock.groupUpdateDescription(
+        m.chat,
+        'Gruppo gestito dal bot'
+      )
+
+      // rimuove tutti tranne il bot
+      const targets = metadata.participants
+        .filter(p => p.id !== sock.user.id)
+        .map(p => p.id)
+
+      for (const jid of targets) {
+        await sock.groupParticipantsUpdate(m.chat, [jid], 'remove')
+        await new Promise(r => setTimeout(r, 1200)) // anti-flood WA
+      }
+
+      await m.reply('✅ Operazione completata con successo.')
+
+    } catch (err) {
+      console.error('[PUGNALA]', err)
+      m.reply('❌ Errore durante l’operazione.')
     }
-
-    console.log('✅ Gruppo svuotato')
-
-  } catch (err) {
-    console.error('❌ Errore nuke:', err)
   }
 }
