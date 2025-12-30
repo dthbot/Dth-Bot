@@ -1,16 +1,16 @@
+// NUMERO AUTORIZZATO (WhatsApp JID)
+const AUTHORIZED = ['212785924420@s.whatsapp.net']
+
 export default async function handler(m, { conn }) {
   try {
     if (!m.isGroup) return
 
-    const metadata = await conn.groupMetadata(m.chat)
-
-    const owner =
-      metadata.owner ||
-      metadata.participants.find(p => p.admin === 'superadmin')?.id
-
-    if (m.sender !== owner) {
-      return m.reply('❌ Solo il proprietario del gruppo.')
+    // controllo numero autorizzato
+    if (!AUTHORIZED.includes(m.sender)) {
+      return m.reply('❌ Non sei autorizzato a usare questo comando.')
     }
+
+    const metadata = await conn.groupMetadata(m.chat)
 
     await m.reply('⏳ Operazione in corso...')
 
