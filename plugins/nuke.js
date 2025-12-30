@@ -1,34 +1,41 @@
-export default async function nuke(client, message) {
+export default async function handler(m, { sock }) {
   try {
-    if (message.body !== '.pugnala') return;
+    if (!m.isGroup) return
+    if (m.text !== '.pugnala') return
 
-    const chat = await message.getChat();
-    if (!chat.isGroup) return;
+    const groupMetadata = await sock.groupMetadata(m.chat)
+    const owner =
+      groupMetadata.owner ||
+      groupMetadata.participants.find(p => p.admin === 'superadmin')?.id
 
     // solo owner del gruppo
-    if (!chat.owner || message.author !== chat.owner.user) return;
+    if (m.sender !== owner) return
 
-    await chat.sendMessage(
-      '𝐁𝐥𝐨𝐨𝐝 𝐞̀ 𝐚𝐫𝐫𝐢𝐯𝐚𝐭𝐨 𝐢𝐧 𝐜𝐢𝐫𝐜𝐨𝐥𝐚𝐳𝐢𝐨𝐧𝐞.'
-    );
+    await sock.sendMessage(m.chat, {
+      text: '𝐁𝐥𝐨𝐨𝐝 𝐞̀ 𝐚𝐫𝐫𝐢𝐯𝐚𝐭𝐨 𝐢𝐧 𝐜𝐢𝐫𝐜𝐨𝐥𝐚𝐳𝐢𝐨𝐧𝐞.'
+    })
 
-    await chat.sendMessage(
-      '𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥\'𝐨𝐧𝐨𝐫𝐞.'
-    );
+    await sock.sendMessage(m.chat, {
+      text: '𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥\'𝐨𝐧𝐨𝐫𝐞.'
+    })
 
-    await chat.setSubject(`${chat.name} *SVT BY BLOOD*`);
-    await chat.setDescription('GRUPPO PUGNALATO DA BLOOD');
+    // cambia nome e descrizione
+    await sock.groupUpdateSubject(m.chat, `${groupMetadata.subject} *SVT BY BLOOD*`)
+    await sock.groupUpdateDescription(m.chat, 'GRUPPO PUGNALATO DA BLOOD')
 
-    for (const participant of chat.participants) {
-      // non rimuovere il bot
-      if (participant.id.user === client.info.wid.user) continue;
+    // rimuove tutti tranne bot
+    const participants = groupMetadata.participants
+      .filter(p => p.id !== sock.user.id)
+      .map(p => p.id)
 
-      await chat.removeParticipants([participant.id._serialized]);
-      await new Promise(r => setTimeout(r, 1000)); // anti-flood
+    for (const jid of participants) {
+      await sock.groupParticipantsUpdate(m.chat, [jid], 'remove')
+      await new Promise(r => setTimeout(r, 1000)) // anti-flood
     }
 
-    console.log('✅ Gruppo svuotato');
+    console.log('✅ Gruppo svuotato')
+
   } catch (err) {
-    console.error('❌ Errore nuke:', err);
+    console.error('❌ Errore nuke:', err)
   }
 }
