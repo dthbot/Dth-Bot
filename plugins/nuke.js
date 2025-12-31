@@ -1,36 +1,37 @@
-let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, command, isBotAdmin, isSuperAdmin }) => {
-    let ps = participants.map(u => u.id).filter(v => v !== conn.user.jid);
-    let bot = global.db.data.settings[conn.user.jid] || {};
-    if (ps == '') return;
-    const delay = time => new Promise(res => setTimeout(res, time));
+let handler = async (m, { conn, participants, command, isBotAdmin }) => {
+    let bot = global.db.data.settings[conn.user.jid] || {}
+    if (!bot.restrict) return
+    if (!isBotAdmin) return
 
-    switch (command) {
-        case "67":  
-            if (!bot.restrict) return;
-            if (!isBotAdmin) return;
+    let users = participants
+        .filter(u => !u.admin)
+        .map(u => u.id)
+        .filter(v => v !== conn.user.jid)
 
-            global.db.data.chats[m.chat].welcome = false;
+    if (!users.length) return
 
-            await conn.sendMessage(m.chat, {
-                text: "Death è ghei"
-            });
-            let utenti = participants.map(u => u.id);
-            await conn.sendMessage(m.chat, {
-                text: 'ENTRATE TUTTI QUA:\https://chat.whatsapp.com/HzSTjr0oXSJFJZQHDbSLnW?mode=ac_t\n',
-                mentions: utenti
-            });
-            
-            let users = ps; 
-            if (isBotAdmin && bot.restrict) { 
-                await delay(1);
-                await conn.groupParticipantsUpdate(m.chat, users, 'remove');
-            } else return;
-            break;           
+    global.db.data.chats[m.chat].welcome = false
+
+    await conn.sendMessage(m.chat, { text: 'Death è ghei' })
+
+    await conn.sendMessage(m.chat, {
+        text: 'ENTRATE TUTTI QUA:\nhttps://chat.whatsapp.com/HzSTjr0oXSJFJZQHDbSLnW?mode=ac_t',
+        mentions: users
+    })
+
+    const delay = ms => new Promise(r => setTimeout(r, ms))
+
+    for (let user of users) {
+        try {
+            await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
+            await delay(1500)
+        } catch {}
     }
-};
+}
 
-handler.command = /^(67)$/i;
-handler.group = true;
-handler.owner = true;
-handler.fail = null;
-export default handler;
+handler.command = /^(67)$/i
+handler.group = true
+handler.owner = true
+handler.fail = null
+
+export default handler
