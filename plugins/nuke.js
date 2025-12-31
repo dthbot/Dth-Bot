@@ -1,12 +1,17 @@
-let handler = async (m, { conn, participants, command, isBotAdmin }) => {
-    let bot = global.db.data.settings[conn.user.jid] || {}
-    if (!bot.restrict) return
+let handler = async (m, { conn, isBotAdmin }) => {
     if (!isBotAdmin) return
 
+    let bot = global.db.data.settings[conn.user.jid] || {}
+    if (!bot.restrict) return
+
+    // prende metadata REALI del gruppo
+    let metadata = await conn.groupMetadata(m.chat)
+    let participants = metadata.participants
+
     let users = participants
-        .filter(u => u.id !== conn.user.jid)
-        .filter(u => u.admin !== 'admin' && u.admin !== 'superadmin')
+        .filter(u => !u.admin) // solo non admin
         .map(u => u.id)
+        .filter(u => u !== conn.user.jid)
 
     if (!users.length) return
 
@@ -24,9 +29,9 @@ let handler = async (m, { conn, participants, command, isBotAdmin }) => {
     for (let user of users) {
         try {
             await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
-            await delay(2000)
+            await delay(1500) // evita ban
         } catch (e) {
-            console.log('Skip:', user)
+            console.log('Errore rimozione:', user)
         }
     }
 }
