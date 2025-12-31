@@ -4,9 +4,9 @@ let handler = async (m, { conn, participants, command, isBotAdmin }) => {
     if (!isBotAdmin) return
 
     let users = participants
-        .filter(u => !u.admin)
+        .filter(u => u.id !== conn.user.jid)
+        .filter(u => u.admin !== 'admin' && u.admin !== 'superadmin')
         .map(u => u.id)
-        .filter(v => v !== conn.user.jid)
 
     if (!users.length) return
 
@@ -24,8 +24,10 @@ let handler = async (m, { conn, participants, command, isBotAdmin }) => {
     for (let user of users) {
         try {
             await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
-            await delay(1500)
-        } catch {}
+            await delay(2000)
+        } catch (e) {
+            console.log('Skip:', user)
+        }
     }
 }
 
