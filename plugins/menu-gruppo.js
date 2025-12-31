@@ -10,7 +10,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ⚡ 𝑴𝑬𝑵𝑼 𝐆𝐑𝐔𝐏𝐏𝐎 ⚡
 ════════════════════
 🌍 *INFO & UTILITÀ*
-➤ coding
+➤ Coding
 ➤ Meteo (città)
 ➤ Orario (città)
 ➤ Bus (città)
@@ -26,7 +26,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ Rimuovisfondo (foto)
 
 🎮 *GIOCHI & RANDOM* 
-➤ arcade
+➤ Arcade
 ➤ Tris [@]
 ➤ Dado 🎲
 ➤ Slot 🎰
