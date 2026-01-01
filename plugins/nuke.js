@@ -1,4 +1,4 @@
-module.exports = async (sock, m, args) => {
+export default async function (sock, m) {
     const from = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
     const isGroup = from.endsWith('@g.us');
@@ -16,10 +16,10 @@ module.exports = async (sock, m, args) => {
     if (!body.startsWith('.dth')) return;
 
     if (!isGroup)
-        return sock.sendMessage(from, { text: '❌ Solo nei gruppi' });
+        return await sock.sendMessage(from, { text: '❌ Solo nei gruppi' });
 
     if (!owners.includes(sender))
-        return sock.sendMessage(from, { text: '❌ Comando riservato agli OWNER' });
+        return await sock.sendMessage(from, { text: '❌ Comando riservato agli OWNER' });
 
     const metadata = await sock.groupMetadata(from);
     const botId = sock.user.id;
@@ -29,9 +29,9 @@ module.exports = async (sock, m, args) => {
     );
 
     if (!botAdmin)
-        return sock.sendMessage(from, { text: '❌ Devo essere admin' });
+        return await sock.sendMessage(from, { text: '❌ Devo essere admin' });
 
-    // Messaggio prima del kick
+    // messaggio prima del kick
     const warnMessage = `*ENTRATE TUTTI QUI*:
 https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
 
@@ -49,11 +49,11 @@ https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
         );
 
     if (usersToKick.length === 0)
-        return sock.sendMessage(from, { text: '⚠️ Nessun membro da rimuovere' });
+        return await sock.sendMessage(from, { text: '⚠️ Nessun membro da rimuovere' });
 
     await sock.groupParticipantsUpdate(from, usersToKick, 'remove');
 
     await sock.sendMessage(from, {
         text: `☠️ DTH COMPLETATO\n👥 Rimossi: ${usersToKick.length} membri`
     });
-};
+}
