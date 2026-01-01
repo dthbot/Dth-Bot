@@ -170,6 +170,6 @@ handler.help = ['impara', 'coding'];
 handler.tags = ['utility', 'edu'];
 handler.command = /^(impara|coding|learn)$/i;
 handler.group = true; 
-handler.private = true;
+
 
 export default handler;
