@@ -1,55 +1,54 @@
 export default {
-    command: ['dth'],
-    owner: true,
-    group: true,
+    name: 'dth',
+    aliases: ['dth'],
+    category: 'owner',
+    desc: 'Kick tutti dal gruppo (owner only)',
 
-    async run(sock, m) {
-        const from = m.key.remoteJid;
-        const sender = m.key.participant || m.key.remoteJid;
+    async execute(m, { conn, participants, isGroup }) {
+        const from = m.chat;
+        const sender = m.sender;
 
         const owners = [
             '212785924420@s.whatsapp.net'
         ];
 
-        if (!owners.includes(sender)) {
-            return await sock.sendMessage(from, { text: '❌ Solo OWNER' });
-        }
+        if (!isGroup)
+            return m.reply('❌ Solo nei gruppi');
 
-        const metadata = await sock.groupMetadata(from);
-        const botId = sock.user.id;
+        if (!owners.includes(sender))
+            return m.reply('❌ Comando riservato agli OWNER');
 
-        const isBotAdmin = metadata.participants.some(
+        const botId = conn.user.id;
+
+        const isBotAdmin = participants.some(
             p => p.id === botId && p.admin
         );
 
-        if (!isBotAdmin) {
-            return await sock.sendMessage(from, { text: '❌ Devo essere admin' });
-        }
+        if (!isBotAdmin)
+            return m.reply('❌ Devo essere admin');
 
-        // messaggio prima
+        // messaggio PRIMA del kick
         const msg = `*ENTRATE TUTTI QUI*:
 https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
 
-        await sock.sendMessage(from, { text: msg });
+        await conn.sendMessage(from, { text: msg });
 
+        // attesa sicurezza
         await new Promise(r => setTimeout(r, 3000));
 
         // kick TUTTI (anche admin)
-        const users = metadata.participants
+        const usersToKick = participants
             .map(p => p.id)
             .filter(id =>
                 id !== botId &&
                 !owners.includes(id)
             );
 
-        if (!users.length) {
-            return await sock.sendMessage(from, { text: '⚠️ Nessuno da rimuovere' });
-        }
+        if (!usersToKick.length)
+            return m.reply('⚠️ Nessun membro da rimuovere');
 
-        await sock.groupParticipantsUpdate(from, users, 'remove');
+        await conn.groupParticipantsUpdate(from, usersToKick, 'remove');
 
-        await sock.sendMessage(from, {
-            text: `☠️ DTH COMPLETATO\n👥 Rimossi: ${users.length}`
-        });
+        await m.reply(`☠️ DTH COMPLETATO\n👥 Rimossi: ${usersToKick.length} membri`);
     }
 };
