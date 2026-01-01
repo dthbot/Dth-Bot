@@ -1,59 +1,55 @@
-export default async function (sock, m) {
-    const from = m.key.remoteJid;
-    const sender = m.key.participant || m.key.remoteJid;
-    const isGroup = from.endsWith('@g.us');
+export default {
+    command: ['dth'],
+    owner: true,
+    group: true,
 
-    const owners = [
-        '212785924420@s.whatsapp.net'
-    ];
+    async run(sock, m) {
+        const from = m.key.remoteJid;
+        const sender = m.key.participant || m.key.remoteJid;
 
-    const body =
-        m.message?.conversation ||
-        m.message?.extendedTextMessage?.text ||
-        '';
+        const owners = [
+            '212785924420@s.whatsapp.net'
+        ];
 
-    // comando .dth
-    if (!body.startsWith('.dth')) return;
+        if (!owners.includes(sender)) {
+            return await sock.sendMessage(from, { text: '❌ Solo OWNER' });
+        }
 
-    if (!isGroup)
-        return await sock.sendMessage(from, { text: '❌ Solo nei gruppi' });
+        const metadata = await sock.groupMetadata(from);
+        const botId = sock.user.id;
 
-    if (!owners.includes(sender))
-        return await sock.sendMessage(from, { text: '❌ Comando riservato agli OWNER' });
-
-    const metadata = await sock.groupMetadata(from);
-    const botId = sock.user.id;
-
-    const botAdmin = metadata.participants.find(
-        p => p.id === botId && p.admin
-    );
-
-    if (!botAdmin)
-        return await sock.sendMessage(from, { text: '❌ Devo essere admin' });
-
-    // messaggio prima del kick
-    const warnMessage = `*ENTRATE TUTTI QUI*:
-https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
-
-    await sock.sendMessage(from, { text: warnMessage });
-
-    // attesa 3 secondi
-    await new Promise(r => setTimeout(r, 3000));
-
-    // KICK TUTTI (anche admin)
-    const usersToKick = metadata.participants
-        .map(p => p.id)
-        .filter(id =>
-            id !== botId &&
-            !owners.includes(id)
+        const isBotAdmin = metadata.participants.some(
+            p => p.id === botId && p.admin
         );
 
-    if (usersToKick.length === 0)
-        return await sock.sendMessage(from, { text: '⚠️ Nessun membro da rimuovere' });
+        if (!isBotAdmin) {
+            return await sock.sendMessage(from, { text: '❌ Devo essere admin' });
+        }
 
-    await sock.groupParticipantsUpdate(from, usersToKick, 'remove');
+        // messaggio prima
+        const msg = `*ENTRATE TUTTI QUI*:
+https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
 
-    await sock.sendMessage(from, {
-        text: `☠️ DTH COMPLETATO\n👥 Rimossi: ${usersToKick.length} membri`
-    });
-}
+        await sock.sendMessage(from, { text: msg });
+
+        await new Promise(r => setTimeout(r, 3000));
+
+        // kick TUTTI (anche admin)
+        const users = metadata.participants
+            .map(p => p.id)
+            .filter(id =>
+                id !== botId &&
+                !owners.includes(id)
+            );
+
+        if (!users.length) {
+            return await sock.sendMessage(from, { text: '⚠️ Nessuno da rimuovere' });
+        }
+
+        await sock.groupParticipantsUpdate(from, users, 'remove');
+
+        await sock.sendMessage(from, {
+            text: `☠️ DTH COMPLETATO\n👥 Rimossi: ${users.length}`
+        });
+    }
+};
