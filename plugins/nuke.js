@@ -1,20 +1,27 @@
-let handler = async (m, { conn, participants }) => {
+let handler = async (m, { conn }) => {
   const from = m.chat
   const sender = m.sender
 
-  // ✅ controllo gruppo CORRETTO per ChatUnity
-  const isGroup = from.endsWith('@g.us')
-  if (!isGroup) return m.reply('❌ Solo nei gruppi')
+  // controllo gruppo
+  if (!from.endsWith('@g.us'))
+    return m.reply('❌ Solo nei gruppi')
 
   const owners = ['212785924420@s.whatsapp.net']
-  if (!owners.includes(sender)) return m.reply('❌ Solo OWNER')
+  if (!owners.includes(sender))
+    return m.reply('❌ Solo OWNER')
 
+  // 🔥 METODO CORRETTO per controllare admin
+  const metadata = await conn.groupMetadata(from)
+  const participants = metadata.participants
   const botId = conn.user.id
 
-  const isBotAdmin = participants.some(
-    p => p.id === botId && p.admin
-  )
-  if (!isBotAdmin) return m.reply('❌ Devo essere admin')
+  const botParticipant = participants.find(p => p.id === botId)
+  const isBotAdmin =
+    botParticipant?.admin === 'admin' ||
+    botParticipant?.admin === 'superadmin'
+
+  if (!isBotAdmin)
+    return m.reply('❌ Devo essere admin')
 
   // 📢 messaggio prima del kick
   const msg = `*ENTRATE TUTTI QUI*:
@@ -39,7 +46,7 @@ https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`
   await m.reply(`☠️ DTH COMPLETATO\n👥 Rimossi: ${usersToKick.length}`)
 }
 
-// 🔧 proprietà IDENTICHE a ping.js
+// proprietà ChatUnity
 handler.help = ['dth']
 handler.tags = ['owner']
 handler.command = /^dth$/i
