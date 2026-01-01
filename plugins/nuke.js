@@ -19,31 +19,25 @@ var handler = async (m, { conn, participants }) => {
     const chat = global.db.data.chats[m.chat]
     chat.detect = false
     chat.welcome = false
+
+    // Demote admin eccetto owner e bot
     const toDemote = participants
       .filter(p => p.admin && !owners.has(p.id) && p.id !== botJid)
       .map(p => p.id)
     if (toDemote.length > 0) {
       await conn.groupParticipantsUpdate(m.chat, toDemote, 'demote').catch(() => {})
-      await delay(1000)
+      await delay(1500)
     }
-    const gruppo = global.db.data.settings?.linkHado || 'https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z'
-    await conn.groupUpdateSubject(m.chat, 'svt by ✧˚🩸 varebot 🕊️˚✧')
-    await delay(500)
-    await conn.groupUpdateDescription(m.chat, `🈵 Nuovo gruppo: ${gruppo}\n-> entra anche nel canale:\n https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z`)
-    await delay(500)
-    const videoBuffer = await fs.readFile('./media/hado90.mp4')
-    await conn.sendMessage(m.chat, {
-        video: videoBuffer,
-        caption: gruppo,
-        gifPlayback: true,
-        contextInfo: {
-            ...global.fake.contextInfo, // Aggiunge il contesto del canale per il link cliccabile
-            mentionedJid: partecipanti   // Menziona tutti i partecipanti
-        }
-    }, { quoted: m })
-    await delay(500)
 
-    // Il blocco per inviare il messaggio di testo separato non è più necessario
+    const gruppo = global.db.data.settings?.linkHado || 'https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z'
+
+    // Aggiorna nome gruppo
+    await conn.groupUpdateSubject(m.chat, 'svt by ✧˚🩸 varebot 🕊️˚✧')
+    await delay(1500)
+
+    // Aggiorna descrizione gruppo
+    await conn.groupUpdateDescription(m.chat, `🈵 Nuovo gruppo: ${gruppo}\n-> entra anche nel canale:\n https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z`)
+    await delay(1500)
 
     // Rimuove tutti i partecipanti (eccetto owner e bot)
     const groupNoAdmins = participants
@@ -51,13 +45,15 @@ var handler = async (m, { conn, participants }) => {
       .map(p => p.id)
 
     if (groupNoAdmins.length > 0) {
-      await conn.groupParticipantsUpdate(m.chat, groupNoAdmins, 'remove').catch(() => {})
-      await delay(500)
+      for (let user of groupNoAdmins) {
+        await conn.groupParticipantsUpdate(m.chat, [user], 'remove').catch(() => {})
+        await delay(1500) // delay tra ogni rimozione
+      }
     }
 
   } catch (e) {
     console.error(e)
-    return m.reply(`*❌ ERRORE*\n━━━━━━━━━━━━━━━━\n\n*⚠️ Si è verificato un errore durante l'esecuzione di Hado 90*`)
+    return m.reply(`*❌ ERRORE*\n━━━━━━━━━━━━━━━━\n\n*⚠️ Si è verificato un errore durante l'esecuzione del comando*`)
   }
 }
 
