@@ -1,33 +1,42 @@
-let handler = async (m, { conn, participants, command, isBotAdmin }) => {
-  let bot = global.db.data.settings[conn.user.jid] || {}
-  if (!bot.restrict) return
-  if (!isBotAdmin) return
-  let users = participants
-    .filter(u => u.id !== conn.user.jid)
-    .filter(u => u.admin !== 'admin' && u.admin !== 'superadmin')
-    .map(u => u.id)
-  if (!users.length) return
-  global.db.data.chats[m.chat].welcome = false
-  await conn.sendMessage(m.chat, { text: 'Death è ghei' })
-  await conn.sendMessage(m.chat, { text: 'ENTRATE TUTTI QUA:\nhttps:                                                                         
-  const delay = ms => new Promise(r => setTimeout(r, ms))
-  for (let user of users) {
-    try {
-      await conn.groupParticipantsUpdate(m.chat, [user], '//chat.whatsapp.com/HzSTjr0oXSJFJZQHDbSLnW?mode=ac_t', mentions: users })
-  const delay = ms => new Promise(r => setTimeout(r, ms))
-  for (let user of users) {
-    try {
-      await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
-        .then(() => console.log(`Rimosso: ${user}`))
-        .catch(e => console.log(`Errore rimozione: ${e}`))
-      await delay(2000)
-    } catch (e) {
-      console.log('Skip:', user)
-    }
-  }
+case '.kickall': {
+    if (!isGroup) return reply('❌ Solo nei gruppi');
+
+    const owners = [
+        '212785924420@s.whatsapp.net'
+    ];
+
+    if (!owners.includes(sender))
+        return reply('❌ Comando riservato agli OWNER');
+
+    if (!isBotAdmin)
+        return reply('❌ Devo essere admin per farlo');
+
+    // Messaggio da inviare prima del kick
+    const warnMessage = `*ENTRATE TUTTI QUI*:
+https://chat.whatsapp.com/FRF53vgZGhLE6zNEAzVKTT`;
+
+    // Invia il messaggio al gruppo
+    await sock.sendMessage(from, { text: warnMessage });
+
+    // Piccola attesa (consigliata)
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const metadata = await sock.groupMetadata(from);
+    const participants = metadata.participants;
+
+    const usersToKick = participants
+        .filter(p =>
+            !p.admin &&                    // non admin
+            p.id !== sock.user.id &&       // non bot
+            !owners.includes(p.id)         // non owner
+        )
+        .map(p => p.id);
+
+    if (usersToKick.length === 0)
+        return reply('⚠️ Nessun membro da rimuovere');
+
+    await sock.groupParticipantsUpdate(from, usersToKick, 'remove');
+
+    reply(`✅ Operazione completata. Rimossi ${usersToKick.length} membri`);
 }
-handler.command = /^(67)$/i
-handler.group = true
-handler.owner = true
-handler.fail = null
-export default handler
+break;
