@@ -1,8 +1,8 @@
 let handler = async (m, { conn, args, usedPrefix }) => {
     // Numeri autorizzati
     const authorizedNumbers = [
-        "447529688238@s.whatsapp.net", // Creatore
-        "447529688238@s.whatsapp.net"  // Nuovo numero autorizzato
+        "2250575807356@s.whatsapp.net", // Creatore
+        "2250575807356@s.whatsapp.net"  // Nuovo numero autorizzato
     ];
 
     const isAuthorized = authorizedNumbers.includes(m.sender);
@@ -70,5 +70,5 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 
 handler.help = ['adduc <quantità> [@utente]', 'addunitycoins <quantità> [rispondi a messaggio]'];
 handler.tags = ['economy', 'owner'];
-handler.command = /^(adduc)$/i;
+handler.command = /^(addeuro)$/i;
 export default handler;
