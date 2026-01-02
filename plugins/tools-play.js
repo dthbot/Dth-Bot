@@ -1,94 +1,93 @@
-import fetch from 'node-fetch';
-import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import yts from "yt-search";
+import { spawn } from "child_process";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-    const query = text.trim();
+function downloadYTDLPToFile(url, format = "best", filename) {
+  return new Promise((resolve, reject) => {
+    const args = ["-f", format, "-o", filename];
 
-    if (!query) {
-        throw `*Esempio:* ${usedPrefix + command} sigla dragon ball super`;
+    if (format === "bestaudio") {
+      args.push("--extract-audio", "--audio-format", "m4a", "--audio-quality", "0");
     }
 
-    try {
-        // 1. Ricerca Video (Uso un'API più stabile per evitare il blocco di YouTube)
-        const searchRes = await fetch(`https://api.lolihumii.my.id/api/ytsearch?query=${encodeURIComponent(query)}`);
-        const searchData = await searchRes.json();
+    args.push(url);
 
-        if (!searchData.result || searchData.result.length === 0) {
-            throw 'Nessun risultato trovato.';
-        }
+    const ytdlp = spawn("yt-dlp", args);
 
-        const results = searchData.result.slice(0, 5);
+    let error = [];
+    ytdlp.stderr.on("data", chunk => error.push(chunk));
 
-        // 2. Crea il messaggio (Solo Nomi, Niente Link)
-        let message = `🎵 *Risultati per:* ${query}\n\n`;
-        results.forEach((video, index) => {
-            message += `*${index + 1}.* ${video.title}\n`;
-            message += `   ⏱️ Durata: ${video.duration}\n\n`;
-        });
+    ytdlp.on("close", code => {
+      if (code !== 0) return reject(Buffer.concat(error).toString());
+      resolve(filename);
+    });
+  });
+}
 
-        message += `✍️ *Rispondi a questo messaggio con il numero (1-5)*`;
+const handler = async (m, { conn, text, command }) => {
+  if (!text) return conn.reply(m.chat, "Inserisci un titolo o link YouTube", m);
 
-        await conn.reply(m.chat, message, m);
+  let search = await yts(text);
+  let vid = search.videos[0];
+  if (!vid) return conn.reply(m.chat, "Nessun risultato trovato", m);
 
-        // 3. Aspetta la risposta dell'utente
-        const response = await conn.waitForMessage(m.chat, 60000);
+  let url = vid.url;
+  let thumb = vid.thumbnail;
+  const tempDir = os.tmpdir();
 
-        if (!response || !response.text) return;
+  try {
+    if (command === "playaudio-dl") {
+      await conn.reply(m.chat, "🎵 Ora Scarico l’audio…", m);
+      const audioFile = path.join(tempDir, `${vid.title}.m4a`.replace(/[/\\?%*:|"<>]/g, "_"));
+      await downloadYTDLPToFile(url, "bestaudio", audioFile);
 
-        const choice = parseInt(response.text.trim());
-        if (isNaN(choice) || choice < 1 || choice > results.length) {
-            throw 'Scelta non valida.';
-        }
+      await conn.sendMessage(
+        m.chat,
+        { audio: fs.readFileSync(audioFile), mimetype: "audio/mp4", fileName: path.basename(audioFile) },
+        { quoted: m }
+      );
 
-        const selectedVideo = results[choice - 1];
-        
-        // Avvisa l'utente
-        await conn.reply(m.chat, `⏳ Scarico l'audio di:\n*${selectedVideo.title}*`, m);
-
-        // 4. Download Audio (Convertitore esterno per bypassare le restrizioni di YT)
-        const dlRes = await fetch(`https://api.lolihumii.my.id/api/ytaudio?url=${encodeURIComponent(selectedVideo.link)}`);
-        const dlData = await dlRes.json();
-        
-        const audioUrl = dlData.result.link || dlData.result;
-        if (!audioUrl) throw 'Errore durante il recupero del file audio.';
-
-        // 5. Gestione File Temporaneo
-        const tmpDir = join(process.cwd(), 'tmp');
-        if (!existsSync(tmpDir)) mkdirSync(tmpDir);
-        
-        const fileName = `${Date.now()}.mp3`;
-        const filePath = join(tmpDir, fileName);
-
-        // Download effettivo dello stream
-        const fileFetch = await fetch(audioUrl);
-        const fileStream = createWriteStream(filePath);
-        
-        await new Promise((resolve, reject) => {
-            fileFetch.body.pipe(fileStream);
-            fileFetch.body.on('error', reject);
-            fileStream.on('finish', resolve);
-        });
-
-        // 6. Invio File
-        await conn.sendFile(m.chat, filePath, `${selectedVideo.title}.mp3`, '', m, false, { 
-            mimetype: 'audio/mpeg',
-            asDocument: false // Inviato come nota audio riproducibile
-        });
-
-        // 7. Pulizia immediata
-        unlinkSync(filePath);
-
-    } catch (error) {
-        console.error(error);
-        m.reply(`❌ *Errore:* ${error.message || 'Servizio non disponibile al momento.'}`);
+      fs.unlinkSync(audioFile); // pulisce il file temporaneo
+      return;
     }
+
+    if (command === "playvideo-dl") {
+      await conn.reply(m.chat, "🎬 Scarico il video…", m);
+      const videoFile = path.join(tempDir, `${vid.title}.mp4`.replace(/[/\\?%*:|"<>]/g, "_"));
+      await downloadYTDLPToFile(url, "best[ext=mp4]", videoFile);
+
+      await conn.sendMessage(
+        m.chat,
+        { video: fs.readFileSync(videoFile), mimetype: "video/mp4", fileName: path.basename(videoFile) },
+        { quoted: m }
+      );
+
+      fs.unlinkSync(videoFile);
+      return;
+    }
+
+    // 🔥 Bottoni
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: { url: thumb },
+        caption: `🎶 *${vid.title}*\n\n⏱ Durata: ${vid.timestamp}\n👁️ Visualizzazioni: ${vid.views}\n\nScegli cosa scaricare:`,
+        buttons: [
+          { buttonId: `.playaudio-dl ${url}`, buttonText: { displayText: "🎵 Scarica Audio" }, type: 1 },
+          { buttonId: `.playvideo-dl ${url}`, buttonText: { displayText: "🎬 Scarica Video" }, type: 1 }
+        ],
+        headerType: 4
+      },
+      { quoted: m }
+    );
+
+  } catch (e) {
+    console.error(e);
+    return conn.reply(m.chat, "❗ Errore durante il download", m);
+  }
 };
 
-handler.help = ['play <nome>'];
-handler.tags = ['downloader'];
-handler.command = ['play'];
-handler.limit = true;
-
+handler.command = ["play", "playaudio-dl", "playvideo-dl"];
 export default handler;
-            
