@@ -1,0 +1,58 @@
+// ⛔ Comando per uscire da una partita di Roulette Russa
+let handler = async (m, { conn, usedPrefix, command }) => {
+    conn.game = conn.game ? conn.game : {}
+    const sender = m.sender
+
+    // Trova la stanza di Roulette a cui il mittente sta partecipando
+    let roomFound = null;
+    let roomIdToDelete = null;
+
+    // Scansiona tutte le stanze per trovare quella che coinvolge il mittente
+    for (const [id, room] of Object.entries(conn.game)) {
+        if (id.startsWith('roulette') && (room.game.playerX === sender || room.game.playerO === sender)) {
+            roomFound = room;
+            roomIdToDelete = id;
+            break;
+        }
+    }
+
+    if (!roomFound) {
+        return m.reply('*[❌] Non sei in nessuna partita di Roulette Russa!*')
+    }
+    
+    // --- Logica di Pulizia Aggressiva ---
+    const exitingPlayer = sender
+    const winnerId = roomFound.game.playerX === exitingPlayer ? roomFound.game.playerO : roomFound.game.playerX
+    
+    // 1. Rimuovi la stanza dalla memoria globale
+    delete conn.game[roomIdToDelete]
+
+    // 2. Controllo incrociato (necessario se ci sono stati crash precedenti)
+    // Se la stanza è stata cancellata correttamente, questa verifica aggiuntiva garantisce che non ci siano ID duplicati in futuro
+    
+    let winnerTag = '@' + winnerId.split('@')[0]
+    let exitingTag = '@' + exitingPlayer.split('@')[0]
+
+    const message = `*⛔ ${exitingTag} ha abbandonato la partita!*
+
+🏆 *VINCITORE D'UFFICIO: ${winnerTag}*
+La partita di Roulette Russa è terminata.
+_Digita ${usedPrefix}roulette per iniziarne una nuova._`
+
+    // Invia la notifica a entrambi i giocatori (se sono in chat diverse)
+    if (roomFound.x !== roomFound.o) {
+        await conn.sendMessage(roomFound.x, { text: message, mentions: conn.parseMention(message) }, { quoted: m })
+    }
+    // Invia la notifica finale alla chat corrente
+    if (roomFound.o) {
+        await conn.sendMessage(roomFound.o, { text: message, mentions: conn.parseMention(message) }, { quoted: m })
+    } else {
+        // Se la stanza era in WAITING, invia solo al creatore
+        await conn.sendMessage(roomFound.x, { text: message, mentions: conn.parseMention(message) }, { quoted: m })
+    }
+}
+
+handler.command = /^(esci-roulette|abbandonaroulette)$/i
+handler.group = true
+
+export default handler
