@@ -6,86 +6,89 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const query = text.trim();
 
     if (!query) {
-        throw `*Esempio:* ${usedPrefix + command} Pezzi di fango`;
+        throw `*Esempio:* ${usedPrefix + command} sigla dragon ball super`;
     }
 
     try {
-        // Ricerca video tramite API
-        const ytSearch = await fetch(`https://api.akuari.my.id/search/youtube?query=${encodeURIComponent(query)}`);
-        const ytData = await ytSearch.json();
+        // 1. Ricerca Video (Uso un'API più stabile per evitare il blocco di YouTube)
+        const searchRes = await fetch(`https://api.lolihumii.my.id/api/ytsearch?query=${encodeURIComponent(query)}`);
+        const searchData = await searchRes.json();
 
-        if (!ytData.result || ytData.result.length === 0) {
+        if (!searchData.result || searchData.result.length === 0) {
             throw 'Nessun risultato trovato.';
         }
 
-        const results = ytData.result.slice(0, 5);
+        const results = searchData.result.slice(0, 5);
 
-        // Costruzione messaggio senza link
+        // 2. Crea il messaggio (Solo Nomi, Niente Link)
         let message = `🎵 *Risultati per:* ${query}\n\n`;
         results.forEach((video, index) => {
             message += `*${index + 1}.* ${video.title}\n`;
-            message += `⏱️ Durata: ${video.duration}\n\n`;
+            message += `   ⏱️ Durata: ${video.duration}\n\n`;
         });
 
-        message += `Rispondi con un numero (1-${results.length}) per scaricare l'audio.`;
+        message += `✍️ *Rispondi a questo messaggio con il numero (1-5)*`;
 
         await conn.reply(m.chat, message, m);
 
-        // Attesa della scelta dell'utente
+        // 3. Aspetta la risposta dell'utente
         const response = await conn.waitForMessage(m.chat, 60000);
 
-        if (!response || !response.text) return; // Timeout silenzioso
+        if (!response || !response.text) return;
 
         const choice = parseInt(response.text.trim());
         if (isNaN(choice) || choice < 1 || choice > results.length) {
-            throw 'Scelta non valida. Operazione annullata.';
+            throw 'Scelta non valida.';
         }
 
         const selectedVideo = results[choice - 1];
-        await conn.reply(m.chat, `_Sto preparando l'audio di:_ \n*${selectedVideo.title}*`, m);
+        
+        // Avvisa l'utente
+        await conn.reply(m.chat, `⏳ Scarico l'audio di:\n*${selectedVideo.title}*`, m);
 
-        // Recupero link di download
-        const dlData = await fetch(`https://api.akuari.my.id/downloader/youtube?link=${encodeURIComponent(selectedVideo.link)}`);
-        const dlJson = await dlData.json();
-        const mp3Url = dlJson.mp3 || dlJson.link;
+        // 4. Download Audio (Convertitore esterno per bypassare le restrizioni di YT)
+        const dlRes = await fetch(`https://api.lolihumii.my.id/api/ytaudio?url=${encodeURIComponent(selectedVideo.link)}`);
+        const dlData = await dlRes.json();
+        
+        const audioUrl = dlData.result.link || dlData.result;
+        if (!audioUrl) throw 'Errore durante il recupero del file audio.';
 
-        if (!mp3Url) throw 'Impossibile recuperare il file audio.';
-
-        // Gestione file locale
+        // 5. Gestione File Temporaneo
         const tmpDir = join(process.cwd(), 'tmp');
         if (!existsSync(tmpDir)) mkdirSync(tmpDir);
         
         const fileName = `${Date.now()}.mp3`;
         const filePath = join(tmpDir, fileName);
 
-        // Download effettivo
-        const res = await fetch(mp3Url);
+        // Download effettivo dello stream
+        const fileFetch = await fetch(audioUrl);
         const fileStream = createWriteStream(filePath);
         
         await new Promise((resolve, reject) => {
-            res.body.pipe(fileStream);
-            res.body.on('error', reject);
+            fileFetch.body.pipe(fileStream);
+            fileFetch.body.on('error', reject);
             fileStream.on('finish', resolve);
         });
 
-        // Invio audio
+        // 6. Invio File
         await conn.sendFile(m.chat, filePath, `${selectedVideo.title}.mp3`, '', m, false, { 
-            mimetype: 'audio/mpeg' 
+            mimetype: 'audio/mpeg',
+            asDocument: false // Inviato come nota audio riproducibile
         });
 
-        // Pulizia rapida
+        // 7. Pulizia immediata
         unlinkSync(filePath);
 
     } catch (error) {
         console.error(error);
-        m.reply(`❌ *Errore:* ${error.message || error}`);
+        m.reply(`❌ *Errore:* ${error.message || 'Servizio non disponibile al momento.'}`);
     }
 };
 
-handler.help = ['play <titolo>'];
+handler.help = ['play <nome>'];
 handler.tags = ['downloader'];
 handler.command = ['play'];
 handler.limit = true;
 
 export default handler;
-                         
+            
