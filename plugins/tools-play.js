@@ -1,113 +1,91 @@
 import fetch from 'node-fetch';
-import { createWriteStream, existsSync, mkdirSync } from 'fs'; // Aggiunto check cartella
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs';
 import { join } from 'path';
 
-const handler = async (m, { conn, args, text, usedPrefix, command }) => {
+const handler = async (m, { conn, text, usedPrefix, command }) => {
     const query = text.trim();
 
     if (!query) {
-        throw `*Esempio:* ${usedPrefix + command} sigla dragon ball super`;
+        throw `*Esempio:* ${usedPrefix + command} Pezzi di fango`;
     }
 
     try {
-        // Ricerca su YouTube
-        // Nota: Le API pubbliche gratuite cambiano spesso.
+        // Ricerca video tramite API
         const ytSearch = await fetch(`https://api.akuari.my.id/search/youtube?query=${encodeURIComponent(query)}`);
         const ytData = await ytSearch.json();
 
         if (!ytData.result || ytData.result.length === 0) {
-            throw 'Nessun risultato trovato su YouTube.';
+            throw 'Nessun risultato trovato.';
         }
 
-        // Prendi i primi 5 risultati
         const results = ytData.result.slice(0, 5);
 
-        // Crea il messaggio con le opzioni
+        // Costruzione messaggio senza link
         let message = `🎵 *Risultati per:* ${query}\n\n`;
         results.forEach((video, index) => {
-            message += `${index + 1}. ${video.title}\n`;
-            message += `   Durata: ${video.duration}\n`;
-            message += `   Canale: ${video.channel}\n\n`;
+            message += `*${index + 1}.* ${video.title}\n`;
+            message += `⏱️ Durata: ${video.duration}\n\n`;
         });
 
-        message += `Scegli un numero da 1 a ${results.length} per scaricare.`;
+        message += `Rispondi con un numero (1-${results.length}) per scaricare l'audio.`;
 
-        // Invia il messaggio con le opzioni
-        // Assicuriamoci di passare 'm' per quotare il messaggio
         await conn.reply(m.chat, message, m);
 
-        // ⚠️ PUNTO CRITICO: waitForMessage non è standard in tutte le basi
-        // Verifica se il tuo bot supporta questa funzione
-        const response = await conn.waitForMessage(m.chat, 60000); // 60 secondi di timeout
+        // Attesa della scelta dell'utente
+        const response = await conn.waitForMessage(m.chat, 60000);
 
-        if (!response || !response.text) {
-            throw 'Tempo scaduto. Riprova.';
-        }
+        if (!response || !response.text) return; // Timeout silenzioso
 
         const choice = parseInt(response.text.trim());
-
         if (isNaN(choice) || choice < 1 || choice > results.length) {
-            throw 'Scelta non valida. Scegli un numero tra 1 e ' + results.length + '.';
+            throw 'Scelta non valida. Operazione annullata.';
         }
 
         const selectedVideo = results[choice - 1];
-        const videoUrl = selectedVideo.link;
+        await conn.reply(m.chat, `_Sto preparando l'audio di:_ \n*${selectedVideo.title}*`, m);
 
-        await conn.reply(m.chat, `_Scarico l'audio: ${selectedVideo.title}..._`, m);
-
-        // Scarica il video come MP3
-        const ytdlUrl = `https://api.akuari.my.id/downloader/youtube?link=${encodeURIComponent(videoUrl)}`;
-        const dlData = await fetch(ytdlUrl);
+        // Recupero link di download
+        const dlData = await fetch(`https://api.akuari.my.id/downloader/youtube?link=${encodeURIComponent(selectedVideo.link)}`);
         const dlJson = await dlData.json();
-
-        // A volte le API restituiscono il link in 'mp3', a volte in 'link' o 'url'
         const mp3Url = dlJson.mp3 || dlJson.link;
 
-        if (!mp3Url) {
-            throw 'Errore durante il recupero del link di download.';
-        }
+        if (!mp3Url) throw 'Impossibile recuperare il file audio.';
 
-        const fileName = `temp_${Date.now()}.mp3`;
-        // Verifica esistenza cartella tmp
+        // Gestione file locale
         const tmpDir = join(process.cwd(), 'tmp');
         if (!existsSync(tmpDir)) mkdirSync(tmpDir);
         
+        const fileName = `${Date.now()}.mp3`;
         const filePath = join(tmpDir, fileName);
 
-        // Scarica il file MP3
-        const responseStream = await fetch(mp3Url);
+        // Download effettivo
+        const res = await fetch(mp3Url);
         const fileStream = createWriteStream(filePath);
+        
         await new Promise((resolve, reject) => {
-            responseStream.body.pipe(fileStream);
-            responseStream.body.on('error', reject);
+            res.body.pipe(fileStream);
+            res.body.on('error', reject);
             fileStream.on('finish', resolve);
         });
 
-        // Invia il file MP3
-        await conn.sendFile(m.chat, filePath, fileName, null, m, false, { 
-            asDocument: false, // Meglio false per inviarlo come audio riproducibile
+        // Invio audio
+        await conn.sendFile(m.chat, filePath, `${selectedVideo.title}.mp3`, '', m, false, { 
             mimetype: 'audio/mpeg' 
         });
 
-        // Pulizia file temporaneo
-        setTimeout(() => {
-            try {
-                require('fs').unlinkSync(filePath);
-            } catch (e) {
-                console.error('Errore durante la pulizia del file:', e);
-            }
-        }, 5000);
+        // Pulizia rapida
+        unlinkSync(filePath);
 
     } catch (error) {
         console.error(error);
-        throw error.toString() || 'Errore durante l\'elaborazione della richiesta.';
+        m.reply(`❌ *Errore:* ${error.message || error}`);
     }
 };
 
-handler.help = ['play <query>'];
+handler.help = ['play <titolo>'];
 handler.tags = ['downloader'];
 handler.command = ['play'];
 handler.limit = true;
 
 export default handler;
-          
+                         
