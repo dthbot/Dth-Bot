@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 ➤ AntiTrava
 ➤ AntiNuke
 ➤ AntiBestemmie
-➤ AntiBot
+➤ AntiBot on/off
 
 🔒 *CONTROLLO GRUPPO* 
 ➤ SoloAdmin
