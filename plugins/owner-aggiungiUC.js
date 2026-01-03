@@ -87,7 +87,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 │  💶 Importo: *+${amount} €*
 │  📊 Nuovo saldo: *${user.limit} €*
 │
-╰━━━━━━━━━━━━━━━━━━━━━━╯`;
+╰━━━━━━━━━━━━━━━━━━━━╯`;
 
         await conn.sendMessage(
             m.chat,
