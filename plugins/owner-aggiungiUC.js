@@ -10,12 +10,12 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     if (!isAuthorized) {
         return conn.reply(
             m.chat,
-`╭━━━━━━ ❌ ACCESSO NEGATO ❌ ━━━━━━╮
+`╭━━━━ ❌ ACCESSO NEGATO ❌ ━━━━╮
 │
 │  🚫 Solo utenti autorizzati
 │  possono utilizzare questo comando
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
@@ -28,13 +28,13 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     if (!amount || isNaN(amount)) {
         return conn.reply(
             m.chat,
-`╭━━━━━━ ⚠ VALORE MANCANTE ⚠ ━━━━━━╮
+`╭━━━━ ⚠ VALORE MANCANTE ⚠ ━━━━╮
 │
 │  📌 Esempio di utilizzo:
 │  ▸ ${usedPrefix}addeuro 100
 │  ▸ ${usedPrefix}addeuro 50 @utente
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
@@ -42,12 +42,12 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     if (amount < 1) {
         return conn.reply(
             m.chat,
-`╭━━━ ❌ VALORE NON VALIDO ❌ ━━━╮
+`╭━━ ❌ VALORE NON VALIDO ❌ ━━╮
 │
 │  🚫 Devi inserire un numero
 │  maggiore di 0
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
@@ -57,12 +57,12 @@ let handler = async (m, { conn, args, usedPrefix }) => {
         if (!(who in global.db.data.users)) {
             return conn.reply(
                 m.chat,
-`╭━━━ 🚷 UTENTE NON REGISTRATO 🚷 ━━━╮
+`╭━━ 🚷 UTENTE NON REGISTRATO 🚷 ━━╮
 │
 │  👤 L'utente non è presente
 │  nel database
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
                 m,
                 { mentions: [who] }
             );
@@ -73,21 +73,21 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 
         let message = who === m.sender
             ? 
-`╭━━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━━╮
+`╭━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━╮
 │
 │  👤 Utente: *Tu*
 │  💶 Importo: *+${amount} €*
 │  📊 Nuovo saldo: *${user.limit} €*
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
             :
-`╭━━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━━╮
+`╭━ 💰 TRANSAZIONE COMPLETATA 💰 ━╮
 │
 │  👤 Destinatario: *@${who.split('@')[0]}*
 │  💶 Importo: *+${amount} €*
 │  📊 Nuovo saldo: *${user.limit} €*
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+╰━━━━━━━━━━━━━━━━━━━━━━━━╯`;
 
         await conn.sendMessage(
             m.chat,
