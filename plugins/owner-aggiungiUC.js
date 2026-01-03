@@ -81,13 +81,13 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 │
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
             :
-`╭━ 💰 TRANSAZIONE COMPLETATA 💰 ━╮
+`╭ 💰 TRANSAZIONE COMPLETATA 💰 ╮
 │
 │  👤 Destinatario: *@${who.split('@')[0]}*
 │  💶 Importo: *+${amount} €*
 │  📊 Nuovo saldo: *${user.limit} €*
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+╰━━━━━━━━━━━━━━━━━━━━━━╯`;
 
         await conn.sendMessage(
             m.chat,
