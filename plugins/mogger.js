@@ -1,18 +1,20 @@
+import fetch from 'node-fetch';
+
 let handler = async (m, { conn, participants }) => {
     // 1. Controllo Gruppo
     if (!m.isGroup) return m.reply('❌ Questo comando funziona solo nei gruppi.');
 
     try {
-        // 2. Selezione Utente (Blindata)
-        // Usa ?. per evitare crash se conn.user è undefined
+        // 2. Selezione Utente (Anti-Crash)
         const botId = conn.user?.jid || conn.user?.id;
-        const users = participants.map(u => u.id).filter(id => id !== botId);
+        // Filtra bot e utenti non validi
+        const users = participants.map(u => u.id).filter(id => id && id !== botId);
         
-        if (!users || users.length === 0) return m.reply('⚠️ Non ci sono abbastanza utenti da analizzare.');
+        if (!users || users.length === 0) return m.reply('⚠️ Non ci sono abbastanza utenti.');
 
         const target = users[Math.floor(Math.random() * users.length)];
         
-        // 3. Recupero Foto Profilo
+        // 3. Recupero Foto Profilo (PFP)
         let pfp;
         try {
             pfp = await conn.profilePictureUrl(target, 'image');
@@ -25,62 +27,68 @@ let handler = async (m, { conn, participants }) => {
         
         let status, color, verdict, emoji, audioUrl;
         
+        // Link audio hostati su GitHub (più stabili di myinstants)
         if (mogLevel > 50) {
             status = 'MOGGER';
             color = '00FF00'; // Verde
             verdict = 'VERDETTO: MOGGER SUPREMO 🗿';
             emoji = '🤫🧏‍♂️';
-            // Link audio "Mission Passed" (funzionante)
-            audioUrl = 'https://www.myinstants.com/media/sounds/gta-san-andreas-mission-passed-sound.mp3';
+            audioUrl = 'https://github.com/Quiec/WhatsApp-Bot/raw/master/media/mission_passed.mp3'; 
         } else {
             status = 'MOGGET';
             color = 'FF0000'; // Rosso
             verdict = 'VERDETTO: MOGGET (WASTED) 💀';
             emoji = '📉';
-            // Link audio "Wasted" (funzionante)
-            audioUrl = 'https://www.myinstants.com/media/sounds/gta-v-wasted-sound-effect.mp3';
+            audioUrl = 'https://github.com/Quiec/WhatsApp-Bot/raw/master/media/wasted.mp3';
         }
 
-        // 5. Generazione Immagine
-        const gtaImage = `https://api.memegen.link/images/custom/_/${status}.png?background=${encodeURIComponent(pfp)}&font=impact&color=%23${color}&size=100`;
-
-        // 6. Costruzione Testo
-        let caption = `🔍 *SCANSIONE FACCIALE GTA EDITION* 🔍\n\n`;
+        // 5. Preparazione Testo
+        let caption = `🔍 *SCANSIONE FACCIALE GTA* 🔍\n\n`;
         caption += `👤 *Soggetto:* @${target.split('@')[0]}\n`;
         caption += `📊 *Mog Level:* ${mogLevel}%\n`;
         caption += `🏆 *${verdict}* ${emoji}\n\n`;
         caption += `_Analisi completata._`;
 
-        // 7. Tentativo di invio (Con gestione errore immagine)
+        // 6. TENTATIVO INVIO IMMAGINE (Gestione Fallback 404)
+        let imageSent = false;
+        
+        // Tentativo A: Immagine GTA
         try {
-            // Prova a inviare l'immagine GTA
+            const gtaUrl = `https://api.memegen.link/images/custom/_/${status}.png?background=${encodeURIComponent(pfp)}&font=impact&color=%23${color}&size=100`;
+            
+            // Verifichiamo prima se il link esiste davvero (evita il crash 404)
+            const check = await fetch(gtaUrl);
+            if (check.status !== 200) throw new Error("Memegen Error");
+
             await conn.sendMessage(m.chat, {
-                image: { url: gtaImage },
+                image: { url: gtaUrl },
                 caption: caption,
                 mentions: [target]
             }, { quoted: m });
-        } catch (imgError) {
-            // SE FALLISCE (API down o url troppo lungo), invia la foto normale
-            console.log("Errore API Memegen, uso fallback:", imgError);
+            imageSent = true;
+        } catch (e) {
+            // Se fallisce, non fare nulla qui, passiamo al fallback
+            console.log("Mogger GTA Image Failed, switching to fallback.");
+        }
+
+        // Tentativo B: Foto Normale (Se Tentativo A fallisce)
+        if (!imageSent) {
             await conn.sendMessage(m.chat, {
-                image: { url: pfp }, // Usa la foto originale
-                caption: caption + "\n_(Grafica GTA non disponibile, mostro foto originale)_",
+                image: { url: pfp },
+                caption: caption + "\n_(Grafica GTA non disp., uso foto originale)_",
                 mentions: [target]
             }, { quoted: m });
         }
 
-        // 8. Invio Audio (Opzionale - se vuoi la musica)
-        // Usa try/catch anche qui per evitare blocchi
+        // 7. INVIO AUDIO (Separato per sicurezza)
         try {
-            if (audioUrl) {
-                await conn.sendMessage(m.chat, { 
-                    audio: { url: audioUrl }, 
-                    mimetype: 'audio/mp4', 
-                    ptt: true // Manda come nota vocale
-                }, { quoted: m });
-            }
+            await conn.sendMessage(m.chat, { 
+                audio: { url: audioUrl }, 
+                mimetype: 'audio/mp4', 
+                ptt: true 
+            }, { quoted: m });
         } catch (e) {
-            console.log("Impossibile inviare audio");
+            console.log("Audio non inviato (errore link o formato)");
         }
 
         // Reazione finale
@@ -88,7 +96,7 @@ let handler = async (m, { conn, participants }) => {
 
     } catch (error) {
         console.error(error);
-        m.reply(`⚠️ Errore imprevisto: ${error.message}`);
+        m.reply('⚠️ Errore generico nel comando.');
     }
 };
 
