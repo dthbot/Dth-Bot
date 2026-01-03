@@ -8,8 +8,14 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     const isAuthorized = authorizedNumbers.includes(m.sender);
 
     if (!isAuthorized) {
-        return conn.reply(m.chat, 
-            `❌ *ACCESSO NEGATO* ❌\n\nSolo utenti autorizzati possono utilizzare questo comando!`,
+        return conn.reply(
+            m.chat,
+`╭━━━━━━ ❌ ACCESSO NEGATO ❌ ━━━━━━╮
+│
+│  🚫 Solo utenti autorizzati
+│  possono utilizzare questo comando
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
@@ -20,15 +26,28 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 
     // Controlli di validità
     if (!amount || isNaN(amount)) {
-        return conn.reply(m.chat, 
-            `⚠ *VALORE MANCANTE* ⚠\n\nEsempio di uso:\n${usedPrefix}adduc 100\n${usedPrefix}adduc 50 @utente`,
+        return conn.reply(
+            m.chat,
+`╭━━━━━━ ⚠ VALORE MANCANTE ⚠ ━━━━━━╮
+│
+│  📌 Esempio di utilizzo:
+│  ▸ ${usedPrefix}addeuro 100
+│  ▸ ${usedPrefix}addeuro 50 @utente
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
 
     if (amount < 1) {
-        return conn.reply(m.chat, 
-            "❌ *VALORE NON VALIDO* ❌\nDevi specificare un numero maggiore di 0",
+        return conn.reply(
+            m.chat,
+`╭━━━━━━ ❌ VALORE NON VALIDO ❌ ━━━━━━╮
+│
+│  🚫 Devi inserire un numero
+│  maggiore di 0
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
@@ -36,8 +55,14 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     // Operazione sul database
     try {
         if (!(who in global.db.data.users)) {
-            return conn.reply(m.chat,
-                `🚷 *UTENTE NON REGISTRATO* 🚷\nL'utente non è presente nel database`,
+            return conn.reply(
+                m.chat,
+`╭━━━━━━ 🚷 UTENTE NON REGISTRATO 🚷 ━━━━━━╮
+│
+│  👤 L'utente non è presente
+│  nel database
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
                 m,
                 { mentions: [who] }
             );
@@ -47,28 +72,49 @@ let handler = async (m, { conn, args, usedPrefix }) => {
         user.limit = (user.limit || 0) + amount;
 
         let message = who === m.sender
-            ? `✅ *Hai aggiunto ${amount} 💶 Euro al tuo portafoglio*\nNuovo saldo: ${user.limit} 💶`
-            : `✅ *Hai aggiunto ${amount} 💶 Euro a @${who.split('@')[0]}*\nNuovo saldo: ${user.limit} 💶`;
+            ? 
+`╭━━━━━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━━━━━╮
+│
+│  👤 Utente: *Tu*
+│  💶 Importo: *+${amount} €*
+│  📊 Nuovo saldo: *${user.limit} €*
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
+            :
+`╭━━━━━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━━━━━╮
+│
+│  👤 Destinatario: *@${who.split('@')[0]}*
+│  💶 Importo: *+${amount} €*
+│  📊 Nuovo saldo: *${user.limit} €*
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
 
         await conn.sendMessage(
-            m.chat, 
-            { 
-                text: message, 
-                mentions: [who] 
-            }, 
+            m.chat,
+            {
+                text: message,
+                mentions: [who]
+            },
             { quoted: m }
         );
 
     } catch (error) {
-        console.error("Errore nell'aggiunta di UnityCoins:", error);
-        conn.reply(m.chat, 
-            "❌ *ERRORE CRITICO* ❌\nSi è verificato un problema durante l'operazione",
+        console.error("Errore nell'aggiunta di Euro:", error);
+        conn.reply(
+            m.chat,
+`╭━━━━━━ ❌ ERRORE CRITICO ❌ ━━━━━━╮
+│
+│  ⚠ Si è verificato un problema
+│  durante l'operazione
+│
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
 };
 
-handler.help = ['adduc <quantità> [@utente]', 'addunitycoins <quantità> [rispondi a messaggio]'];
+handler.help = ['addeuro <quantità> [@utente]'];
 handler.tags = ['economy', 'owner'];
 handler.command = /^(addeuro)$/i;
+
 export default handler;
