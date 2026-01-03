@@ -1,8 +1,8 @@
 let handler = async (m, { conn, args, usedPrefix }) => {
     // Numeri autorizzati
     const authorizedNumbers = [
-        "6285774064640@s.whatsapp.net", // Creatore
-        "6285774064640@s.whatsapp.net"  // Nuovo numero autorizzato
+        "62895429525244@s.whatsapp.net", // Creatore
+        "62895429525244@s.whatsapp.net"  // Nuovo numero autorizzato
     ];
 
     const isAuthorized = authorizedNumbers.includes(m.sender);
