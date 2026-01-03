@@ -1,51 +1,63 @@
-// Plugin: .104 (Tagga un utente a caso e assegna una percentuale di 104)
-// Funzionamento: Estrae un partecipante, genera un numero casuale e invia un meme.
+// Plugin .104 per bot WhatsApp
+// Estrae un utente a caso e assegna una percentuale di "invalidità"
 
-export default async function handler(m, { conn, participants }) {
-    // 1. Controlla se siamo in un gruppo
-    if (!m.isGroup) return m.reply('❌ Questo comando può essere usato solo nei gruppi.');
+let handler = async (m, { conn, participants, usedPrefix, command }) => {
+    // 1. Controllo se è un gruppo (ridondante se usi handler.group = true, ma sicuro)
+    if (!m.isGroup) return m.reply('❌ Questo comando funziona solo nei gruppi.');
 
-    // 2. Seleziona un utente a caso (escludendo il bot stesso se possibile)
-    const users = participants.map(u => u.id);
-    const randomUser = users[Math.floor(Math.random() * users.length)];
-    
-    // 3. Genera una percentuale casuale
-    const percentuale = Math.floor(Math.random() * 101); // Da 0 a 100
-    
-    // 4. Lista di immagini meme (Sostituisci i link con quelli che preferisci)
-    const memeLinks = [
-        'https://i.ibb.co/L5hS0tF/legge104-meme1.jpg',
-        'https://i.ibb.co/vYmC0z4/legge104-meme2.jpg',
-        'https://api.memegen.link/images/custom/_/CERTIFICATO_104.png?background=https://i.imgflip.com/4/30b1gx.jpg'
-    ];
-    const randomMeme = memeLinks[Math.floor(Math.random() * memeLinks.length)];
+    try {
+        // 2. Filtra i partecipanti per evitare di taggare il bot stesso (opzionale)
+        const botId = conn.user.jid || conn.user.id;
+        const users = participants.map(u => u.id).filter(id => id !== botId);
+        
+        if (users.length === 0) return m.reply('Non ci sono abbastanza utenti qui.');
 
-    // 5. Messaggi in base alla percentuale
-    let diagnosi = '';
-    if (percentuale < 20) diagnosi = "Sta bene, è solo un po' pigro.";
-    else if (percentuale < 50) diagnosi = "Sintomi lievi, serve una visita dall'INPS.";
-    else if (percentuale < 80) diagnosi = "La situazione è grave, parcheggio riservato immediato.";
-    else diagnosi = "LIVELLO MASSIMO: Può guidare la sedia a rotelle in autostrada. ♿";
+        // 3. Selezione casuale dell'utente
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        
+        // 4. Genera percentuale casuale (0-104%)
+        const percentuale = Math.floor(Math.random() * 105); 
+        
+        // 5. Database Meme (Link diretti a immagini)
+        const memeLinks = [
+            'https://i.imgflip.com/4/30b1gx.jpg',
+            'https://api.memegen.link/images/custom/_/CERTIFICATO_104.png?background=https://i.ibb.co/L5hS0tF/legge104-meme1.jpg'
+        ];
+        const randomMeme = memeLinks[Math.floor(Math.random() * memeLinks.length)];
 
-    // 6. Testo del messaggio
-    const caption = `🚨 *CONTROLLO INVALIDITÀ (Legge 104)* 🚨\n\n` +
-                    `👤 *Paziente:* @${randomUser.split('@')[0]}\n` +
-                    `📊 *Livello di sofferenza:* ${percentuale}%\n` +
-                    `📝 *Diagnosi:* ${diagnosi}`;
+        // 6. Logica della diagnosi
+        let diagnosi = '';
+        if (percentuale < 20) diagnosi = "Sta bene, è solo un po' stanco.";
+        else if (percentuale < 50) diagnosi = "Sintomi lievi, inizia a dimenticare le chiavi di casa.";
+        else if (percentuale < 80) diagnosi = "La situazione è critica, parcheggio giallo riservato.";
+        else if (percentuale <= 100) diagnosi = "INVALIDITÀ TOTALE: Ha diritto alla sedia a rotelle truccata.";
+        else diagnosi = "LIVELLO DIO: 104% Superato. È ufficialmente il presidente dell'INPS. ♿";
 
-    // 7. Invio del messaggio con immagine e tag
-    await conn.sendMessage(m.chat, {
-        image: { url: randomMeme },
-        caption: caption,
-        mentions: [randomUser]
-    }, { quoted: m });
+        // 7. Costruzione del messaggio
+        const caption = `🚨 *CONTROLLO INVALIDITÀ (Legge 104)* 🚨\n\n` +
+                        `👤 *Paziente:* @${randomUser.split('@')[0]}\n` +
+                        `📊 *Grado:* ${percentuale}%\n` +
+                        `📝 *Esito:* ${diagnosi}`;
+
+        // 8. Invio con immagine, didascalia e tag attivo
+        await conn.sendMessage(m.chat, {
+            image: { url: randomMeme },
+            caption: caption,
+            mentions: [randomUser]
+        }, { quoted: m });
+
+        // Feedback visivo
+        if (m.react) await m.react('♿');
+
+    } catch (e) {
+        console.error(e);
+        m.reply('⚠️ Errore durante la visita medica.');
+    }
 }
 
-// Configurazione comando
 handler.help = ['104'];
 handler.tags = ['fun'];
-handler.command = ['104'];
-handler.group = true; // Solo gruppi
+handler.command = /^(104|invalidita)$/i; // Risponde a .104 o .invalidita
+handler.group = true; // Impedisce l'uso in chat privata
 
-// export default handler; // Se usi il sistema a caricamento automatico
-      
+export default handler;
