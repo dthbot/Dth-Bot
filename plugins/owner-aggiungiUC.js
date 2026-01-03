@@ -73,7 +73,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 
         let message = who === m.sender
             ? 
-`╭━━ 💰 TRANSAZIONE COMPLETATA 💰 ━━╮
+`╭━━ *TRANSAZIONE COMPLETATA* ━━╮
 │
 │  👤 Utente: *Tu*
 │  💶 Importo: *+${amount} €*
@@ -81,7 +81,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 │
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
             :
-`╭ 💰 TRANSAZIONE COMPLETATA 💰 ╮
+`╭ *TRANSAZIONE COMPLETATA* ╮
 │
 │  👤 Destinatario: *@${who.split('@')[0]}*
 │  💶 Importo: *+${amount} €*
