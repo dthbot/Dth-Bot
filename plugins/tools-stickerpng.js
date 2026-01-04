@@ -5,15 +5,19 @@ let handler = async (m, { conn }) => {
 
     let q = m.quoted
 
-    // Controllo corretto 
-    if (!q.message || !q.message.stickerMessage) {
+    // Controllo
+    if (!q.sticker && !q.isSticker) {
         return m.reply('❌ Il messaggio risposto non è uno sticker.')
     }
 
-    // Scarica lo sticker
+    // Download media (ChatUnity wrapper)
     let media = await q.download()
 
-    // Invia come immagine
+    if (!media) {
+        return m.reply('❌ Errore nel download dello sticker.')
+    }
+
+    // Invia come immagine PNG
     await conn.sendMessage(
         m.chat,
         {
