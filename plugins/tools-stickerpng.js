@@ -1,31 +1,23 @@
-import fs from 'fs'
-import { downloadContentFromMessage } from '@whiskeysockets/baileys'
-
 let handler = async (m, { conn }) => {
     if (!m.quoted) {
-        return conn.sendMessage(m.chat, { text: '❌ Rispondi a uno sticker.' }, { quoted: m })
+        return m.reply('❌ Rispondi a uno sticker.')
     }
 
-    let quoted = m.quoted
-    let mime = quoted.mimetype || ''
+    let q = m.quoted
+    let mime = q.mimetype || ''
 
-    if (!/webp/.test(mime)) {
-        return conn.sendMessage(m.chat, { text: '❌ Il messaggio risposto non è uno sticker.' }, { quoted: m })
+    if (!/sticker/.test(mime)) {
+        return m.reply('❌ Il messaggio risposto non è uno sticker.')
     }
 
-    // Scarica lo sticker
-    let stream = await downloadContentFromMessage(quoted.message.stickerMessage, 'sticker')
-    let buffer = Buffer.from([])
+    // Scarica lo sticker usando il metodo interno di ChatUnity
+    let media = await q.download()
 
-    for await (const chunk of stream) {
-        buffer = Buffer.concat([buffer, chunk])
-    }
-
-    // Invia come immagine PNG
+    // Invia come immagine (PNG)
     await conn.sendMessage(
         m.chat,
         {
-            image: buffer,
+            image: media,
             caption: '✅ Sticker convertito in immagine'
         },
         { quoted: m }
@@ -33,7 +25,7 @@ let handler = async (m, { conn }) => {
 }
 
 handler.command = ['stickerpng']
-handler.help = ['stickerpng']
 handler.tags = ['tools']
+handler.help = ['stickerpng']
 
 export default handler
