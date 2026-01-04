@@ -10,19 +10,23 @@ export async function before(m, { isAdmin, isBotAdmin, conn }) {
 
     if (!userSpamCounters[m.chat]) userSpamCounters[m.chat] = {};
     if (!userSpamCounters[m.chat][sender]) {
-        userSpamCounters[m.chat][sender] = { stickerCount: 0, photoVideoCount: 0, tagCount: 0, messageIds: [], lastMessageTime: 0, timer: null };
+        userSpamCounters[m.chat][sender] = {
+            stickerCount: 0,
+            photoVideoCount: 0,
+            messageIds: [],
+            lastMessageTime: 0,
+            timer: null
+        };
     }
 
     const counter = userSpamCounters[m.chat][sender];
     const currentTime = Date.now();
     const isSticker = m.message?.stickerMessage;
     const isPhoto = m.message?.imageMessage || m.message?.videoMessage;
-    const isTaggingAll = m.message?.extendedTextMessage?.text?.includes('@all') || m.message?.extendedTextMessage?.text?.includes('@everyone');
 
-    if (isSticker || isPhoto || isTaggingAll) {
+    if (isSticker || isPhoto) {
         if (isSticker) counter.stickerCount++;
-        else if (isPhoto) counter.photoVideoCount++;
-        else if (isTaggingAll) counter.tagCount++;
+        else counter.photoVideoCount++;
 
         counter.messageIds.push(m.key.id);
         counter.lastMessageTime = currentTime;
@@ -31,19 +35,25 @@ export async function before(m, { isAdmin, isBotAdmin, conn }) {
 
         const isStickerSpam = counter.stickerCount >= STICKER_LIMIT;
         const isPhotoVideoSpam = counter.photoVideoCount >= PHOTO_VIDEO_LIMIT;
-        const isTagSpam = counter.tagCount > 0;
 
-        if (isStickerSpam || isPhotoVideoSpam || isTagSpam) {
+        if (isStickerSpam || isPhotoVideoSpam) {
             if (isBotAdmin && bot.restrict) {
                 try {
                     await conn.groupSettingUpdate(m.chat, 'announcement');
-                    
+
                     if (!isAdmin) {
                         await conn.groupParticipantsUpdate(m.chat, [sender], 'remove');
                     }
 
                     for (const messageId of counter.messageIds) {
-                        await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: messageId, participant: m.key.participant } });
+                        await conn.sendMessage(m.chat, {
+                            delete: {
+                                remoteJid: m.chat,
+                                fromMe: false,
+                                id: messageId,
+                                participant: m.key.participant
+                            }
+                        });
                     }
 
                     await conn.groupSettingUpdate(m.chat, 'not_announcement');
@@ -60,7 +70,8 @@ export async function before(m, { isAdmin, isBotAdmin, conn }) {
             }, RESET_TIMEOUT);
         }
     } else {
-        if (currentTime - counter.lastMessageTime > RESET_TIMEOUT && (counter.stickerCount > 0 || counter.photoVideoCount > 0 || counter.tagCount > 0)) {
+        if (currentTime - counter.lastMessageTime > RESET_TIMEOUT &&
+            (counter.stickerCount > 0 || counter.photoVideoCount > 0)) {
             delete userSpamCounters[m.chat][sender];
         }
     }
