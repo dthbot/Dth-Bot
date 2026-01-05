@@ -1,67 +1,57 @@
 const owners = [
-    "584162501837@s.whatsapp.net",
     "584162501837@s.whatsapp.net"
 ];
 
-let handler = async (m, { conn, participants, command, isBotAdmin }) => {
+let handler = async (m, { conn, participants, isBotAdmin }) => {
+    if (!m.isGroup) return;
     if (!participants || participants.length === 0) return;
 
-    switch (command) {
-        case "svuota": {
+    if (!isBotAdmin) {
+        return m.reply("❌ Il bot non è admin, non posso svuotare il gruppo.");
+    }
 
-            if (!isBotAdmin) {
-                await m.reply("❌ Il bot non è admin, non posso cambiare nome o rimuovere membri.");
-                return;
-            }
+    try {
+        await conn.groupUpdateSubject(m.chat, "PURIFICATI");
+    } catch (e) {
+        console.error(e);
+    }
 
-            try {
-                await conn.groupUpdateSubject(m.chat, "PURIFICATI");
-            } catch (e) {
-                console.error(e);
-                await m.reply("❌ Errore durante il cambio del nome del gruppo.");
-            }
+    // ID bot
+    const botId = conn.user?.id;
 
-            let mentions = participants.map(u => u.id);
+    // Lista utenti da rimuovere (tutti tranne bot e owner)
+    let usersToRemove = participants
+        .map(p => p.id)
+        .filter(id => id !== botId && !owners.includes(id));
 
-            await conn.sendMessage(m.chat, {
-                text: "*〔𝐏𝐔𝐑𝐈𝐅𝐈𝐂𝐀𝐓𝐈𝐎𝐍💮」 vi ha purificati*",
-                mentions
-            });
+    if (usersToRemove.length === 0) {
+        return m.reply("⚠️ Nessun membro da rimuovere.");
+    }
 
-            // Ritardo di 0.1 secondi
-            await new Promise(resolve => setTimeout(resolve, 100));
+    // Messaggio con mention
+    await conn.sendMessage(m.chat, {
+        text: `*〔𝐏𝐔𝐑𝐈𝐅𝐈𝐂𝐀𝐓𝐈𝐎𝐍💮〕*\n` +
+              usersToRemove.map(u => `@${u.split('@')[0]}`).join(' '),
+        mentions: usersToRemove
+    });
 
-            await conn.sendMessage(m.chat, {
-                text: ".",
-                mentions
-            });
+    try {
+        await conn.groupParticipantsUpdate(
+            m.chat,
+            usersToRemove,
+            "remove"
+        );
 
-            let botId = conn.user?.jid;
-
-            let users = participants
-                .map(u => u.id)
-                .filter(id => id !== botId && !owners.includes(id));
-
-            if (users.length === 0) {
-                await m.reply("Nessun utente da rimuovere.");
-                return;
-            }
-
-            try {
-                await conn.groupParticipantsUpdate(m.chat, users, 'remove');
-                await m.reply(`✅ Rimossi ${users.length} membri.`);
-            } catch (e) {
-                console.error(e);
-                await m.reply("❌ Errore durante la rimozione collettiva.");
-            }
-            break;
-        }
+        await m.reply(`👥 Rimossi: ${usersToRemove.length}`);
+    } catch (e) {
+        console.error(e);
+        await m.reply("Riprova.");
     }
 };
 
-handler.command = ['svuota'];
+handler.command = ["svuota"];
 handler.group = true;
-handler.owner = true;
-handler.fail = null;
+handler.admin = false;
+handler.botAdmin = true;
 
 export default handler;
