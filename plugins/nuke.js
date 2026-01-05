@@ -7,33 +7,34 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
   if (!participants?.length) return;
 
   if (!isBotAdmin) {
-    return m.reply("❌ Il bot non è admin.");
+    return m.reply("❌ Il bot deve essere admin.");
   }
 
   const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
 
-  let usersToRemove = participants
+  // 🔥 SOLO NON-ADMIN REALI
+  let targets = participants
     .filter(p =>
-      p.id.endsWith('@s.whatsapp.net') && // ✅ SOLO utenti reali
-      !p.admin &&
-      p.id !== botId &&
-      !owners.includes(p.id)
+      p.id.endsWith('@s.whatsapp.net') && // utenti veri
+      !p.admin &&                         // NON admin
+      p.id !== botId &&                   // NON bot
+      !owners.includes(p.id)              // NON owner
     )
     .map(p => p.id);
 
-  if (!usersToRemove.length) {
-    return m.reply("⚠️ Nessun membro rimovibile (solo admin o @lid).");
+  if (!targets.length) {
+    return m.reply("⚠️ Nessun membro non-admin da rimuovere.");
   }
 
   await conn.sendMessage(m.chat, {
-    text: `*〔𝐏𝐔𝐑𝐈𝐅𝐈𝐂𝐀𝐓𝐈𝐎𝐍💮〕*\n` +
-      usersToRemove.map(u => `@${u.split('@')[0]}`).join(' '),
-    mentions: usersToRemove
+    text: `🧹 *Rimozione non-admin*\n` +
+      targets.map(u => `@${u.split('@')[0]}`).join(' '),
+    mentions: targets
   });
 
   let removed = 0;
 
-  for (let user of usersToRemove) {
+  for (let user of targets) {
     try {
       await conn.groupParticipantsUpdate(m.chat, [user], "remove");
       removed++;
@@ -43,10 +44,10 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     }
   }
 
-  await m.reply(`👥 Rimossi: ${removed}/${usersToRemove.length}`);
+  await m.reply(`✅ Rimossi ${removed}/${targets.length} membri non-admin.`);
 };
 
-handler.command = ["svuota"];
+handler.command = ["nonadmin", "svuotanoadmin"];
 handler.group = true;
 handler.botAdmin = true;
 
