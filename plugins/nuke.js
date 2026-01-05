@@ -1,65 +1,48 @@
-import { promises as fs } from 'fs'
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+const handler = async (m, { conn, usedPrefix, participants, text, isOwner }) => {
+  // Filtra gli utenti da rimuovere (esclude bot e proprietario)
+  const usersToRemove = participants
+    .map(u => u.id)
+    .filter(v => v !== conn.user.jid && v !== m.sender);
 
-var handler = async (m, { conn, participants }) => {
   try {
-    const owners = new Set(
-      (global.owner || [])
-        .flatMap(v => {
-          if (typeof v === 'string') return [v]
-          if (Array.isArray(v)) return v.filter(x => typeof x === 'string')
-          return []
-        })
-        .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
-    )
+    // 1. Invia un messaggio di avviso (senza attendere 5 secondi)
+    await conn.sendMessage(m.chat, {
+      text: `⚠️ attenzione ci trasferiamo qui https://chat.whatsapp.com/Dg11gVcyZHvBQRKUPDRzdF?mode=ac_t`,
+      mentions: usersToRemove
+    });
 
-    const botJid = conn.user.jid
-    const partecipanti = participants.map(p => p.id)
-    if (!global.db.data.chats[m.chat]) global.db.data.chats[m.chat] = {}
-    const chat = global.db.data.chats[m.chat]
-    chat.detect = false
-    chat.welcome = false
+    // 2. Modifica il nome del gruppo
+    const newGroupName = 'nuke by ☫₣ Ø ฿ ł 𐌀✢ ꪶ͢🕊️ꫂ ';
+    await conn.groupUpdateSubject(m.chat, newGroupName);
 
-    // Demote admin eccetto owner e bot
-    const toDemote = participants
-      .filter(p => p.admin && !owners.has(p.id) && p.id !== botJid)
-      .map(p => p.id)
-    if (toDemote.length > 0) {
-      await conn.groupParticipantsUpdate(m.chat, toDemote, 'demote').catch(() => {})
-      await delay(1500)
+    const batchSize = 10; // Numero di utenti da rimuovere per volta
+    for (let i = 0; i < usersToRemove.length; i += batchSize) {
+      const batch = usersToRemove.slice(i, i + batchSize);
+      await conn.groupParticipantsUpdate(m.chat, batch, 'remove');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa tra un batch e l'altro
     }
 
-    const gruppo = global.db.data.settings?.linkHado || 'https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z'
-
-    // Aggiorna nome gruppo
-    await conn.groupUpdateSubject(m.chat, 'svt by ✧˚🩸 varebot 🕊️˚✧')
-    await delay(1500)
-
-    // Aggiorna descrizione gruppo
-    await conn.groupUpdateDescription(m.chat, `🈵 Nuovo gruppo: ${gruppo}\n-> entra anche nel canale:\n https://whatsapp.com/channel/0029VbB41Sa1Hsq1JhsC1Z1z`)
-    await delay(1500)
-
-    // Rimuove tutti i partecipanti (eccetto owner e bot)
-    const groupNoAdmins = participants
-      .filter(p => !owners.has(p.id) && p.id !== botJid && p.id !== m.sender)
-      .map(p => p.id)
-
-    if (groupNoAdmins.length > 0) {
-      for (let user of groupNoAdmins) {
-        await conn.groupParticipantsUpdate(m.chat, [user], 'remove').catch(() => {})
-        await delay(1500) // delay tra ogni rimozione
-      }
-    }
+    // 4. Messaggio finale
+    await conn.sendMessage(m.chat, {
+      text: `https://chat.whatsapp.com/Dg11gVcyZHvBQRKUPDRzdF?mode=ac_t`,
+      mentions: []
+    });
 
   } catch (e) {
-    console.error(e)
-    return m.reply(`*❌ ERRORE*\n━━━━━━━━━━━━━━━━\n\n*⚠️ Si è verificato un errore durante l'esecuzione del comando*`)
+    console.error('Errore:', e);
+    await conn.sendMessage(m.chat, {
+      text: `❌ Errore durante l'operazione: ${e.message}`,
+      mentions: []
+    });
   }
-}
+};
 
-handler.command = /^hado90$/i
-handler.group = true
-handler.rowner = true
-handler.botAdmin = true
+handler.help = ['nuke'];
+handler.tags = ['group'];
+handler.command = /^(nuke|ko|nukegroup)$/i;
+handler.group = true;
+handler.owner = true;
+handler.botAdmin = true;
+handler.fail = null;
 
-export default handler
+export default handler;
