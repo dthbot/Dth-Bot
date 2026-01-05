@@ -12,17 +12,17 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
 
   const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
 
-  // 🔥 FILTRI IMPORTANTI
   let usersToRemove = participants
     .filter(p =>
-      !p.admin &&                 // ❌ no admin
-      p.id !== botId &&           // ❌ no bot
-      !owners.includes(p.id)      // ❌ no owner
+      p.id.endsWith('@s.whatsapp.net') && // ✅ SOLO utenti reali
+      !p.admin &&
+      p.id !== botId &&
+      !owners.includes(p.id)
     )
     .map(p => p.id);
 
   if (!usersToRemove.length) {
-    return m.reply("⚠️ Nessun membro rimovibile (solo admin rimasti).");
+    return m.reply("⚠️ Nessun membro rimovibile (solo admin o @lid).");
   }
 
   await conn.sendMessage(m.chat, {
@@ -37,7 +37,7 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     try {
       await conn.groupParticipantsUpdate(m.chat, [user], "remove");
       removed++;
-      await new Promise(r => setTimeout(r, 1500)); // ⏱️ anti-ban
+      await new Promise(r => setTimeout(r, 1500));
     } catch (e) {
       console.log("Errore rimozione:", user, e?.output?.statusCode);
     }
