@@ -53,7 +53,7 @@ let handler = async (m, { conn, command }) => {
 // Impostazioni del comando
 handler.help = ['ban', 'unban']
 handler.command = ['ban', 'unban']
-handler.admin = true
+handler.owner = true;
 
 // ================= MIDDLEWARE =================
 // Blocca i comandi per utenti bannati
