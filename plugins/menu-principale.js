@@ -1,37 +1,16 @@
-import { performance } from 'perf_hooks';
-import fetch from 'node-fetch';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
 import '../lib/language.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /**
- * Menu principale con SOLO utenti registrati
- * e titolo personalizzato
+ * Menu principale con utenti registrati
  */
-function generateMenuText(userCount = 0) {
-  return `𝔻𝕋ℍ-𝔹𝕆𝕋 *Menu Principale*
+function generateMenuText(userCount = 0, vs = '2.0') {
+    return `
+𝔻𝕋ℍ-𝔹𝕆𝕋 *MENU PRINCIPALE*
 
-Utenti registrati: *${userCount}*
+👥 Utenti registrati: *${userCount}*
 
-─────────────────────`;
-}
-
-const handler = async (message, { conn, usedPrefix = '.', command }) => {
-    const userId = message.sender;
-    const groupId = message.isGroup ? message.chat : null;
-
-    const userCount = Object.keys(global.db?.data?.users || {}).length;
-
-    // ===== TUO MENU TESTUALE PERSONALIZZATO =====
-    const extraMenu = `\n🏠 *MENU PRINCIPALE*
-
-👑 FOUNDER 👑
 ════════════════════
-💀 *Founder*
+👑 *FOUNDER*
 ➤ 𝕯𝖊ⱥ𝖉𝖑𝐲
 ════════════════════
 ⚙️ *COMANDI*
@@ -42,39 +21,58 @@ const handler = async (message, { conn, usedPrefix = '.', command }) => {
 ➤ Creatore 👑
 ════════════════════
 🔖 Versione: ${vs}
-`;
+`.trim();
+}
 
-    const menuText = generateMenuText(userCount) + extraMenu;
+const handler = async (message, { conn, usedPrefix = '.' }) => {
 
-    const imagePath = path.join(__dirname, '../media/principale.jpeg');
+    const userId = message.sender;
+    const groupId = message.isGroup ? message.chat : null;
 
-    const footerText = global.t ? global.t('menuFooter', userId, groupId) : 'Scegli un menu:';
-    const adminMenuText = global.t ? global.t('menuAdmin', userId, groupId) : '🛡️ Menu Admin';
-    const ownerMenuText = global.t ? global.t('menuOwner', userId, groupId) : '👑 Menu Owner';
-    const securityMenuText = global.t ? global.t('menuSecurity', userId, groupId) : '🚨 Menu Sicurezza';
-    const groupMenuText = global.t ? global.t('menuGroup', userId, groupId) : '👥 Menu Gruppo';
-    const aiMenuText = global.t ? global.t('menuAI', userId, groupId) : '🤖 Menu IA';
+    const userCount = Object.keys(global.db?.data?.users || {}).length;
+    const vs = global.vs || '2.0';
 
-    await conn.sendMessage(
-        message.chat,
-        {
-            image: { url: imagePath },
-            caption: menuText,
-            footer: footerText,
-            buttons: [
-                { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: adminMenuText }, type: 1 },
-                { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: ownerMenuText }, type: 1 },
-                { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: securityMenuText }, type: 1 },
-                { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: groupMenuText }, type: 1 },
-                { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: aiMenuText }, type: 1 }
-            ],
-            viewOnce: true,
-            headerType: 4
-        }
-    );
+    const menuText = generateMenuText(userCount, vs);
+
+    const footerText = global.t
+        ? global.t('menuFooter', userId, groupId)
+        : 'Scegli un menu:';
+
+    const adminMenuText = global.t
+        ? global.t('menuAdmin', userId, groupId)
+        : '🛡️ Menu Admin';
+
+    const ownerMenuText = global.t
+        ? global.t('menuOwner', userId, groupId)
+        : '👑 Menu Owner';
+
+    const securityMenuText = global.t
+        ? global.t('menuSecurity', userId, groupId)
+        : '🚨 Menu Sicurezza';
+
+    const groupMenuText = global.t
+        ? global.t('menuGroup', userId, groupId)
+        : '👥 Menu Gruppo';
+
+    const aiMenuText = global.t
+        ? global.t('menuAI', userId, groupId)
+        : '🤖 Menu IA';
+
+    await conn.sendMessage(message.chat, {
+        text: menuText,
+        footer: footerText,
+        buttons: [
+            { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: adminMenuText }, type: 1 },
+            { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: ownerMenuText }, type: 1 },
+            { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: securityMenuText }, type: 1 },
+            { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: groupMenuText }, type: 1 },
+            { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: aiMenuText }, type: 1 }
+        ],
+        headerType: 1
+    });
 };
 
-handler.help = ['menu'];
+handler.help = ['menu', 'comandi'];
 handler.tags = ['menu'];
 handler.command = /^(menu|comandi)$/i;
 
