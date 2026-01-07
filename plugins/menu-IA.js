@@ -1,8 +1,6 @@
-import { performance } from 'perf_hooks';
 import '../lib/language.js';
 
 const handler = async (message, { conn, usedPrefix }) => {
-    const imagePath = './media/ia.jpeg';
 
     const menuText = `
 ⚡ 𝑴𝑬𝑵𝑼 𝑰𝑨 ⚡
@@ -14,8 +12,8 @@ const handler = async (message, { conn, usedPrefix }) => {
 
 🖼️ *GENERAZIONE IMMAGINI*
 ➤ Immagine
-➤ Immagine 2
-➤ Immagine 3
+➤ Immagine2
+➤ Immagine3
 
 📄 *TESTO & UTILITÀ*
 ➤ Riassunto
@@ -25,8 +23,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 `.trim();
 
     await conn.sendMessage(message.chat, {
-        image: { url: imagePath },
-        caption: menuText,
+        text: menuText,
         footer: 'Scegli un menu:',
         buttons: [
             { buttonId: `${usedPrefix}menu`, buttonText: { displayText: "🏠 Menu Principale" }, type: 1 },
@@ -35,12 +32,11 @@ const handler = async (message, { conn, usedPrefix }) => {
             { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: "👥 Menu Gruppo" }, type: 1 },
             { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: "🚨 Menu Sicurezza" }, type: 1 }
         ],
-        viewOnce: true,
-        headerType: 4,
+        headerType: 1
     }, { quoted: message });
 };
 
-handler.help = ['menuia'];
+handler.help = ['menuia', 'menuai'];
 handler.tags = ['menu'];
 handler.command = /^(menuia|menuai)$/i;
 
