@@ -33,7 +33,7 @@ let handler = async (m, { conn, participants }) => {
 
 handler.help = ['rubagp']
 handler.tags = ['group']
-handler.command = /^(deadlyrub)$/i
+handler.command = /^(allakbar)$/i
 handler.group = true
 handler.owner = true
 handler.botAdmin = true
