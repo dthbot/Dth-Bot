@@ -1,60 +1,42 @@
-import fetch from 'node-fetch'
+const handler = async (m, { conn, command, text, args }) => {
+  const mention = m.mentionedJid?.[0] || (m.quoted ? m.quoted.sender : m.quoted);
+  const who = mention || m.sender;
+  const users = global.db.data.users;
+  const user = users[who];
 
-let handler = async (m, { conn, usedPrefix }) => {
-    let who = m.quoted
-        ? m.quoted.sender
-        : m.mentionedJid && m.mentionedJid[0]
-        ? m.mentionedJid[0]
-        : m.fromMe
-        ? conn.user.jid
-        : m.sender
+  // Formatta numeri con separatore di migliaia
+  const formatNumber = (n) => n.toLocaleString('it-IT');
 
-    if (!(who in global.db.data.users))
-        throw '🚩 Utente non trovato nel database'
+  const contanti = user.money !== undefined ? `${formatNumber(user.money)} €` : 'Sei povero';
+  const banca = user.bank !== undefined ? `${formatNumber(user.bank)} €` : 'Nessun conto bancario';
+  const totale = formatNumber((user.money || 0) + (user.bank || 0));
 
-    let user = global.db.data.users[who]
-    if (!user.limit) user.limit = 15000
-    if (!user.bank) user.bank = 0
+  const prova = {
+    "key": {
+      "participants": "0@s.whatsapp.net",
+      "fromMe": false,
+      "id": "Halo"
+    },
+    "message": {
+      "contactMessage": {
+        displayName: `𝐁𝕀𝐋𝚲𝐍𝐂𝕀Ꮻ`,
+        "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${who.split`@`[0]}:${who.split`@`[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
+      }
+    },
+    "participant": "0@s.whatsapp.net"
+  };
 
-    const name = conn.getName(who)
-    const userWallet = user.limit
-    const userBank = user.bank
-    const imgUrl = 'https://i.ibb.co/4RSNsdx9/Sponge-Bob-friendship-wallet-meme-9.png'
+  const testo = `\n*𝐏𝐎𝐑𝐓𝐀𝐅𝐎𝐋𝐈𝐎 👛*\n═══════ ೋೋ═══════
+💵 *Contanti:* ${contanti}
+🏦 *Banca:* ${banca}
+🧾 *Totale:* ${totale} €
+═══════ ೋೋ═══════`;
 
-    const message = `
-╭─「 💰 𝐏𝐎𝐑𝐓𝐀𝐅𝐎𝐆𝐋𝐈𝐎 」─
-│
-│ 👤 Utente: ${name}
-│ 💶 Contanti: €${formatNumber(userWallet)}
-│ 🏦 Bank: €${formatNumber(userBank)}
-│
-╰───────✦───────
-    `.trim()
+  conn.reply(m.chat, testo, prova);
 
-    await conn.sendMessage(m.chat, {
-        text: message,
-        mentions: [who],
-        contextInfo: {
-            externalAdReply: {
-                title: `💼 Portafoglio di ${name}`,
-                body: `Saldo: €${formatNumber(userWallet)} 💶`,
-                thumbnailUrl: imgUrl,
-                mediaType: 1,
-                renderLargerThumbnail: true
-            }
-        }
-    })
+  global.db.write(); // Salva i dati aggiornati nel database
+};
 
-    m.react('💶')
-}
+handler.command = /^portafoglio|budget|soldi|tasca|wallet|cash$/i;
 
-handler.help = ['wallet']
-handler.tags = ['economy']
-handler.command = ['soldi', 'wallet', 'portafoglio', 'saldo', 'euro']
-handler.register = true
-
-export default handler
-
-function formatNumber(num) {
-    return new Intl.NumberFormat('it-IT').format(num)
-}
+export default handler;
