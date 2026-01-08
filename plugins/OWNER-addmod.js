@@ -1,121 +1,108 @@
-// Plugin fatto da Deadly
-import { existsSync, promises as fs } from 'fs';
+// Plugin fatto da deadly
+import fs from 'fs';
 import path from 'path';
-import { canUseModCommands } from '../lib/moderator.js';
 
-const AUTHORIZED_NUMBERS = [
-    '447880017985@s.whatsapp.net', // deadly
-    '447529686760@s.whatsapp.net', // vixiie
-    '48726875208@s.whatsapp.net'   // vampexa
+const AUTHORIZED = [
+  '447880017985@s.whatsapp.net', // deadly
+  '447529686760@s.whatsapp.net', // vixiie
+  '48726875208@s.whatsapp.net'   // vampexa
 ];
 
-const CREATOR = '447880017985@s.whatsapp.net';
+const CREATOR = '447880017985@s.whatsapp.net'; // creator bot
 
-const handler = async (m, { conn, command, text, participants, isAdmin, isOwner }) => {
-    const chatId = m.chat;
-    const sender = m.sender;
+// Funzioni utili
+function isMod(chatId, userId) {
+  if (!global.db.data.mods) global.db.data.mods = {};
+  if (!global.db.data.mods[chatId]) global.db.data.mods[chatId] = {};
+  return !!global.db.data.mods[chatId][userId];
+}
 
-    // -------------------------------------------------------------
-    // 🔐 .addmod / .delmod SOLO numeri autorizzati
-    // -------------------------------------------------------------
-    if (command === 'addmod' || command === 'delmod') {
-        if (!AUTHORIZED_NUMBERS.includes(sender)) {
-            return m.reply('❌ Non sei autorizzato a usare questo comando.');
-        }
+function canUseModCommands(m) {
+  if (m.isOwner || m.isAdmin) return true;
+  return isMod(m.chat, m.sender);
+}
 
-        const mentioned = m.mentionedJid?.[0] || m.quoted?.sender;
-        if (!mentioned) return m.reply('❌ Tagga un utente per procedere.');
+// ===== PLUGIN =====
+const handler = async (m, { conn, command, text, isAdmin }) => {
+  const chatId = m.chat;
+  const sender = m.sender;
 
-        global.db.data.mods ||= {};
-        global.db.data.mods[chatId] ||= {};
+  // =======================
+  // ADD / DEL MOD
+  // =======================
+  if (command === 'addmod' || command === 'delmod') {
+    if (!AUTHORIZED.includes(sender)) return m.reply('❌ Non sei autorizzato a usare questo comando.');
 
-        if (command === 'addmod') {
-            global.db.data.mods[chatId][mentioned] = true;
-            return m.reply(`✅ @${mentioned.split('@')[0]} è stato aggiunto come moderatore.`, null, { mentions: [mentioned] });
-        } else {
-            delete global.db.data.mods[chatId][mentioned];
-            return m.reply(`✅ @${mentioned.split('@')[0]} è stato rimosso dai moderatori.`, null, { mentions: [mentioned] });
-        }
+    let target = m.mentionedJid?.[0] || m.quoted?.sender;
+    if (!target && text) target = text.includes('@s.whatsapp.net') ? text.trim() : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+    if (!target) return m.reply('❌ Inserisci o menziona un utente.');
+
+    if (!global.db.data.mods) global.db.data.mods = {};
+    if (!global.db.data.mods[chatId]) global.db.data.mods[chatId] = {};
+
+    if (command === 'addmod') {
+      global.db.data.mods[chatId][target] = true;
+      return m.reply(`✅ Utente ${target.split('@')[0]} aggiunto come moderatore!`);
+    } else {
+      delete global.db.data.mods[chatId][target];
+      return m.reply(`✅ Utente ${target.split('@')[0]} rimosso dai moderatori!`);
     }
+  }
 
-    // -------------------------------------------------------------
-    // 🔐 Altri comandi SOLO mod / admin / owner
-    // -------------------------------------------------------------
-    if (!canUseModCommands(m)) return m.reply('❌ Solo owner/admin/moderatori possono usare questo comando.');
+  // =======================
+  // TAG MOD
+  // =======================
+  if (command === 'tagmod') {
+    if (!m.isGroup) return m.reply('❌ Comando valido solo in gruppo.');
+    const mods = global.db.data.mods?.[chatId] ? Object.keys(global.db.data.mods[chatId]) : [];
+    if (!mods.length) return m.reply('❌ Nessun moderatore nel gruppo.');
+    const mentions = mods;
+    const textTag = mods.map(u => '@' + u.split('@')[0]).join(' ');
+    await conn.sendMessage(chatId, { text: textTag, mentions }, { quoted: m });
+  }
 
-    // -------------------------------------------------------------
-    // 🔘 .tagmod
-    // -------------------------------------------------------------
-    if (command === 'tagmod') {
-        const mods = Object.keys(global.db.data.mods?.[chatId] || {});
-        if (mods.length === 0) return m.reply('❌ Nessun moderatore in questo gruppo.');
-        const mentions = mods;
-        const textToSend = '📢 Moderatori del gruppo:\n' + mods.map(u => `@${u.split('@')[0]}`).join('\n');
-        return conn.sendMessage(chatId, { text: textToSend, mentions });
+  // =======================
+  // DS MOD
+  // =======================
+  if (command === 'dsmod') {
+    const sessionFolder = './sessioni/';
+    if (!fs.existsSync(sessionFolder)) return m.reply('❌ La cartella sessioni non esiste.');
+    const files = fs.readdirSync(sessionFolder);
+    let count = 0;
+    for (const f of files) {
+      if (f !== 'creds.json') {
+        fs.unlinkSync(path.join(sessionFolder, f));
+        count++;
+      }
     }
+    return m.reply(`✅ Sessioni cancellate: ${count}`);
+  }
 
-    // -------------------------------------------------------------
-    // 🔘 .dsmod
-    // -------------------------------------------------------------
-    if (command === 'dsmod') {
-        try {
-            const folder = './sessioni/';
-            if (!existsSync(folder)) return m.reply('❌ Cartella sessioni vuota o inesistente.');
+  // =======================
+  // MUTA / SMUTA MOD
+  // =======================
+  if (command === 'mutamod' || command === 'smutamod') {
+    if (!canUseModCommands(m)) return m.reply('❌ Non hai permessi per usare questo comando.');
+    let target = m.mentionedJid?.[0] || m.quoted?.sender;
+    if (!target && text) target = text.includes('@s.whatsapp.net') ? text.trim() : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+    if (!target) return m.reply('❌ Inserisci o menziona un utente.');
 
-            const files = await fs.readdir(folder);
-            let deleted = 0;
-            for (const f of files) {
-                if (f !== 'creds.json') {
-                    await fs.unlink(path.join(folder, f));
-                    deleted++;
-                }
-            }
+    if (!global.db.data.users[target]) global.db.data.users[target] = {};
+    const user = global.db.data.users[target];
 
-            return conn.sendMessage(chatId, {
-                text: deleted === 0 ? '❗ Le sessioni sono vuote' : `🔥 Eliminati ${deleted} file dalle sessioni.`,
-                buttons: [
-                    { buttonId: '.dsmod', buttonText: { displayText: '🔄 Svuota di nuovo' }, type: 1 },
-                    { buttonId: '.ping', buttonText: { displayText: '📊 Ping' }, type: 1 }
-                ],
-                headerType: 1
-            });
-        } catch (err) {
-            console.error(err);
-            return m.reply('❌ Errore durante l\'eliminazione delle sessioni.');
-        }
+    if (command === 'mutamod') {
+      if (user.muto) return m.reply('⚠️ Utente già mutato.');
+      user.muto = true;
+      return m.reply(`🔇 Utente ${target.split('@')[0]} mutato.`);
+    } else {
+      if (!user.muto) return m.reply('⚠️ Utente non è mutato.');
+      user.muto = false;
+      return m.reply(`🔊 Utente ${target.split('@')[0]} smutato.`);
     }
-
-    // -------------------------------------------------------------
-    // 🔘 .mutamod / .smutamod
-    // -------------------------------------------------------------
-    if (command === 'mutamod' || command === 'smutamod') {
-        const mentioned = m.mentionedJid?.[0] || m.quoted?.sender;
-        if (!mentioned) return m.reply('❌ Tagga un utente.');
-
-        const botNumber = conn.user.jid;
-        const groupMetadata = m.isGroup ? await conn.groupMetadata(chatId) : {};
-        const groupOwner = groupMetadata.owner || chatId.split('-')[0] + '@s.whatsapp.net';
-
-        if ([groupOwner, botNumber, CREATOR].includes(mentioned))
-            return m.reply('❌ Non puoi mutare questo utente.');
-
-        global.db.data.users[mentioned] ||= {};
-        const user = global.db.data.users[mentioned];
-
-        if (command === 'mutamod') {
-            if (user.muto) return m.reply('⚠️ L’utente è già mutato.');
-            user.muto = true;
-            return m.reply(`🔇 Utente mutato: @${mentioned.split('@')[0]}`, null, { mentions: [mentioned] });
-        } else {
-            if (!user.muto) return m.reply('⚠️ L’utente non è mutato.');
-            user.muto = false;
-            return m.reply(`🔊 Utente smutato: @${mentioned.split('@')[0]}`, null, { mentions: [mentioned] });
-        }
-    }
+  }
 };
 
-handler.help = ['addmod','delmod','tagmod','dsmod','mutamod','smutamod'];
-handler.tags = ['moderator'];
+// Comandi
 handler.command = /^(addmod|delmod|tagmod|dsmod|mutamod|smutamod)$/i;
 handler.group = true;
 
