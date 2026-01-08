@@ -21,7 +21,7 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ 𝐁𝐨𝐧𝐨𝐢𝐫 (AFK mode) 🚫  
 ➤ 𝐖𝐚𝐤𝐞𝐲𝐰𝐚𝐤𝐞𝐲 ✅  
 
-═════════════════════════
+══════════════════════
 🔖 𝐕𝐞𝐫𝐬𝐢𝐨𝐧𝐞: 2.0
 `.trim();
 
