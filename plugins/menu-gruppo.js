@@ -1,102 +1,105 @@
 const handler = async (message, { conn, usedPrefix }) => {
 
     const menuText = `
-⚡ 𝑴𝑬𝑵𝑼 𝐆𝐑𝐔𝐏𝐏𝐎 ⚡
-════════════════════
-🌍 *INFO & UTILITÀ*
-➤ Coding
-➤ Meteo (città)
-➤ Orario (città)
-➤ Bus (città)
-➤ Id (gruppo)
-➤ Pic [@]
-➤ Fp [numero]
+╔══════════════════════╗
+        ⚡ 𝑴𝑬𝑵𝑼 𝐆𝐑𝐔𝐏𝐏𝐎 ⚡
+╚══════════════════════╝
 
-🖼️ *MEDIA & GRAFICA*
-➤ S / Sticker
-➤ Wm
-➤ Png
-➤ Hd
-➤ Rimuovisfondo (foto)
+─❖🌍 𝐈𝐍𝐅𝐎 & 𝐔𝐓𝐈𝐋𝐈𝐓𝐀̀❖─
+➤ 𝐂𝐨𝐝𝐢𝐧𝐠  
+➤ 𝐌𝐞𝐭𝐞𝐨 (città)  
+➤ 𝐎𝐫𝐚𝐫𝐢𝐨 (città)  
+➤ 𝐁𝐮𝐬 (città)  
+➤ 𝐈𝐝 (gruppo)  
+➤ 𝐏𝐢𝐜 [@]  
+➤ 𝐅𝐩 [numero]  
 
-🎮 *GIOCHI & RANDOM* 
-➤ Arcade
-➤ Tris [@]
-➤ Dado 🎲
-➤ Slot 🎰
-➤ Bandiera 🏳️
-➤ Classificabandiera 🚩
-➤ Impiccato 👤
+─❖🖼️ 𝐌𝐄𝐃𝐈𝐀 & 𝐆𝐑𝐀𝐅𝐈𝐂𝐀❖─
+➤ 𝐒 / 𝐒𝐭𝐢𝐜𝐤𝐞𝐫  
+➤ 𝐖𝐦  
+➤ 𝐏𝐧𝐠  
+➤ 𝐇𝐝  
+➤ 𝐑𝐢𝐦𝐮𝐨𝐯𝐢𝐬𝐟𝐨𝐧𝐝𝐨 (foto)  
 
-👤 *TAG & INTERAZIONI*
-➤ Bonk [@]
-➤ Hornycard [@]
-➤ Stupido/a [@]
-➤ Wanted [@]
-➤ Nokia [@]
-➤ Carcere [@]
-➤ Fight [@]
-➤ Ano [@]
-➤ Sbirro [@]
-➤ Ghost [@]
-➤ Teletrasporto [@]
-➤ Rincoglionito [@]
-➤ Mira [@]
-➤ Xban [numero]
-➤ Hotdog [@]
+─❖🎮 𝐆𝐈𝐎𝐂𝐇𝐈 & 𝐑𝐀𝐍𝐃𝐎𝐌❖─
+➤ 𝐀𝐫𝐜𝐚𝐝𝐞  
+➤ 𝐓𝐫𝐢𝐬 [@]  
+➤ 𝐃𝐚𝐝𝐨 🎲  
+➤ 𝐒𝐥𝐨𝐭 🎰  
+➤ 𝐁𝐚𝐧𝐝𝐢𝐞𝐫𝐚 🏳️  
+➤ 𝐂𝐥𝐚𝐬𝐬𝐢𝐟𝐢𝐜𝐚𝐛𝐚𝐧𝐝𝐢𝐞𝐫𝐚 🚩  
+➤ 𝐈𝐦𝐩𝐢𝐜𝐜𝐚𝐭𝐨 👤  
 
-💬 *SOCIAL & AZIONI*
-➤ Bacia 💋
-➤ Amore 🩷
-➤ Trovafida ❤️
-➤ Odio 😡
-➤ Rizz 🤩
-➤ Minaccia ☠️
-➤ Zizzania 🤡
-➤ Obbligo 🚫
-➤ Insulta 😹
-➤ Lavoro 👷🏻
-➤ Macchina 🏎️
+─❖👤 𝐓𝐀𝐆 & 𝐈𝐍𝐓𝐄𝐑𝐀𝐙𝐈𝐎𝐍𝐈❖─
+➤ 𝐁𝐨𝐧𝐤 [@]  
+➤ 𝐇𝐨𝐫𝐧𝐲𝐜𝐚𝐫𝐝 [@]  
+➤ 𝐒𝐭𝐮𝐩𝐢𝐝𝐨/𝐚 [@]  
+➤ 𝐖𝐚𝐧𝐭𝐞𝐝 [@]  
+➤ 𝐍𝐨𝐤𝐢𝐚 [@]  
+➤ 𝐂𝐚𝐫𝐜𝐞𝐫𝐞 [@]  
+➤ 𝐅𝐢𝐠𝐡𝐭 [@]  
+➤ 𝐀𝐧𝐨 [@]  
+➤ 𝐒𝐛𝐢𝐫𝐫𝐨 [@]  
+➤ 𝐆𝐡𝐨𝐬𝐭 [@]  
+➤ 𝐓𝐞𝐥𝐞𝐭𝐫𝐚𝐬𝐩𝐨𝐫𝐭𝐨 [@]  
+➤ 𝐑𝐢𝐧𝐜𝐨𝐠𝐥𝐢𝐨𝐧𝐢𝐭𝐨 [@]  
+➤ 𝐌𝐢𝐫𝐚 [@]  
+➤ 𝐗𝐛𝐚𝐧 [numero]  
+➤ 𝐇𝐨𝐭𝐝𝐨𝐠 [@]  
 
-💍 *RELAZIONI*
-➤ Sposa 💍
-➤ Divorzia 💔
-➤ Adotta 👶🏻
-➤ Famiglia 🙍🏻
-➤ Coppie 👩‍❤️‍💋‍👨
+─❖💬 𝐒𝐎𝐂𝐈𝐀𝐋 & 𝐀𝐙𝐈𝐎𝐍𝐈❖─
+➤ 𝐁𝐚𝐜𝐢𝐚 💋  
+➤ 𝐀𝐦𝐨𝐫𝐞 🩷  
+➤ 𝐓𝐫𝐨𝐯𝐚𝐟𝐢𝐝𝐚 ❤️  
+➤ 𝐎𝐝𝐢𝐨 😡  
+➤ 𝐑𝐢𝐳𝐳 🤩  
+➤ 𝐌𝐢𝐧𝐚𝐜𝐜𝐢𝐚 ☠️  
+➤ 𝐙𝐢𝐳𝐳𝐚𝐧𝐢𝐚 🤡  
+➤ 𝐎𝐛𝐛𝐥𝐢𝐠𝐨 🚫  
+➤ 𝐈𝐧𝐬𝐮𝐥𝐭𝐚 😹  
+➤ 𝐋𝐚𝐯𝐨𝐫𝐨 👷🏻  
+➤ 𝐌𝐚𝐜𝐜𝐡𝐢𝐧𝐚 🏎️  
 
-💰 *ECONOMIA*
-➤ Wallet 👛
-➤ Banca 🏦
-➤ Ruba 🕵🏽
-➤ Deposita ✅
-➤ Dona 👤
+─❖💍 𝐑𝐄𝐋𝐀𝐙𝐈𝐎𝐍𝐈❖─
+➤ 𝐒𝐩𝐨𝐬𝐚 💍  
+➤ 𝐃𝐢𝐯𝐨𝐫𝐳𝐢𝐚 💔  
+➤ 𝐀𝐝𝐨𝐭𝐭𝐚 👶🏻  
+➤ 𝐅𝐚𝐦𝐢𝐠𝐥𝐢𝐚 🙍🏻  
+➤ 𝐂𝐨𝐩𝐩𝐢𝐞 👩‍❤️‍💋‍👨  
 
-🎭 *VARIE*
-➤ Ic 🎼
-➤ Auto 🚗
-➤ Cur 🎶
-➤ Sigaretta 🚬
-➤ StartBlast 🚦
-➤ Mc 🍔
-➤ Gelato 🍦
-➤ Pizza 🍕 
-➤ Winx 🧚🏿
-➤ Gratta 🌟
-➤ Mossad
-➤ Agejob [anni]
+─❖💰 𝐄𝐂𝐎𝐍𝐎𝐌𝐈𝐀❖─
+➤ 𝐖𝐚𝐥𝐥𝐞𝐭 👛  
+➤ 𝐁𝐚𝐧𝐜𝐚 🏦  
+➤ 𝐑𝐮𝐛𝐚 🕵🏽  
+➤ 𝐃𝐞𝐩𝐨𝐬𝐢𝐭𝐚 ✅  
+➤ 𝐃𝐨𝐧𝐚 👤  
 
-🔞 *NSFW*
-➤ Tette [@]
-➤ Incinta [@]
-➤ Pene
-➤ Sega
-➤ Scopa
-➤ Sborra
-➤ Pompino
-➤ Ditalino
-════════════════════
-🔖 Versione: 2.0
+─❖🎭 𝐕𝐀𝐑𝐈𝐄❖─
+➤ 𝐈𝐜 🎼  
+➤ 𝐀𝐮𝐭𝐨 🚗  
+➤ 𝐂𝐮𝐫 🎶  
+➤ 𝐒𝐢𝐠𝐚𝐫𝐞𝐭𝐭𝐚 🚬  
+➤ 𝐒𝐭𝐚𝐫𝐭𝐁𝐥𝐚𝐬𝐭 🚦  
+➤ 𝐌𝐜 🍔  
+➤ 𝐆𝐞𝐥𝐚𝐭𝐨 🍦  
+➤ 𝐏𝐢𝐳𝐳𝐚 🍕  
+➤ 𝐖𝐢𝐧𝐱 🧚🏿  
+➤ 𝐆𝐫𝐚𝐭𝐭𝐚 🌟  
+➤ 𝐌𝐨𝐬𝐬𝐚𝐝  
+➤ 𝐀𝐠𝐞𝐣𝐨𝐛 [anni]  
+
+─❖🔞 𝐍𝐒𝐅𝐖❖─
+➤ 𝐓𝐞𝐭𝐭𝐞 [@]  
+➤ 𝐈𝐧𝐜𝐢𝐧𝐭𝐚 [@]  
+➤ 𝐏𝐞𝐧𝐞  
+➤ 𝐒𝐞𝐠𝐚  
+➤ 𝐒𝐜𝐨𝐩𝐚  
+➤ 𝐒𝐛𝐨𝐫𝐫𝐚  
+➤ 𝐏𝐨𝐦𝐩𝐢𝐧𝐨  
+➤ 𝐃𝐢𝐭𝐚𝐥𝐢𝐧𝐨  
+
+═════════════════════════
+🔖 𝐕𝐞𝐫𝐬𝐢𝐨𝐧𝐞: 2.0
 `.trim();
 
     await conn.sendMessage(message.chat, {
