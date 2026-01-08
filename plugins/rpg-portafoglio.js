@@ -1,42 +1,63 @@
-const handler = async (m, { conn, command, text, args }) => {
-  const mention = m.mentionedJid?.[0] || (m.quoted ? m.quoted.sender : m.quoted);
-  const who = mention || m.sender;
-  const users = global.db.data.users;
-  const user = users[who];
+let handler = async (m, { conn }) => {
+    let who = m.quoted
+        ? m.quoted.sender
+        : m.mentionedJid && m.mentionedJid[0]
+        ? m.mentionedJid[0]
+        : m.fromMe
+        ? conn.user.jid
+        : m.sender
 
-  // Formatta numeri con separatore di migliaia
-  const formatNumber = (n) => n.toLocaleString('it-IT');
+    if (!(who in global.db.data.users))
+        throw '🚩 Il bot non è stato trovato nel database'
 
-  const contanti = user.money !== undefined ? `${formatNumber(user.money)} €` : 'Sei povero';
-  const banca = user.bank !== undefined ? `${formatNumber(user.bank)} €` : 'Nessun conto bancario';
-  const totale = formatNumber((user.money || 0) + (user.bank || 0));
+    let user = global.db.data.users[who]
+    let name = conn.getName(who)
 
-  const prova = {
-    "key": {
-      "participants": "0@s.whatsapp.net",
-      "fromMe": false,
-      "id": "Halo"
-    },
-    "message": {
-      "contactMessage": {
-        displayName: `𝐁𝕀𝐋𝚲𝐍𝐂𝕀Ꮻ`,
-        "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${who.split`@`[0]}:${who.split`@`[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`
-      }
-    },
-    "participant": "0@s.whatsapp.net"
-  };
+    if (!user.limit) user.limit = 15000
+    if (!user.bank) user.bank = 0
 
-  const testo = `\n*𝐏𝐎𝐑𝐓𝐀𝐅𝐎𝐋𝐈𝐎 👛*\n═══════ ೋೋ═══════
-💵 *Contanti:* ${contanti}
-🏦 *Banca:* ${banca}
-🧾 *Totale:* ${totale} €
-═══════ ೋೋ═══════`;
+    let total = user.limit + user.bank
 
-  conn.reply(m.chat, testo, prova);
+    let message = `
+╔═ 💼 𝑾𝑨𝑳𝑳𝑬𝑻 💼 ═╗
+║
+║ 👤 𝑼𝒕𝒆𝒏𝒕𝒆: ${name}
+║
+║ 💶 𝑪𝒐𝒏𝒕𝒂𝒏𝒕𝒊
+║    ➜ ${formatNumber(user.limit)} €
+║
+║ 🏦 𝑩𝒂𝒏𝒄𝒂
+║    ➜ ${formatNumber(user.bank)} €
+║
+║ ─────────────────
+║ 🧾 𝑻𝒐𝒕𝒂𝒍𝒆
+║    ➜ ${formatNumber(total)} €
+║
+╚════════════════╝
+`.trim()
 
-  global.db.write(); // Salva i dati aggiornati nel database
-};
+    await conn.sendMessage(m.chat, {
+        text: message,
+        contextInfo: {
+            forwardingScore: 99,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+                newsletterJid: '120363259442839354@newsletter',
+                newsletterName: 'ChatUnity'
+            }
+        }
+    }, { quoted: m })
 
-handler.command = /^portafoglio|budget|soldi|tasca|wallet|cash$/i;
+    m.react('💶')
+}
 
-export default handler;
+handler.help = ['wallet']
+handler.tags = ['economy']
+handler.command = ['soldi', 'wallet', 'portafoglio', 'saldo', 'euro']
+handler.register = true
+
+export default handler
+
+function formatNumber(num) {
+    return new Intl.NumberFormat('it-IT').format(num)
+}
