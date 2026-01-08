@@ -42,8 +42,8 @@ let handler = async (m, { conn }) => {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
-                newsletterName: 'ChatUnity'
+                newsletterJid: '',
+                newsletterName: 'Dth-Bot'
             }
         }
     }, { quoted: m })
