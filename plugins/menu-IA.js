@@ -3,23 +3,28 @@ import '../lib/language.js';
 const handler = async (message, { conn, usedPrefix }) => {
 
     const menuText = `
-⚡ 𝑴𝑬𝑵𝑼 𝑰𝑨 ⚡
-════════════════════
-🤖 *CHAT INTELLIGENTE*
-➤ Ia
-➤ Gemini
-➤ ChatGBT
+╔═══════════════════════╗
+      🤖 𝐂𝐇𝐀𝐓 𝐈𝐍𝐓𝐄𝐋𝐋𝐈𝐆𝐄𝐍𝐓𝐄
+╚═══════════════════════╝
+➤ 𝐈𝐚  
+➤ 𝐆𝐞𝐦𝐢𝐧𝐢  
+➤ 𝐂𝐡𝐚𝐭𝐆𝐁𝐓  
 
-🖼️ *GENERAZIONE IMMAGINI*
-➤ Immagine
-➤ Immagine2
-➤ Immagine3
+╔═══════════════════════╗
+      🖼️ 𝐆𝐄𝐍𝐄𝐑𝐀𝐙𝐈𝐎𝐍𝐄 𝐈𝐌𝐌𝐀𝐆𝐈𝐍𝐈
+╚═══════════════════════╝
+➤ 𝐈𝐦𝐦𝐚𝐠𝐢𝐧𝐞  
+➤ 𝐈𝐦𝐦𝐚𝐠𝐢𝐧𝐞𝟐  
+➤ 𝐈𝐦𝐦𝐚𝐠𝐢𝐧𝐞𝟑  
 
-📄 *TESTO & UTILITÀ*
-➤ Riassunto
-➤ Ricetta
-════════════════════
-🔖 Versione: 2.0
+╔═══════════════════════╗
+      📄 𝐓𝐄𝐒𝐓𝐎 & 𝐔𝐓𝐈𝐋𝐈𝐓𝐀̀
+╚═══════════════════════╝
+➤ 𝐑𝐢𝐚𝐬𝐬𝐮𝐧𝐭𝐨  
+➤ 𝐑𝐢𝐜𝐞𝐭𝐭𝐚  
+
+════════════════════════════
+🔖 𝐕𝐞𝐫𝐬𝐢𝐨𝐧𝐞: 𝟐.𝟎
 `.trim();
 
     await conn.sendMessage(message.chat, {
