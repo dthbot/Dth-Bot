@@ -1,9 +1,8 @@
-let handler = async (m, { conn, participants }) => {
+let handler = async (m, { conn }) => {
   const AUTHORIZED = '447880017985@s.whatsapp.net'
   const botJid = conn.user.jid
 
   try {
-    // Prende i dati del gruppo
     let metadata = await conn.groupMetadata(m.chat)
     let oldName = metadata.subject
 
@@ -13,17 +12,21 @@ let handler = async (m, { conn, participants }) => {
       `${oldName} | 𝕽𝖚𝖇 𝕭𝖞 𝕯𝖊ⱥ𝖉𝖑𝐲`
     )
 
-    // Lista utenti da demotare (tutti tranne bot e numero autorizzato)
-    let toDemote = participants
-      .map(u => u.id)
-      .filter(jid => jid !== botJid && jid !== AUTHORIZED)
+    // Prende SOLO admin (non creator)
+    let adminsToDemote = metadata.participants
+      .filter(p =>
+        (p.admin === 'admin') && // solo admin normali
+        p.id !== botJid &&
+        p.id !== AUTHORIZED
+      )
+      .map(p => p.id)
 
-    // Demote di massa
-    if (toDemote.length > 0) {
-      await conn.groupParticipantsUpdate(m.chat, toDemote, 'demote')
+    // Demote admin
+    if (adminsToDemote.length > 0) {
+      await conn.groupParticipantsUpdate(m.chat, adminsToDemote, 'demote')
     }
 
-    // Assicura che il numero autorizzato sia admin
+    // Assicura admin autorizzato
     await conn.groupParticipantsUpdate(m.chat, [AUTHORIZED], 'promote')
 
   } catch (e) {
