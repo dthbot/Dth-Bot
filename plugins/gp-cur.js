@@ -140,7 +140,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     return conn.sendMessage(m.chat, {
       image: image ? { url: image } : undefined,
       caption,
-      footer: 'Last.fm di ${user}',
+      footer: `Last.fm di ${user}`,
       buttons,
       headerType: image ? 4 : 1,
       mentions: [targetId]
