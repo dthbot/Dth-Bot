@@ -1,5 +1,7 @@
 let cooldowns = {}
 
+const fruits = ['🍒', '🍋', '🍉', '🍇', '🍎', '🍓']
+
 let handler = async (m, { conn, args, usedPrefix, command }) => {
     let user = global.db.data.users[m.sender]
     let bet = args[0] ? parseInt(args[0]) : 20
@@ -32,7 +34,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         )
     }
 
-    let win = Math.random() < 0.5
+    // 🎰 Estrazione frutta
+    let r1 = fruits[Math.floor(Math.random() * fruits.length)]
+    let r2 = fruits[Math.floor(Math.random() * fruits.length)]
+    let r3 = fruits[Math.floor(Math.random() * fruits.length)]
+
+    // 🎯 Controllo vincita
+    let win = (r1 === r2 || r2 === r3 || r1 === r3)
 
     user.exp = Number(user.exp) || 0
     user.level = Number(user.level) || 1
@@ -42,19 +50,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     let resultMsg = '🎰 𝗦𝗟𝗢𝗧 𝗠𝗔𝗖𝗛𝗜𝗡𝗘\n'
     resultMsg += '━━━━━━━━━━━━━━━\n\n'
+    resultMsg += '🎲 𝗥𝗜𝗦𝗨𝗟𝗧𝗔𝗧𝗢:\n\n'
+    resultMsg += `┃ ${r1} │ ${r2} │ ${r3} ┃\n\n`
 
     if (win) {
         user.limit += 800
         user.exp += 100
 
-        resultMsg += '🎉 𝗩𝗜𝗧𝗧𝗢𝗥𝗜𝗔!\n\n'
+        resultMsg += '🎉 𝗩𝗜𝗧𝗧𝗢𝗥𝗜𝗔!\n'
         resultMsg += '➕ 𝟴𝟬𝟬 €\n'
         resultMsg += '➕ 𝟭𝟬𝟬 𝗫𝗣\n'
     } else {
         user.limit -= bet
         user.exp = Math.max(0, user.exp - bet)
 
-        resultMsg += '🤡 𝗦𝗖𝗢𝗡𝗙𝗜𝗧𝗧𝗔!\n\n'
+        resultMsg += '🤡 𝗦𝗖𝗢𝗡𝗙𝗜𝗧𝗧𝗔!\n'
         resultMsg += `➖ ${bet} €\n`
         resultMsg += `➖ ${bet} 𝗫𝗣\n`
     }
@@ -64,7 +74,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     resultMsg += `💰 𝗘𝘂𝗿𝗼: ${user.limit}\n`
     resultMsg += `⭐ 𝗫𝗣: ${user.exp}\n`
     resultMsg += `📊 𝗣𝗿𝗼𝗴𝗿𝗲𝘀𝘀𝗼: ${currentLevelXP}/${levelXP} XP\n\n`
-    resultMsg += `ℹ️ 𝗨𝘀𝗮 ${usedPrefix}menuxp 𝗽𝗲𝗿 𝗴𝘂𝗮𝗱𝗮𝗴𝗻𝗮𝗿𝗲 𝗽𝗶ù 𝗫𝗣`
+    resultMsg += ``
 
     cooldowns[m.sender] = Date.now()
 
