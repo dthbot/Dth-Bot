@@ -11,14 +11,14 @@ const handler = async (m, { conn }) => {
   }
 
   const text = `
-╭───〔 🔗 *LINK DEL GRUPPO* 🔗 〕───╮
+╭─〔 🔗 *LINK DEL GRUPPO* 🔗 〕─╮
 │
 │ 🏷 *Nome:* ${metadata.subject}
 │
 │ 🌐 *Link d’invito:*
 │ https://chat.whatsapp.com/${inviteCode}
 │
-╰────────────────────────╯
+╰────────────────────╯
 `
 
   await conn.sendMessage(m.chat, {
