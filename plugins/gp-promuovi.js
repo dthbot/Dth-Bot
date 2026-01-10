@@ -1,30 +1,30 @@
-let handler = async (m, { conn,usedPrefix, text }) => {
-if(isNaN(text) && !text.match(/@/g)){
-	
-}else if(isNaN(text)) {
-var number = text.split`@`[1]
-}else if(!isNaN(text)) {
-var number = text
+let handler = async (m, { conn, text }) => {
+  let user
+
+  // 1️⃣ Se c'è una mention (.p @utente)
+  if (m.mentionedJid && m.mentionedJid.length > 0) {
+    user = m.mentionedJid[0]
+
+  // 2️⃣ Se si risponde a un messaggio
+  } else if (m.quoted) {
+    user = m.quoted.sender
+
+  // 3️⃣ Se si usa il numero (.p 393xxx)
+  } else if (text && !isNaN(text)) {
+    if (text.length < 11 || text.length > 13) return
+    user = text + '@s.whatsapp.net'
+  }
+
+  if (!user) return m.reply('❌ Tagga un utente, rispondi a un messaggio o scrivi il numero')
+
+  await conn.groupParticipantsUpdate(m.chat, [user], 'promote')
+  m.reply('✅ Utente promosso ad admin')
 }
-	
-if(!text && !m.quoted) return
-if(number.length > 13 || (number.length < 11 && number.length > 0)) return
-	
-try {
-if(text) {
-var user = number + '@s.whatsapp.net'
-} else if(m.quoted.sender) {
-var user = m.quoted.sender
-} else if(m.mentionedJid) {
-var user = number + '@s.whatsapp.net'
-} 
-} catch (e) {
-} finally {
-conn.groupParticipantsUpdate(m.chat, [user], 'promote')
-}}
-handler.command = /^(p|promuovi|mettiadmin|p)$/i
+
+handler.command = /^(p|promuovi|mettiadmin)$/i
 handler.group = true
 handler.admin = true
 handler.botAdmin = true
 handler.fail = null
+
 export default handler
