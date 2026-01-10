@@ -1,84 +1,71 @@
-const bestemmiaGradi = [
-  { min: 1, max: 24, nome: "Peccatore Occasionale", emoji: "😐" },
-  { min: 25, max: 49, nome: "Empio Recidivo", emoji: "😶‍🌫️" },
-  { min: 50, max: 74, nome: "Blasfemo Iniziato", emoji: "🩸" },
-  { min: 75, max: 99, nome: "Eretico Consacrato", emoji: "🔥" },
-  { min: 100, max: 149, nome: "Scomunicato Ufficiale", emoji: "🕯️" },
-  { min: 150, max: 299, nome: "Profanatore Supremo", emoji: "⚰️" },
-  { min: 300, max: Infinity, nome: "Avatar della Bestemmia", emoji: "⛧" }
-];
+// BESTEMMIO METRO 😇➡️😈
+// Plugin con ON/OFF - solo conteggio punti
 
-const bestemmieRegex =
-  /porco dio|porcodio|dio bastardo|dio cane|porcamadonna|madonnaporca|dio cristo|diocristo|dio maiale|diomaiale|cristo madonna|madonna impanata|dio frocio|dio gay|dio infuocato|dio crocifissato|madonna puttana|madonna vacca|madonna inculata|maremma maiala|jesu porco|diocane|padre pio|madonna troia|zoccola madonna|dio pentito/i;
+const bestemmieRegex = /(porco dio|porcodio|dio bastardo|dio cane|porcamadonna|madonnaporca|dio cristo|diocristo|dio maiale|diomaiale|cristo madonna|madonna impanata|dio frocio|dio gay|dio infuocato|dio crocifissato|madonna puttana|madonna vacca|madonna inculata|maremma maiala|jesu porco|diocane|padre pio|madonna troia|zoccola madonna|dio pentito)/i
 
-export default function (sock) {
+// ───── COMANDO ON / OFF ─────
+let handler = async (m, { conn, args }) => {
+  if (!args[0]) {
+    return conn.reply(
+      m.chat,
+      '⚠️ Usa:\n• `.attiva bestemmiometro`\n• `.disattiva bestemmiometro`',
+      m
+    )
+  }
 
-  console.log('✅ Bestemmiometro caricato');
+  let chat = global.db.data.chats[m.chat]
+  if (!chat) global.db.data.chats[m.chat] = {}
 
-  const db = {
-    users: {},
-    chats: {}
-  };
+  if (args[0].toLowerCase() === 'bestemmiometro') {
+    chat.bestemmiometro = true
+    await conn.reply(m.chat, '✅ *BestemmioMetro ATTIVATO* 😈📊', m)
+  }
+}
 
-  sock.ev.on('messages.upsert', async ({ messages }) => {
-    const m = messages[0];
-    if (!m?.message || !m.key?.remoteJid) return;
+// Alias off separato
+handler.command = ['attiva']
+handler.admin = true
+handler.group = true
 
-    const chatId = m.key.remoteJid;
-    const sender = m.key.participant || m.key.remoteJid;
-    const text =
-      (m.message.conversation || m.message.extendedTextMessage?.text || "")
-        .toLowerCase();
+// ───── DISATTIVA ─────
+handler.before = async function (m, { conn, isAdmin }) {
+  if (!m.text || !m.isGroup) return true
 
-    // Init chat
-    if (!db.chats[chatId]) {
-      db.chats[chatId] = { bestemmiometro: false };
-    }
+  let chat = global.db.data.chats[m.chat]
+  if (!chat) global.db.data.chats[m.chat] = {}
 
-    /* ===== COMANDI ===== */
-    if (text === ".bestemmiometro on") {
-      db.chats[chatId].bestemmiometro = true;
-      return sock.sendMessage(chatId, {
-        text: "☠️ *Bestemmiometro attivato*"
-      });
-    }
+  // DISATTIVA comando
+  if (m.text.toLowerCase() === '.disattiva bestemmiometro') {
+    if (!isAdmin) return true
+    chat.bestemmiometro = false
+    await conn.reply(m.chat, '❌ *BestemmioMetro DISATTIVATO* 🙏', m)
+    return false
+  }
 
-    if (text === ".bestemmiometro off") {
-      db.chats[chatId].bestemmiometro = false;
-      return sock.sendMessage(chatId, {
-        text: "🙏 *Bestemmiometro disattivato*"
-      });
-    }
+  // Se non attivo, esce
+  if (!chat.bestemmiometro) return true
+  if (m.isBaileys || m.fromMe) return true
+  if (isAdmin) return true
+  if (!bestemmieRegex.test(m.text)) return true
 
-    // Se disattivo → stop
-    if (!db.chats[chatId].bestemmiometro) return;
+  // ───── CONTEGGIO ─────
+  let user = global.db.data.users[m.sender]
+  if (!user.bestemmie) user.bestemmie = 0
 
-    // Se non bestemmia → stop
-    if (!bestemmieRegex.test(text)) return;
+  user.bestemmie += 1
 
-    // Init user
-    if (!db.users[sender]) {
-      db.users[sender] = { blasphemy: 0 };
-    }
+  await conn.sendMessage(m.chat, {
+    text:
+`🚨 *BESTEMMIO METRO* 🚨
 
-    const user = db.users[sender];
-    user.blasphemy++;
+👤 Utente: @${m.sender.split('@')[0]}
+📊 Totale bestemmie: *${user.bestemmie}*
 
-    const grado =
-      bestemmiaGradi.find(
-        g => user.blasphemy >= g.min && user.blasphemy <= g.max
-      ) || { nome: "Eresiarca Anonimo", emoji: "❓" };
+😇 Dio prende appunti...`,
+    mentions: [m.sender]
+  })
 
-    const testo = `ೋೋ═══•═══ೋೋ
-📛 Utente: @${sender.split('@')[0]}
-📊 Conteggio: *${user.blasphemy}*
+  return true
+}
 
-🎖️ Grado: *${grado.nome}* ${grado.emoji}
-ೋೋ═══•═══ೋೋ`;
-
-    await sock.sendMessage(chatId, {
-      text: testo,
-      mentions: [sender]
-    });
-  });
-                           }
+export default handler
