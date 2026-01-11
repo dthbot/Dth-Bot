@@ -56,7 +56,7 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
         : '👥 Menu Gruppo';
 
     const aiMenuText = global.t
-        ? global.t('menumod', userId, groupId)
+        ? global.t('🌟 Menu MOD', userId, groupId)
         : '🌟 Menu MOD';
 
     await conn.sendMessage(message.chat, {
