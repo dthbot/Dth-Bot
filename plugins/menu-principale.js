@@ -56,8 +56,8 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
         : '👥 Menu Gruppo';
 
     const aiMenuText = global.t
-        ? global.t('menuAI', userId, groupId)
-        : '🤖 Menu IA';
+        ? global.t('menumod', userId, groupId)
+        : '🌟 Menu MOD';
 
     await conn.sendMessage(message.chat, {
         text: menuText,
@@ -67,7 +67,7 @@ const handler = async (message, { conn, usedPrefix = '.' }) => {
             { buttonId: `${usedPrefix}menuowner`, buttonText: { displayText: ownerMenuText }, type: 1 },
             { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: securityMenuText }, type: 1 },
             { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: groupMenuText }, type: 1 },
-            { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: aiMenuText }, type: 1 }
+            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: aiMenuText }, type: 1 }
         ],
         headerType: 1
     });
