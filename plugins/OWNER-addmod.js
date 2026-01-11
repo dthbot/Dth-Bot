@@ -1,49 +1,51 @@
 const handler = async (m, { conn }) => {
-let who;
-if (m.isGroup)
-who = m.mentionedJid[0] || (m.quoted ? m.quoted.sender : null);
-else who = m.chat;
+  let who;
+  if (m.isGroup)
+    who = m.mentionedJid[0] || (m.quoted ? m.quoted.sender : null);
+  else return;
 
-if (!who)
-return m.reply('⚠️ Tagga l’utente da promuovere a MODERATORE.');
+  if (!who)
+    return m.reply('⚠️ Tagga l’utente da promuovere a MODERATORE.');
 
-const user = global.db.data.users[who];
-if (!user)
-return m.reply('❌ Questo utente non è presente nel database.');
+  const chat = global.db.data.chats[m.chat];
+  if (!chat)
+    return m.reply('❌ Chat non trovata nel database.');
 
-// Imposta premium permanente
-user.premium = true;
-user.premiumTime = Infinity;
+  // Inizializza lista moderatori del gruppo
+  if (!chat.mods) chat.mods = {};
 
-// Foto profilo
-let pp;
-try {
-pp = await conn.profilePictureUrl(who, 'image');
-} catch {
-pp = 'https://i.ibb.co/3Fh9V6p/avatar-contact.png';
-}
+  // Imposta moderatore SOLO per questo gruppo
+  chat.mods[who] = true;
 
-const name = '@' + who.split('@')[0];
+  // Foto profilo
+  let pp;
+  try {
+    pp = await conn.profilePictureUrl(who, 'image');
+  } catch {
+    pp = 'https://i.ibb.co/3Fh9V6p/avatar-contact.png';
+  }
 
-const caption = `
+  const name = '@' + who.split('@')[0];
+
+  const caption = `
 👑 MOD ATTIVATO 👑
 
 👤 Utente: ${name}
-🛡️ Stato: PERMANENTE
-🚀 Accesso completo sbloccato
+🏘️ Gruppo: ${chat.subject || 'Questo gruppo'}
+🛡️ Stato: ATTIVO SOLO QUI
 
-✨ Benvenuto nello staff dei moderatori!
+✨ Ora è moderatore di questo gruppo!
 `.trim();
 
-await conn.sendMessage(
-m.chat,
-{
-image: { url: pp },
-caption,
-mentions: [who]
-},
-{ quoted: m }
-);
+  await conn.sendMessage(
+    m.chat,
+    {
+      image: { url: pp },
+      caption,
+      mentions: [who]
+    },
+    { quoted: m }
+  );
 };
 
 handler.help = ['addmod @user'];
