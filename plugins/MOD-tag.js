@@ -108,5 +108,6 @@ handler.help = ['tagmod'];
 handler.tags = ['gruppo', 'moderazione'];
 handler.command = /^tagmod$/i;
 handler.group = true;
+handler.premium = false
 
 export default handler;
