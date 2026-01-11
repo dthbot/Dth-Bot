@@ -5,19 +5,20 @@ const handler = async (m, { conn }) => {
   if (!who)
     return m.reply('⚠️ Tagga l’utente da promuovere a MODERATORE.');
 
-  // DATABASE GRUPPO
-  let group = global.db.data.groups[m.chat];
-  if (!group) global.db.data.groups[m.chat] = {};
-  group = global.db.data.groups[m.chat];
+  // 🔒 INIZIALIZZA DATABASE CHAT (FIX ERRORE)
+  if (!global.db.data.chats) global.db.data.chats = {};
+  if (!global.db.data.chats[m.chat])
+    global.db.data.chats[m.chat] = {};
 
-  // inizializza mods
-  if (!group.mods) group.mods = [];
+  const chat = global.db.data.chats[m.chat];
 
-  // evita doppioni
-  if (group.mods.includes(who))
+  // 🔧 inizializza mods
+  if (!Array.isArray(chat.mods)) chat.mods = [];
+
+  if (chat.mods.includes(who))
     return m.reply('⚠️ Questo utente è già moderatore di questo gruppo.');
 
-  group.mods.push(who);
+  chat.mods.push(who);
 
   let pp;
   try {
@@ -39,7 +40,7 @@ const handler = async (m, { conn }) => {
 🏘️ Gruppo: QUESTO
 🛡️ Stato: SOLO QUI
 
-✅ Moderatore aggiunto correttamente
+✅ Operazione completata
 `.trim(),
       mentions: [who]
     },
