@@ -15,6 +15,10 @@ const handler = async (message, { conn, usedPrefix }) => {
 ➤ 𝐉𝐨𝐢𝐧 + 𝐋𝐢𝐧𝐤 ⚠️  
 ➤ 𝐎𝐮𝐭 👋  
 ➤ 𝐀𝐠𝐠𝐢𝐨𝐫𝐧𝐚 🌐  
+➤ 𝐀𝐝𝐝𝐦𝐨𝐝
+➤ 𝐃𝐞𝐥𝐦𝐨𝐝 
+➤ 𝐀𝐝𝐝𝐨𝐰𝐧𝐞𝐫 
+➤ 𝐃𝐞𝐥𝐨𝐰𝐧𝐞𝐫
 
 ─❖📢 𝐅𝐔𝐍𝐙𝐈𝐎𝐍𝐈 𝐒𝐏𝐄𝐂𝐈𝐀𝐋𝐈❖─
 ➤ 𝐁𝐢𝐠𝐓𝐚𝐠  
@@ -33,7 +37,7 @@ const handler = async (message, { conn, usedPrefix }) => {
             { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: "🛡️ Menu Admin" }, type: 1 },
             { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: "🚨 Menu Sicurezza" }, type: 1 },
             { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: "👥 Menu Gruppo" }, type: 1 },
-            { buttonId: `${usedPrefix}menuia`, buttonText: { displayText: "🤖 Menu IA" }, type: 1 }
+            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: "🌟 Menu Mod" }, type: 1 }
         ],
         headerType: 1
     });
