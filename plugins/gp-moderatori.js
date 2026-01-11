@@ -58,7 +58,4 @@ handler.tags = ['gruppo'];
 handler.command = /^(moderatori|mods|staff)$/i;
 handler.group = true;
 
-// Proprietà premium
-handler.premium = true;
-
 export default handler;
