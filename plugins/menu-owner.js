@@ -37,7 +37,7 @@ const handler = async (message, { conn, usedPrefix }) => {
             { buttonId: `${usedPrefix}menuadmin`, buttonText: { displayText: "🛡️ Menu Admin" }, type: 1 },
             { buttonId: `${usedPrefix}menusicurezza`, buttonText: { displayText: "🚨 Menu Sicurezza" }, type: 1 },
             { buttonId: `${usedPrefix}menugruppo`, buttonText: { displayText: "👥 Menu Gruppo" }, type: 1 },
-            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: "🌟 Menu Mod" }, type: 1 }
+            { buttonId: `${usedPrefix}menumod`, buttonText: { displayText: "🌟 Menu MOD" }, type: 1 }
         ],
         headerType: 1
     });
