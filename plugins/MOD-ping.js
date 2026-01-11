@@ -58,7 +58,6 @@ let handler = async (m, { conn }) => {
 handler.help = ["status", "uptime"]
 handler.tags = ["info"]
 handler.command = /^pingmod$/i
-handler.admin = true
 handler.premium = false
 
 export default handler
