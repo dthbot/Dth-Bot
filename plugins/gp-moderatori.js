@@ -1,23 +1,17 @@
 import fetch from 'node-fetch'
 
+// thumbnail piccola per i moderatori
 const getThumb = async () => 
   Buffer.from(await (await fetch('https://media.tenor.com/WyqUoMKzV6kAAAAC/shocked-face-black.gif')).arrayBuffer())
 
-let handler = async (m, { conn, text, participants, isAdmin }) => {
-  // 🔐 Solo admin possono usare il comando
-  if (!isAdmin) return m.reply('❌ Solo admin possono usare questo comando!')
+let handler = async (m, { conn, text, participants }) => {
 
-  // Filtra i moderatori dal database globale
+  // filtriamo solo utenti premium (moderatori)
   const mods = participants
-    .filter(p => {
-      const userDB = global.db.data.users[p.id] || {}
-      return userDB.mod || userDB.premium || false
-    })
+    .filter(p => global.db.data.users[p.id]?.premium)
     .map(p => p.id)
 
-  if (!mods.length) {
-    return m.reply('❌ Non ci sono moderatori attivi in questo gruppo.')
-  }
+  if (!mods.length) return m.reply('❌ Non ci sono moderatori attivi in questo gruppo.')
 
   const mentionsText = text ? `${text}\n\n` : ''
 
@@ -49,5 +43,5 @@ ${mentionsText}${styledMods}
 handler.help = ['moderatori [messaggio]']
 handler.command = ['moderatori']
 handler.group = true
-handler.admin = true 
+handler.premium = true 
 export default handler
