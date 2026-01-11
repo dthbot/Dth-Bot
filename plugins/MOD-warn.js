@@ -123,7 +123,7 @@ END:VCARD`
 }
 
 handler.help = ['warn', 'ammonisci', 'unwarn', 'delwarn', 'resetwarn']
-handler.command = ['warn', 'ammonisci', 'unwarn', 'delwarn', 'resetwarn']
+handler.command = ['warnmod', 'ammoniscimod', 'unwarnmod', 'delwarnmod', 'resetwarnmod']
 handler.group = true
 handler.botAdmin = true
 handler.premium = false
