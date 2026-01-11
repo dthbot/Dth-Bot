@@ -1,5 +1,6 @@
 // plugin-moderatori-simple.js
-module.exports = {
+
+export default {
     name: 'Moderatori List',
     
     async init(bot) {
@@ -22,15 +23,7 @@ module.exports = {
     
     async handleModeratoriCommand(message, bot) {
         try {
-            // MODIFICA QUESTA PARTE - Come recuperi i moderatori?
-            // Esempio 1: da variabile globale del bot
             const moderatori = bot.moderatori || [];
-            
-            // Esempio 2: da database
-            // const moderatori = await bot.db.getModeratori();
-            
-            // Esempio 3: da file
-            // const moderatori = require('./moderatori.json');
             
             if (!moderatori || moderatori.length === 0) {
                 return bot.sendMessage(message.from, {
@@ -41,13 +34,10 @@ module.exports = {
             let response = '👑 *MODERATORI DEL BOT*\n━━━━━━━━━━━━━━━━\n\n';
             
             moderatori.forEach((mod, i) => {
-                // Formatta il nome
                 const nome = mod.nome || mod.id || 'Sconosciuto';
                 const livello = mod.livello ? ` [${mod.livello}]` : '';
-                
                 response += `*${i + 1}. ${nome}*${livello}\n`;
                 
-                // Informazioni aggiuntive
                 if (mod.permessi && mod.permessi.length > 0) {
                     response += `   🔧 ${mod.permessi.join(', ')}\n`;
                 }
@@ -61,7 +51,6 @@ module.exports = {
             });
             
             response += `━━━━━━━━━━━━━━━━\n📊 *Totale: ${moderatori.length} moderatori*`;
-            
             await bot.sendMessage(message.from, { text: response });
             
         } catch (error) {
@@ -73,7 +62,6 @@ module.exports = {
     },
     
     async handleModeratoriOnline(message, bot) {
-        // Mostra solo moderatori online
         const moderatori = bot.moderatori || [];
         const onlineMods = moderatori.filter(mod => mod.online === true);
         
@@ -84,7 +72,6 @@ module.exports = {
         }
         
         let response = '👁️ *MODERATORI ONLINE*\n━━━━━━━━━━━━━━━━\n\n';
-        
         onlineMods.forEach((mod, i) => {
             response += `🟢 *${mod.nome}*\n`;
             
@@ -97,14 +84,12 @@ module.exports = {
         });
         
         response += `━━━━━━━━━━━━━━━━\n🟢 Online: ${onlineMods.length}/${moderatori.length}`;
-        
         await bot.sendMessage(message.from, { text: response });
     },
     
     calcolaTempoOnline(dataInizio) {
         const diff = Date.now() - new Date(dataInizio).getTime();
         const minuti = Math.floor(diff / 60000);
-        
         if (minuti < 60) return `${minuti} minuti`;
         const ore = Math.floor(minuti / 60);
         if (ore < 24) return `${ore} ore`;
