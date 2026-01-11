@@ -1,7 +1,7 @@
 const handler = async (m, { conn, participants, groupMetadata, args }) => {
 
     // Cooldown opzionale per tutti gli utenti
-    const cooldownInMilliseconds = 6 * 60 * 60 * 1000; // 6 ore
+const cooldownInMilliseconds = 10 * 60 * 1000; // 10 minuti
     const lastUsed = handler.cooldowns.get(m.sender) || 0;
     const now = Date.now();
 
@@ -62,5 +62,8 @@ handler.help = ['moderatori <messaggio>'];
 handler.tags = ['gruppo'];
 handler.command = /^(moderatori|mods|staff)$/i;
 handler.group = true;
+
+// Tutti possono usarlo
+handler.premium = false;
 
 export default handler;
