@@ -1,8 +1,5 @@
 import fetch from 'node-fetch'
 
-const time = async (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
-// thumbnail (fetch FIX)
 const getThumb = async () =>
   Buffer.from(await (await fetch('https://qu.ax/fmHdc.png')).arrayBuffer())
 
@@ -16,8 +13,8 @@ let handler = async (m, { conn, text, command, isOwner }) => {
   if (!who) return
 
   // Controllo permessi: owner o premium
-  const userDB = global.db.data.users[m.sender] || {}
-  if (!isOwner && !userDB.premium) {
+  const senderDB = global.db.data.users[m.sender] || {}
+  if (!isOwner && !senderDB.premium) {
     return m.reply('⛔ *Questo comando è riservato ai MOD / PREMIUM*')
   }
 
@@ -47,10 +44,11 @@ END:VCARD`
 
   // ================= WARN MOD =================
   if (command === 'warnmod') {
-    user.warn = 1
+    user.warn = (user.warn || 0) + 1
     await conn.reply(
       m.chat,
-      `⚠️ @${who.split('@')[0]} è stato ammonito da un MOD / PREMIUM`,
+      `⚠️ @${who.split('@')[0]} è stato ammonito da un moderatore\n` +
+      `📝 Numero totale di warn: ${user.warn}`,
       prova,
       { mentions: [who] }
     )
@@ -61,7 +59,8 @@ END:VCARD`
     user.warn = 0
     await conn.reply(
       m.chat,
-      `✅ @${who.split('@')[0]} non ha più ammonizioni`,
+      `✅ @${who.split('@')[0]} non ha più warn\n` +
+      `📝 Numero totale di warn: ${user.warn}`,
       prova,
       { mentions: [who] }
     )
