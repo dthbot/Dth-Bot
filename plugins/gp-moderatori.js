@@ -1,44 +1,64 @@
-// Plugin Moderatori Premium
-// Creato per utenti premium simile a VareBot
+const handler = async (m, { conn, participants, groupMetadata, args, isPremium }) => {
 
-module.exports = {
-    name: "moderatori",
-    description: "Visualizza la lista dei moderatori con stile premium ✨",
-    premium: true, // Solo utenti premium
-    execute(client, message, args) {
-
-        // Controllo premium
-        if (!message.member.roles.cache.some(r => r.name === "Premium")) {
-            return message.channel.send("🚫 Questo comando è disponibile solo per utenti **Premium**!");
-        }
-
-        // Lista dei moderatori
-        const moderatori = [
-            { nome: "Admin01", ruolo: "Head Admin" },
-            { nome: "Mod01", ruolo: "Moderatore Senior" },
-            { nome: "Mod02", ruolo: "Moderatore Junior" },
-            { nome: "Helper01", ruolo: "Helper" }
-        ];
-
-        // Creiamo un messaggio decorato
-        let embedMessage = {
-            color: 0x00FFFF, // colore azzurro neon
-            title: "🌟 Lista Moderatori Premium 🌟",
-            description: "Ecco tutti i moderatori disponibili per il server!",
-            fields: [],
-            footer: { text: "Grazie per essere un utente Premium ✨" },
-            timestamp: new Date()
-        };
-
-        moderatori.forEach(mod => {
-            embedMessage.fields.push({
-                name: `👤 ${mod.nome}`,
-                value: `Ruolo: **${mod.ruolo}**`,
-                inline: true
-            });
-        });
-
-        // Invia il messaggio embed
-        message.channel.send({ embeds: [embedMessage] });
+    // Controllo utente premium
+    if (!isPremium) {
+        return m.reply("🚫 Questo comando è disponibile solo per utenti *Premium*!");
     }
+
+    // Cooldown (opzionale)
+    const cooldownInMilliseconds = 6 * 60 * 60 * 1000; // 6 ore
+    const lastUsed = handler.cooldowns.get(m.sender) || 0;
+    const now = Date.now();
+    if (now - lastUsed < cooldownInMilliseconds) {
+        const timeLeft = cooldownInMilliseconds - (now - lastUsed);
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        const timeString = `${hours > 0 ? `${hours} ore, ` : ''}${minutes > 0 ? `${minutes} minuti e ` : ''}${seconds} secondi`;
+        return m.reply(`⏳ Comando in cooldown! Riprova tra ${timeString}`);
+    }
+    handler.cooldowns.set(m.sender, now);
+
+    // Foto del gruppo o fallback
+    const foto = await conn.profilePictureUrl(m.chat, 'image').catch(_ => null) || './media/menu/varebotcoc.jpg';
+
+    // Trova i moderatori del gruppo automaticamente
+    const moderatori = participants.filter(p => p.admin);
+
+    if (moderatori.length === 0) {
+        return m.reply("⚠️ In questo gruppo non ci sono moderatori.");
+    }
+
+    const mentionList = moderatori.map(p => p.id);
+    const messaggioUtente = args.join(" ") || "Nessun messaggio inviato";
+
+    // Testo decorato
+    const testo = `ㅤㅤ⋆｡˚『 🔰 MODERATORS PREMIUM 🔰 』˚｡⋆\n\n${moderatori.map((mod, i) => `『 *${i + 1}.* 』@${mod.id.split('@')[0]}`).join('\n')}\n\n『 🍥 』 \`Messaggio:\` » ${messaggioUtente}\n\n> Questo comando è riservato agli utenti *Premium*. Usalo responsabilmente.`.trim();
+
+    await conn.sendMessage(m.chat, {
+        text: testo,
+        contextInfo: {
+            mentionedJid: mentionList,
+            externalAdReply: {
+                title: groupMetadata.subject,
+                body: "『 🛎️ 』 invocando i moderatori premium",
+                thumbnailUrl: foto,
+                mediaType: 1,
+                renderLargerThumbnail: false
+            }
+        }
+    }, { quoted: m });
 };
+
+// Inizializza la mappa per i cooldown
+handler.cooldowns = new Map();
+
+handler.help = ['moderatori <messaggio>'];
+handler.tags = ['gruppo'];
+handler.command = /^(moderatori|mods|staff)$/i;
+handler.group = true;
+
+// Proprietà premium
+handler.premium = true;
+
+export default handler;
