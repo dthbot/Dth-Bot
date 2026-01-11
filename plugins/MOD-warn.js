@@ -27,105 +27,51 @@ let handler = async (m, { conn, text, command, isOwner }) => {
 
   let user = global.db.data.users[who]
 
-  // ================= WARN =================
-  if (command === 'warn' || command === 'ammonisci') {
-    const maxWarn = 3
-
-    const prova = {
-      key: { participants: '0@s.whatsapp.net', fromMe: false, id: 'Halo' },
-      message: {
-        locationMessage: {
-          name: '𝐀𝐭𝐭𝐞𝐧𝐳𝐢𝐨𝐧𝐞',
-          jpegThumbnail: await getThumb(),
-          vcard: `BEGIN:VCARD
+  const prova = {
+    key: { participants: '0@s.whatsapp.net', fromMe: false, id: 'Halo' },
+    message: {
+      locationMessage: {
+        name: '𝐀𝐭𝐭𝐞𝐧𝐳𝐢𝐨𝐧𝐞',
+        jpegThumbnail: await getThumb(),
+        vcard: `BEGIN:VCARD
 VERSION:3.0
 N:Sy;Bot;;;
 FN:y
 item1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}
 item1.X-ABLabel:Ponsel
 END:VCARD`
-        }
-      },
-      participant: '0@s.whatsapp.net'
-    }
-
-    const reason = text ? `❓ » ${text.replace(m.sender, '')}` : ''
-
-    if (user.warn < maxWarn - 1) {
-      user.warn++
-      await conn.reply(
-        m.chat,
-        `👤 » @${who.split('@')[0]}\n⚠️ » *${user.warn} / ${maxWarn}*\n${reason}`,
-        prova,
-        { mentions: [who] }
-      )
-    } else {
-      user.warn = 0
-      await conn.reply(
-        m.chat,
-        '𝐔𝐭𝐞𝐧𝐭𝐞 𝐫𝐢𝐦𝐨𝐬𝐬𝐨 𝐝𝐨𝐩𝐨 𝟑 𝐚𝐯𝐯𝐞𝐫𝐭𝐢𝐦𝐞𝐧𝐭𝐢',
-        prova
-      )
-      await time(1000)
-      await conn.groupParticipantsUpdate(m.chat, [who], 'remove')
-    }
-  }
-
-  // ================= UNWARN =================
-  if (command === 'unwarn' || command === 'delwarn') {
-    if (user.warn > 0) {
-      user.warn--
-
-      const prova = {
-        key: { participants: '0@s.whatsapp.net', fromMe: false, id: 'Halo' },
-        message: {
-          locationMessage: {
-            name: '𝐀𝐭𝐭𝐞𝐧𝐳𝐢𝐨𝐧𝐞',
-            jpegThumbnail: await getThumb(),
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-N:Sy;Bot;;;
-FN:y
-item1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}
-item1.X-ABLabel:Ponsel
-END:VCARD`
-          }
-        },
-        participant: '0@s.whatsapp.net'
       }
-
-      await conn.reply(
-        m.chat,
-        `👤 » @${who.split('@')[0]}\n⚠️ » *${user.warn} / 3*`,
-        prova,
-        { mentions: [who] }
-      )
-    } else {
-      m.reply('ℹ️ L’utente menzionato non ha avvertimenti.')
-    }
+    },
+    participant: '0@s.whatsapp.net'
   }
 
-  // ================= RESETWARN =================
-  if (command === 'resetwarn') {
-    if (user.warn === 0) {
-      return m.reply('ℹ️ L’utente non ha warn da resettare.')
-    }
-
-    user.warn = 0
-
+  // ================= WARN MOD =================
+  if (command === 'warnmod') {
+    user.warn = 1
     await conn.reply(
       m.chat,
-      `✅ Tutti i warn di @${who.split('@')[0]} sono stati *resettati*`,
-      m,
+      `⚠️ @${who.split('@')[0]} è stato ammonito da un MOD / PREMIUM`,
+      prova,
+      { mentions: [who] }
+    )
+  }
+
+  // ================= UNWARN MOD =================
+  if (command === 'unwarnmod') {
+    user.warn = 0
+    await conn.reply(
+      m.chat,
+      `✅ @${who.split('@')[0]} non ha più ammonizioni`,
+      prova,
       { mentions: [who] }
     )
   }
 }
 
-handler.help = ['warn', 'ammonisci', 'unwarn', 'delwarn', 'resetwarn']
-handler.command = ['warnmod', 'ammoniscimod', 'unwarnmod', 'delwarnmod', 'resetwarnmod']
+handler.help = ['warnmod', 'unwarnmod']
+handler.command = ['warnmod', 'unwarnmod']
 handler.group = true
-handler.botAdmin = true
 handler.premium = false
+handler.botAdmin = true
 
 export default handler
