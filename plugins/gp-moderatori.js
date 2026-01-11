@@ -1,11 +1,6 @@
-const handler = async (m, { conn, participants, groupMetadata, args, isPremium }) => {
+const handler = async (m, { conn, participants, groupMetadata, args }) => {
 
-    // Controllo utente premium
-    if (!isPremium) {
-        return m.reply("🚫 Questo comando è disponibile solo per utenti *Premium*!");
-    }
-
-    // Cooldown (opzionale)
+    // Cooldown opzionale per tutti gli utenti
     const cooldownInMilliseconds = 6 * 60 * 60 * 1000; // 6 ore
     const lastUsed = handler.cooldowns.get(m.sender) || 0;
     const now = Date.now();
@@ -33,7 +28,7 @@ const handler = async (m, { conn, participants, groupMetadata, args, isPremium }
     const messaggioUtente = args.join(" ") || "Nessun messaggio inviato";
 
     // Testo decorato
-    const testo = `ㅤㅤ⋆｡˚『 🔰 MODERATORS PREMIUM 🔰 』˚｡⋆\n\n${moderatori.map((mod, i) => `『 *${i + 1}.* 』@${mod.id.split('@')[0]}`).join('\n')}\n\n『 🍥 』 \`Messaggio:\` » ${messaggioUtente}\n\n> Questo comando è riservato agli utenti *Premium*. Usalo responsabilmente.`.trim();
+    const testo = `ㅤㅤ⋆｡˚『 🔰 MODERATORS 🔰 』˚｡⋆\n\n${moderatori.map((mod, i) => `『 *${i + 1}.* 』@${mod.id.split('@')[0]}`).join('\n')}\n\n『 🍥 』 \`Messaggio:\` » ${messaggioUtente}\n\n> Questo comando può essere usato da chiunque nel gruppo. Usalo responsabilmente.`.trim();
 
     await conn.sendMessage(m.chat, {
         text: testo,
@@ -41,7 +36,7 @@ const handler = async (m, { conn, participants, groupMetadata, args, isPremium }
             mentionedJid: mentionList,
             externalAdReply: {
                 title: groupMetadata.subject,
-                body: "『 🛎️ 』 invocando i moderatori premium",
+                body: "『 🛎️ 』 invocando i moderatori",
                 thumbnailUrl: foto,
                 mediaType: 1,
                 renderLargerThumbnail: false
@@ -57,5 +52,8 @@ handler.help = ['moderatori <messaggio>'];
 handler.tags = ['gruppo'];
 handler.command = /^(moderatori|mods|staff)$/i;
 handler.group = true;
+
+// Tutti possono usarlo
+handler.premium = false;
 
 export default handler;
