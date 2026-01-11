@@ -84,6 +84,10 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
     const chat = global.db.data.chats[m.chat];
     const userTag = `@${m.sender.split('@')[0]}`;
 
+    // Se il mittente è admin, ignora
+    if (isAdmin) return true;
+
+    // Controllo contenuto e link
     const { text: messageText, urls: extractedUrls } =
         extractTextAndUrlsFromMessage(m.message || {});
 
@@ -92,6 +96,8 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
         extractedUrls.some(url => linkRegex.exec(url));
 
     let qrLinkDetected = false;
+
+    // Se non ci sono link nel testo, controlla QR nelle immagini/video
     if (!containsGroupLink) {
         const media = await getMediaBuffer(m);
         if (media) {
@@ -105,9 +111,17 @@ export async function before(m, { conn, isAdmin, isBotAdmin }) {
     }
 
     if (!chat?.antiLink) return true;
-    if (isAdmin) return true;
     if (!containsGroupLink) return true;
 
+    // Controlla se il messaggio è un forward di admin
+    const quotedAdmin = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (quotedAdmin) {
+        const senderOfQuoted = m.message.extendedTextMessage.contextInfo.participant;
+        const isQuotedAdmin = global.db.data.users[senderOfQuoted]?.isAdmin;
+        if (isQuotedAdmin) return true; // Non dare warn se è un forward da admin
+    }
+
+    // Gestione warn
     let user = global.db.data.users[m.sender];
     if (!user.warn) user.warn = 0;
     if (!user.warnReasons) user.warnReasons = [];
