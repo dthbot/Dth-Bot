@@ -1,95 +1,44 @@
-// plugin-moderatori-simple.js
-export default {
-    name: 'Moderatori List',
+// Plugin Moderatori Premium
+// Creato per utenti premium simile a VareBot
 
-    async init(bot) {
-        console.log('✅ Plugin Moderatori List attivo');
+module.exports = {
+    name: "moderatori",
+    description: "Visualizza la lista dei moderatori con stile premium ✨",
+    premium: true, // Solo utenti premium
+    execute(client, message, args) {
 
-        bot.on('message', async (message) => {
-            if (!message.body) return;
-
-            const text = message.body.toLowerCase();
-
-            if (text === '.moderatori' || text === '.mods') {
-                await this.handleModeratoriCommand(message, bot);
-            }
-
-            if (text === '.moderatori online') {
-                await this.handleModeratoriOnline(message, bot);
-            }
-        });
-    },
-
-    async handleModeratoriCommand(message, bot) {
-        try {
-            const moderatori = bot.moderatori || [];
-
-            if (!moderatori.length) {
-                return bot.sendMessage(message.from, {
-                    text: '🔍 *LISTA MODERATORI*\n\nNessun moderatore registrato.\n\nUsa `.aggiungimod` per aggiungerne uno.'
-                });
-            }
-
-            let response = '👑 *MODERATORI DEL BOT*\n━━━━━━━━━━━━━━━━\n\n';
-
-            moderatori.forEach((mod, i) => {
-                const nome = mod.nome || mod.id || 'Sconosciuto';
-                const livello = mod.livello ? ` [${mod.livello}]` : '';
-                response += `*${i + 1}. ${nome}*${livello}\n`;
-
-                if (mod.permessi && mod.permessi.length) {
-                    response += `   🔧 ${mod.permessi.join(', ')}\n`;
-                }
-
-                if (mod.data) {
-                    const data = new Date(mod.data).toLocaleDateString('it-IT');
-                    response += `   📅 ${data}\n`;
-                }
-
-                response += '\n';
-            });
-
-            response += `━━━━━━━━━━━━━━━━\n📊 *Totale: ${moderatori.length} moderatori*`;
-            await bot.sendMessage(message.from, { text: response });
-
-        } catch (err) {
-            console.error('Errore comando moderatori:', err);
-            await bot.sendMessage(message.from, {
-                text: '❌ Errore nel caricamento della lista moderatori.'
-            });
-        }
-    },
-
-    async handleModeratoriOnline(message, bot) {
-        const moderatori = bot.moderatori || [];
-        const onlineMods = moderatori.filter(mod => mod.online);
-
-        if (!onlineMods.length) {
-            return bot.sendMessage(message.from, {
-                text: '👁️ *MODERATORI ONLINE*\n\nNessun moderatore online al momento.'
-            });
+        // Controllo premium
+        if (!message.member.roles.cache.some(r => r.name === "Premium")) {
+            return message.channel.send("🚫 Questo comando è disponibile solo per utenti **Premium**!");
         }
 
-        let response = '👁️ *MODERATORI ONLINE*\n━━━━━━━━━━━━━━━━\n\n';
-        onlineMods.forEach((mod) => {
-            response += `🟢 *${mod.nome}*\n`;
-            if (mod.ultimaAttivita) {
-                const tempo = this.calcolaTempoOnline(mod.ultimaAttivita);
-                response += `   ⏱️ Online da: ${tempo}\n`;
-            }
-            response += '\n';
+        // Lista dei moderatori
+        const moderatori = [
+            { nome: "Admin01", ruolo: "Head Admin" },
+            { nome: "Mod01", ruolo: "Moderatore Senior" },
+            { nome: "Mod02", ruolo: "Moderatore Junior" },
+            { nome: "Helper01", ruolo: "Helper" }
+        ];
+
+        // Creiamo un messaggio decorato
+        let embedMessage = {
+            color: 0x00FFFF, // colore azzurro neon
+            title: "🌟 Lista Moderatori Premium 🌟",
+            description: "Ecco tutti i moderatori disponibili per il server!",
+            fields: [],
+            footer: { text: "Grazie per essere un utente Premium ✨" },
+            timestamp: new Date()
+        };
+
+        moderatori.forEach(mod => {
+            embedMessage.fields.push({
+                name: `👤 ${mod.nome}`,
+                value: `Ruolo: **${mod.ruolo}**`,
+                inline: true
+            });
         });
 
-        response += `━━━━━━━━━━━━━━━━\n🟢 Online: ${onlineMods.length}/${moderatori.length}`;
-        await bot.sendMessage(message.from, { text: response });
-    },
-
-    calcolaTempoOnline(dataInizio) {
-        const diff = Date.now() - new Date(dataInizio).getTime();
-        const minuti = Math.floor(diff / 60000);
-        if (minuti < 60) return `${minuti} minuti`;
-        const ore = Math.floor(minuti / 60);
-        if (ore < 24) return `${ore} ore`;
-        return `${Math.floor(ore / 24)} giorni`;
+        // Invia il messaggio embed
+        message.channel.send({ embeds: [embedMessage] });
     }
 };
