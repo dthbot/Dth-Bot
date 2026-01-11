@@ -2,7 +2,7 @@ let handler = async (m, { conn,usedPrefix, text }) => {
 if(isNaN(text) && !text.match(/@/g)){
 
 }else if(isNaN(text)) {
-var number = text.split@[1]
+var number = text.split`@`[1]
 }else if(!isNaN(text)) {
 var number = text
 }
@@ -17,7 +17,7 @@ var user = number + '@s.whatsapp.net'
 var user = m.quoted.sender
 } else if(m.mentionedJid) {
 var user = number + '@s.whatsapp.net'
-}
+} 
 } catch (e) {
 } finally {
 conn.groupParticipantsUpdate(m.chat, [user], 'promote')
