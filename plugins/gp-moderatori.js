@@ -3,7 +3,10 @@ import fetch from 'node-fetch'
 const getThumb = async () => 
   Buffer.from(await (await fetch('https://media.tenor.com/WyqUoMKzV6kAAAAC/shocked-face-black.gif')).arrayBuffer())
 
-let handler = async (m, { conn, text, participants }) => {
+let handler = async (m, { conn, text, participants, isAdmin }) => {
+  // 🔐 Solo admin possono usare il comando
+  if (!isAdmin) return m.reply('❌ Solo admin possono usare questo comando!')
+
   // Filtra i moderatori dal database globale
   const mods = participants
     .filter(p => {
@@ -46,6 +49,5 @@ ${mentionsText}${styledMods}
 handler.help = ['moderatori [messaggio]']
 handler.command = ['moderatori']
 handler.group = true
-hadler.admin = true 
-
+handler.admin = true 
 export default handler
