@@ -1,23 +1,24 @@
 const handler = async (m, { conn }) => {
-  let who;
-  if (m.isGroup)
-    who = m.mentionedJid[0] || (m.quoted ? m.quoted.sender : null);
-  else return;
+  if (!m.isGroup) return;
 
+  let who = m.mentionedJid[0] || (m.quoted ? m.quoted.sender : null);
   if (!who)
     return m.reply('⚠️ Tagga l’utente da promuovere a MODERATORE.');
 
-  const chat = global.db.data.chats[m.chat];
-  if (!chat)
-    return m.reply('❌ Chat non trovata nel database.');
+  // DATABASE GRUPPO
+  let group = global.db.data.groups[m.chat];
+  if (!group) global.db.data.groups[m.chat] = {};
+  group = global.db.data.groups[m.chat];
 
-  // Inizializza lista moderatori del gruppo
-  if (!chat.mods) chat.mods = {};
+  // inizializza mods
+  if (!group.mods) group.mods = [];
 
-  // Imposta moderatore SOLO per questo gruppo
-  chat.mods[who] = true;
+  // evita doppioni
+  if (group.mods.includes(who))
+    return m.reply('⚠️ Questo utente è già moderatore di questo gruppo.');
 
-  // Foto profilo
+  group.mods.push(who);
+
   let pp;
   try {
     pp = await conn.profilePictureUrl(who, 'image');
@@ -27,31 +28,27 @@ const handler = async (m, { conn }) => {
 
   const name = '@' + who.split('@')[0];
 
-  const caption = `
-👑 MOD ATTIVATO 👑
-
-👤 Utente: ${name}
-🏘️ Gruppo: ${chat.subject || 'Questo gruppo'}
-🛡️ Stato: ATTIVO SOLO QUI
-
-✨ Ora è moderatore di questo gruppo!
-`.trim();
-
   await conn.sendMessage(
     m.chat,
     {
       image: { url: pp },
-      caption,
+      caption: `
+👑 MOD ATTIVATO 👑
+
+👤 Utente: ${name}
+🏘️ Gruppo: QUESTO
+🛡️ Stato: SOLO QUI
+
+✅ Moderatore aggiunto correttamente
+`.trim(),
       mentions: [who]
     },
     { quoted: m }
   );
 };
 
-handler.help = ['addmod @user'];
-handler.tags = ['owner'];
 handler.command = ['addmod'];
-handler.group = true;
 handler.owner = true;
+handler.group = true;
 
 export default handler;
