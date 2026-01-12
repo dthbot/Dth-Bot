@@ -3,8 +3,13 @@ let games = {};
 let handler = async (m, { conn, usedPrefix, command, text }) => {
     const chatId = m.chat;
 
-    // Estrae solo i numeri dall'ID (es. 393451234567)
-    const parseId = (jid) => jid ? jid.split('@')[0].replace(/[^0-9]/g, '') : '';
+    // FUNZIONE PER PARSARE CORRETTAMENTE GLI ID
+    const parseId = (jid) => {
+        if (!jid) return '';
+        // Rimuove tutto tranne i numeri
+        return jid.replace(/[^0-9]/g, '');
+    };
+    
     const senderId = parseId(m.sender);
 
     // ===== START (.tris) =====
@@ -14,7 +19,9 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         if (!mention) 
             return conn.sendMessage(chatId, { text: `⚠️ Devi menzionare qualcuno o rispondere a un suo messaggio!\nEsempio: ${usedPrefix}tris @utente` }, { quoted: m });
 
-        if (parseId(m.sender) === parseId(mention))
+        const mentionId = parseId(mention);
+        
+        if (senderId === mentionId)
             return conn.sendMessage(chatId, { text: '❌ Non puoi giocare contro te stesso!' }, { quoted: m });
 
         if (games[chatId])
@@ -23,11 +30,12 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         games[chatId] = {
             board: [['A1','A2','A3'],['B1','B2','B3'],['C1','C2','C3']],
             players: [m.sender, mention], 
+            playerIds: [senderId, mentionId], // Salva anche gli ID numerici
             turn: 0,
             timer: null
         };
 
-        await sendBoard(chatId, conn, games[chatId], `🎮 Partita iniziata!\n❌ @${m.sender.split('@')[0]}\n⭕ @${mention.split('@')[0]}\n\nTocca a @${m.sender.split('@')[0]}`);
+        await sendBoard(chatId, conn, games[chatId], `🎮 Partita iniziata!\n❌ @${parseId(m.sender)}\n⭕ @${mentionId}\n\nTocca a @${parseId(m.sender)}`);
         startTurnTimer(chatId, conn);
     }
 
@@ -36,12 +44,23 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         const game = games[chatId];
         if (!game) return conn.sendMessage(chatId, { text: '❌ Nessuna partita attiva. Iniziane una con .tris' }, { quoted: m });
 
-        const currentPlayerJid = game.players[game.turn];
+        // USIAMO GLI ID NUMERICI PER IL CONFRONTO
+        const currentPlayerId = game.playerIds[game.turn];
         
-        // CONFRONTO NUMERICO PURO
-        if (senderId !== parseId(currentPlayerJid)) {
+        // DEBUG: stampa per vedere cosa sta succedendo
+        console.log('DEBUG:', {
+            senderId,
+            currentPlayerId,
+            playerIds: game.playerIds,
+            turn: game.turn,
+            players: game.players.map(p => parseId(p))
+        });
+
+        // CONFRONTO NUMERICO
+        if (senderId !== currentPlayerId) {
+            const currentPlayerJid = game.players[game.turn];
             return conn.sendMessage(chatId, {
-                text: `❌ Non è il tuo turno!\nDeve muovere @${currentPlayerJid.split('@')[0]}`,
+                text: `❌ Non è il tuo turno!\nDeve muovere @${parseId(currentPlayerJid)}`,
                 mentions: [currentPlayerJid]
             }, { quoted: m });
         }
@@ -61,7 +80,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 
         if (checkWinner(game.board)) {
             clearTimeout(game.timer);
-            await sendBoard(chatId, conn, game, `🎉 VITTORIA! @${m.sender.split('@')[0]} ha vinto la partita!`);
+            await sendBoard(chatId, conn, game, `🎉 VITTORIA! @${parseId(m.sender)} ha vinto la partita!`);
             delete games[chatId];
         } else if (game.board.flat().every(c => ['❌','⭕'].includes(c))) {
             clearTimeout(game.timer);
@@ -70,7 +89,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         } else {
             game.turn = 1 - game.turn;
             const nextPlayer = game.players[game.turn];
-            await sendBoard(chatId, conn, game, `Mossa fatta! Tocca a @${nextPlayer.split('@')[0]}`);
+            await sendBoard(chatId, conn, game, `Mossa fatta! Tocca a @${parseId(nextPlayer)}`);
             startTurnTimer(chatId, conn);
         }
     }
@@ -90,7 +109,10 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 async function sendBoard(chatId, conn, game, msg) {
     const s = c => (c === '❌' || c === '⭕') ? c : '⬜';
     const boardStr = `      1   2   3\n   ┌───┬───┬───┐\n A │ ${s(game.board[0][0])} │ ${s(game.board[0][1])} │ ${s(game.board[0][2])} │\n   ├───┼───┼───┤\n B │ ${s(game.board[1][0])} │ ${s(game.board[1][1])} │ ${s(game.board[1][2])} │\n   ├───┼───┼───┤\n C │ ${s(game.board[2][0])} │ ${s(game.board[2][1])} │ ${s(game.board[2][2])} │\n   └───┴───┴───┘`;
-    await conn.sendMessage(chatId, { text: `${boardStr}\n\n${msg}`, mentions: game.players });
+    await conn.sendMessage(chatId, { 
+        text: `${boardStr}\n\n${msg}`,
+        mentions: game.players 
+    });
 }
 
 function startTurnTimer(chatId, conn) {
@@ -98,7 +120,9 @@ function startTurnTimer(chatId, conn) {
     if (game?.timer) clearTimeout(game.timer);
     game.timer = setTimeout(async () => {
         if (games[chatId]) {
-            await conn.sendMessage(chatId, { text: `⏱️ Tempo scaduto! La partita è stata chiusa per inattività.` });
+            await conn.sendMessage(chatId, { 
+                text: `⏱️ Tempo scaduto! La partita è stata chiusa per inattività.` 
+            });
             delete games[chatId];
         }
     }, 60000);
