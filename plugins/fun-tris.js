@@ -47,13 +47,12 @@ Tocca a @${player1.split('@')[0]}`
         const player = m.sender;
         const currentPlayer = game.players[game.turn];
 
-        // NORMALIZZA GLI ID PER IL CONFRONTO
-        const normalizedPlayer = player.split('@')[0].toLowerCase();
-        const normalizedCurrent = currentPlayer.split('@')[0].toLowerCase();
-
-        if (normalizedPlayer !== normalizedCurrent) {
+        // ===== CONFRONTO TURNO =====
+        if (player !== currentPlayer) {
+            // nome pulito per il messaggio
+            const cleanName = currentPlayer.split('@')[0].replace(/[^\w]/g,'');
             return conn.sendMessage(chatId, {
-                text: `❌ Non è il tuo turno!\nTocca a @${currentPlayer.split('@')[0]}`,
+                text: `❌ Non è il tuo turno!\nTocca a @${cleanName}`,
                 mentions: [currentPlayer]
             }, { quoted: m });
         }
@@ -95,8 +94,9 @@ Tocca a @${player1.split('@')[0]}`
         // cambio turno
         game.turn = 1 - game.turn;
         const nextPlayer = game.players[game.turn];
+        const cleanNext = nextPlayer.split('@')[0].replace(/[^\w]/g,'');
 
-        await sendBoard(chatId, m, game, `Tocca a @${nextPlayer.split('@')[0]}`);
+        await sendBoard(chatId, m, game, `Tocca a @${cleanNext}`);
         startTurnTimer(chatId, conn);
     }
 
@@ -142,12 +142,13 @@ function startTurnTimer(chatId, conn) {
     const currentPlayer = game.players[game.turn];
 
     game.timer = setTimeout(async () => {
+        const cleanName = currentPlayer.split('@')[0].replace(/[^\w]/g,'');
         await conn.sendMessage(chatId, {
-            text: `⏱️ Tempo scaduto!\n@${currentPlayer.split('@')[0]} ha perso.\nPartita terminata.`,
+            text: `⏱️ Tempo scaduto!\n@${cleanName} ha perso.\nPartita terminata.`,
             mentions: [currentPlayer]
         });
         delete games[chatId];
-    }, 30000); // 30 secondi per turno
+    }, 30000);
 }
 
 // ===== CONTROLLO VITTORIA =====
