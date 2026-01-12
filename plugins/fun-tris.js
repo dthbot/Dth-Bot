@@ -47,8 +47,11 @@ Tocca a @${player1.split('@')[0]}`
         const player = m.sender;
         const currentPlayer = game.players[game.turn];
 
-        // controllo turno FIXATO
-        if (player !== currentPlayer) {
+        // NORMALIZZA GLI ID PER IL CONFRONTO
+        const normalizedPlayer = player.split('@')[0].toLowerCase();
+        const normalizedCurrent = currentPlayer.split('@')[0].toLowerCase();
+
+        if (normalizedPlayer !== normalizedCurrent) {
             return conn.sendMessage(chatId, {
                 text: `❌ Non è il tuo turno!\nTocca a @${currentPlayer.split('@')[0]}`,
                 mentions: [currentPlayer]
@@ -144,7 +147,7 @@ function startTurnTimer(chatId, conn) {
             mentions: [currentPlayer]
         });
         delete games[chatId];
-    }, 30000);
+    }, 30000); // 30 secondi per turno
 }
 
 // ===== CONTROLLO VITTORIA =====
