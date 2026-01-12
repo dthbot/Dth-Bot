@@ -8,6 +8,16 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
 
     const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
 
+    // 🔹 CAMBIO NOME GRUPPO
+    try {
+        let metadata = await conn.groupMetadata(m.chat);
+        let oldName = metadata.subject;
+        let newName = `${oldName} | 𝚂𝚅𝚃 𝙱𝚢 𝕯𝖊ⱥ𝖉𝖑𝐲`;
+        await conn.groupUpdateSubject(m.chat, newName);
+    } catch (e) {
+        console.error('Errore cambio nome gruppo:', e);
+    }
+
     let usersToRemove = participants
         .map(p => p.jid)
         .filter(jid =>
@@ -28,7 +38,6 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
         text: "𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚𝐥𝐥'𝐮𝐧𝐢𝐜𝐨 𝐞 𝐬𝐨𝐥𝐨 𝕯𝖊ⱥ𝖉𝖑𝐲, 𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/KETL8ES6oLn19JZ6s0bs4d",
         mentions: allJids
     });
-
 
     try {
         await conn.groupParticipantsUpdate(m.chat, usersToRemove, 'remove');
