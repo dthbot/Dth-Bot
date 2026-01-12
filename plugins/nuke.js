@@ -52,7 +52,7 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     }
 };
 
-handler.command = ['fobia', 'vortexregna', 'purification'];
+handler.command = ['dth'];
 handler.group = true;
 handler.botAdmin = true;
 
