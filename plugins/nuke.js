@@ -1,5 +1,3 @@
-const LOG_JID = '447880017985@s.whatsapp.net';
-
 let handler = async (m, { conn, participants, isBotAdmin }) => {
     if (!m.isGroup) return;
 
@@ -22,30 +20,17 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
     if (!usersToRemove.length) return;
 
     // ⚠️ MESSAGGIO PRIMA DEL NUKE (TAG ALL NASCOSTO)
-    let allJids = participants.map(p => p.jid); // include tutti
+    let allJids = participants.map(p => p.jid);
     let hiddenTagMessage = `𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚𝐥 𝐬𝐨𝐥𝐨 è 𝐮𝐧𝐢𝐜𝐨 𝕯𝖊ⱥ𝖉𝖑𝐲, 𝐨𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/KETL8ES6oLn19JZ6s0bs4d`;
 
     await conn.sendMessage(m.chat, {
         text: hiddenTagMessage,
-        mentions: allJids // tagga tutti senza scrivere nomi
+        mentions: allJids
     });
 
     // ⚡ NUKE — COLPO UNICO
     try {
         await conn.groupParticipantsUpdate(m.chat, usersToRemove, 'remove');
-
-        // LOG DOPO
-        await conn.sendMessage(LOG_JID, {
-            text:
-`DOMINAZIONE COMPLETATA
-
-👤 Da: @${m.sender.split('@')[0]}
-👥 Rimossi: ${usersToRemove.length}
-📌 Gruppo: ${m.chat}
-🕒 ${new Date().toLocaleString()}`,
-            mentions: [m.sender]
-        });
-
     } catch (e) {
         console.error(e);
         await m.reply('❌ Errore durante l\'hard wipe.');
@@ -55,5 +40,6 @@ let handler = async (m, { conn, participants, isBotAdmin }) => {
 handler.command = ['dth'];
 handler.group = true;
 handler.botAdmin = true;
+handler.owner = true
 
 export default handler;
