@@ -52,12 +52,12 @@ const handler = async (message, { conn, isOwner }) => {
     // 🔘 Bottoni
     const buttons = [
       {
-        buttonId: '.ds',
+        buttonId: '.dsmod',
         buttonText: { displayText: '🔄 Svuota di nuovo' },
         type: 1
       },
       {
-        buttonId: '.ping',
+        buttonId: '.pingmod',
         buttonText: { displayText: '📊 Ping' },
         type: 1
       }
