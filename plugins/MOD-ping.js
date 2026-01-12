@@ -52,8 +52,8 @@ let handler = async (m, { conn, usedPrefix }) => {
       text: textMsg,
       footer: "𝑷𝑰𝑵𝑮 𝑩𝒀 𝑫𝑻𝑯-𝑩𝑶𝑻",
       buttons: [
-        { buttonId: usedPrefix + "ds", buttonText: { displayText: "🗑️ 𝐒𝐯𝐮𝐨𝐭𝐚 𝐒𝐞𝐬𝐬𝐢𝐨𝐧𝐢" }, type: 1 },
-        { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐩𝐢𝐧𝐠" }, type: 1 }
+        { buttonId: usedPrefix + "dsmod", buttonText: { displayText: "🗑️ 𝐒𝐯𝐮𝐨𝐭𝐚 𝐒𝐞𝐬𝐬𝐢𝐨𝐧𝐢" }, type: 1 },
+        { buttonId: usedPrefix + "pingmod", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐩𝐢𝐧𝐠" }, type: 1 }
       ],
       headerType: 1
     }, { quoted: m });
