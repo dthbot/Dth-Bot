@@ -1,63 +1,78 @@
-import fs from "fs"
-import { performance } from "perf_hooks"
-import Jimp from "jimp"
+import os from 'os';
+import { performance } from 'perf_hooks';
 
-let handler = async (m, { conn }) => {
-  const start = performance.now()
-
-  await conn.sendMessage(m.chat, { text: "𝐒𝐭𝐨 𝐟𝐚𝐜𝐞𝐧𝐝𝐨 𝐢𝐥 𝐭𝐞𝐬𝐭 𝐝𝐞𝐥 𝐏𝐢𝐧𝐠...⏳" })
-
-  const ping = performance.now() - start
-  const uptime = process.uptime() * 1000
-  const status = "🟢 𝐎𝐧𝐥𝐢𝐧𝐞"
-
-  const formatTime = (ms) => {
-    let h = Math.floor(ms / 3600000)
-    let m = Math.floor((ms % 3600000) / 60000)
-    let s = Math.floor((ms % 60000) / 1000)
-    return `${h}h ${m}m ${s}s`
-  }
-
-  const thumbnailPath = "media/ping.jpeg"
-  let thumbBuffer = null
-
+let handler = async (m, { conn, usedPrefix }) => {
   try {
-    if (fs.existsSync(thumbnailPath)) {
-      let image = await Jimp.read(thumbnailPath)
-      image.resize(150, Jimp.AUTO).quality(70) // 🟡 THUMBNAIL PICCOLA
-      thumbBuffer = await image.getBufferAsync(Jimp.MIME_JPEG)
-    }
-  } catch (e) {
-    console.error("Errore nel caricare la thumbnail:", e)
-  }
+    const uptimeMs = process.uptime() * 1000;
+    const uptimeStr = clockString(uptimeMs);
 
-  const textMsg = `╭─❖ 𝗕𝗢𝗧 𝗦𝗧𝗔𝗧𝗢 ❖─⬣
-│ 🕐 𝐔𝐩𝐭𝐢𝐦𝐞: ${formatTime(uptime)}
-│ ⚡ 𝐏𝐢𝐧𝐠: ${ping.toFixed(0)} ms
-│ 📶 𝐒𝐭𝐚𝐭𝐨: ${status}
-╰────────────────────⬣`
+    // Calcolo ping
+    const startTime = performance.now();
+    const endTime = performance.now();
+    const speed = (endTime - startTime).toFixed(4);
 
-  await conn.sendMessage(
-    m.chat,
-    {
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+    const percentUsed = ((usedMem / totalMem) * 100).toFixed(2);
+
+    const totalMemGB = (totalMem / 1024 / 1024 / 1024).toFixed(2);
+    const usedMemGB = (usedMem / 1024 / 1024 / 1024).toFixed(2);
+
+    const botName = global.db?.data?.nomedelbot || "𝐒𝐛𝐨𝐫𝐫𝐚 𝐁𝐨𝐭";
+
+    const botStartTime = new Date(Date.now() - uptimeMs);
+    const activationTime = botStartTime.toLocaleString('it-IT', {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+
+    const textMsg = `╔═⛧═╦═⛧═╦═⛧═╗
+║   ₱ł₦₲ ฿Ø₮   ║
+╠═⛧═╬═⛧═╬═⛧═╣
+║ ⬛ 𝚄𝙿𝚃𝙸𝙼𝙴 ⬛ ║
+║ ▸ ${uptimeStr}
+╠═⛧═╬═⛧═╬═⛧═╣
+║ ⬛ 𝙿𝙸𝙽𝙶 ⬛
+║ ▸ ${speed} ms
+╠═⛧═╬═⛧═╬═⛧═╣
+║ ⬛ 𝚂𝚃𝙰𝚃𝚄𝚂 ⬛
+║ ▸ 𝙾𝙽𝙻𝙸𝙽𝙴
+╠═⛧═╬═⛧═╬═⛧═╣
+║ ⬛ 𝙰𝙲𝚃𝙸𝚅𝙴 ⬛
+║ ▸ ${activationTime}
+╚═⛧═╩═⛧═╩═⛧═╝`;
+
+    await conn.sendMessage(m.chat, {
       text: textMsg,
-      contextInfo: {
-        externalAdReply: {
-          title: "📡 Stato del Bot",
-          body: "𝔻𝕋ℍ-𝔹𝕆𝕋",
-          mediaType: 1,
-          thumbnail: thumbBuffer ?? undefined, // 🟡 MINIATURA
-          // rimosso renderLargerThumbnail → ora è piccola
-        },
-      },
-    },
-    { quoted: m }
-  )
+      footer: "𝐁𝒀 𝛬𝑿𝑻𝑹𝜜𝑳 & 𝑾𝛬𝐓𝐓𝑬𝐃",
+      buttons: [
+        { buttonId: usedPrefix + "ds", buttonText: { displayText: "🗑️ 𝐒𝐯𝐮𝐨𝐭𝐚 𝐒𝐞𝐬𝐬𝐢𝐨𝐧𝐢" }, type: 1 },
+        { buttonId: usedPrefix + "ping", buttonText: { displayText: "📡 𝐑𝐢𝐟𝐚𝐢 𝐩𝐢𝐧𝐠" }, type: 1 }
+      ],
+      headerType: 1
+    }, { quoted: m });
+
+  } catch (err) {
+    console.error("Errore nell'handler:", err);
+  }
+};
+
+function clockString(ms) {
+  const d = Math.floor(ms / 86400000);
+  const h = Math.floor(ms / 3600000) % 24;
+    const m = Math.floor(ms / 60000) % 60;
+    const s = Math.floor(ms / 1000) % 60;
+    return [d, h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
 }
 
-handler.help = ["status", "uptime"]
-handler.tags = ["info"]
-handler.command = /^status|uptime|ping$/i
-handler.admin = true
+handler.help = ['ping'];
+handler.tags = ['info'];
+handler.command = /^(ping)$/i;
 
-export default handler
+export default handler;
