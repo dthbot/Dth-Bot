@@ -2,45 +2,46 @@ let games = {};
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
     const chatId = m.chat;
-    // Funzione interna per pulire i JID e confrontarli correttamente
-    const getId = (jid) => jid.split('@')[0].split(':')[0]; 
-    const senderId = getId(m.sender);
 
+    // Estrae solo i numeri dall'ID (es. 393451234567)
+    const parseId = (jid) => jid ? jid.split('@')[0].replace(/[^0-9]/g, '') : '';
+    const senderId = parseId(m.sender);
+
+    // ===== START (.tris) =====
     if (command === 'tris') {
-        if (!m.mentionedJid || m.mentionedJid.length === 0)
-            return conn.sendMessage(chatId, { text: `⚠️ Menziona un avversario!\nEsempio: ${usedPrefix}tris @utente` }, { quoted: m });
+        let mention = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
+        
+        if (!mention) 
+            return conn.sendMessage(chatId, { text: `⚠️ Devi menzionare qualcuno o rispondere a un suo messaggio!\nEsempio: ${usedPrefix}tris @utente` }, { quoted: m });
 
-        const player1 = m.sender;
-        const player2 = m.mentionedJid[0];
-
-        if (getId(player1) === getId(player2))
+        if (parseId(m.sender) === parseId(mention))
             return conn.sendMessage(chatId, { text: '❌ Non puoi giocare contro te stesso!' }, { quoted: m });
 
         if (games[chatId])
-            return conn.sendMessage(chatId, { text: '❌ Una partita è già in corso!' }, { quoted: m });
+            return conn.sendMessage(chatId, { text: '❌ C\'è già una partita in corso in questa chat!' }, { quoted: m });
 
         games[chatId] = {
             board: [['A1','A2','A3'],['B1','B2','B3'],['C1','C2','C3']],
-            players: [player1, player2], // Salviamo i JID completi per le menzioni
+            players: [m.sender, mention], 
             turn: 0,
             timer: null
         };
 
-        await sendBoard(chatId, conn, games[chatId], `🎮 Turno di: @${player1.split('@')[0]}`);
+        await sendBoard(chatId, conn, games[chatId], `🎮 Partita iniziata!\n❌ @${m.sender.split('@')[0]}\n⭕ @${mention.split('@')[0]}\n\nTocca a @${m.sender.split('@')[0]}`);
         startTurnTimer(chatId, conn);
     }
 
+    // ===== MOVE (.putris) =====
     else if (command === 'putris') {
         const game = games[chatId];
-        if (!game) return;
+        if (!game) return conn.sendMessage(chatId, { text: '❌ Nessuna partita attiva. Iniziane una con .tris' }, { quoted: m });
 
         const currentPlayerJid = game.players[game.turn];
-        const currentPlayerId = getId(currentPlayerJid);
-
-        // CONFRONTO PULITO
-        if (senderId !== currentPlayerId) {
+        
+        // CONFRONTO NUMERICO PURO
+        if (senderId !== parseId(currentPlayerJid)) {
             return conn.sendMessage(chatId, {
-                text: `❌ Non è il tuo turno!\nAspetta @${currentPlayerJid.split('@')[0]}`,
+                text: `❌ Non è il tuo turno!\nDeve muovere @${currentPlayerJid.split('@')[0]}`,
                 mentions: [currentPlayerJid]
             }, { quoted: m });
         }
@@ -51,39 +52,40 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         const col = parseInt(move[1]) - 1;
 
         if (row === undefined || isNaN(col) || col < 0 || col > 2)
-            return conn.sendMessage(chatId, { text: '⚠️ Usa A1, B2, ecc.' }, { quoted: m });
+            return conn.sendMessage(chatId, { text: '⚠️ Posizione non valida! Usa ad esempio: .putris B2' }, { quoted: m });
 
         if (['❌','⭕'].includes(game.board[row][col]))
-            return conn.sendMessage(chatId, { text: '❌ Casella occupata!' }, { quoted: m });
+            return conn.sendMessage(chatId, { text: '❌ Casella già occupata!' }, { quoted: m });
 
         game.board[row][col] = game.turn === 0 ? '❌' : '⭕';
 
         if (checkWinner(game.board)) {
             clearTimeout(game.timer);
-            await sendBoard(chatId, conn, game, `🎉 Vittoria per @${m.sender.split('@')[0]}!`);
+            await sendBoard(chatId, conn, game, `🎉 VITTORIA! @${m.sender.split('@')[0]} ha vinto la partita!`);
             delete games[chatId];
         } else if (game.board.flat().every(c => ['❌','⭕'].includes(c))) {
             clearTimeout(game.timer);
-            await sendBoard(chatId, conn, game, '🤝 Pareggio!');
+            await sendBoard(chatId, conn, game, '🤝 Pareggio! Non ci sono più mosse disponibili.');
             delete games[chatId];
         } else {
             game.turn = 1 - game.turn;
             const nextPlayer = game.players[game.turn];
-            await sendBoard(chatId, conn, game, `Tocca a @${nextPlayer.split('@')[0]}`);
+            await sendBoard(chatId, conn, game, `Mossa fatta! Tocca a @${nextPlayer.split('@')[0]}`);
             startTurnTimer(chatId, conn);
         }
     }
 
+    // ===== END (.endtris) =====
     else if (command === 'endtris') {
         if (games[chatId]) {
             clearTimeout(games[chatId].timer);
             delete games[chatId];
-            await conn.sendMessage(chatId, { text: '🛑 Partita chiusa.' });
+            await conn.sendMessage(chatId, { text: '🛑 La partita è stata annullata.' });
         }
     }
 };
 
-// --- FUNZIONI DI SUPPORTO (Non modificate, ma incluse per completezza) ---
+// --- UTILS ---
 
 async function sendBoard(chatId, conn, game, msg) {
     const s = c => (c === '❌' || c === '⭕') ? c : '⬜';
@@ -96,7 +98,7 @@ function startTurnTimer(chatId, conn) {
     if (game?.timer) clearTimeout(game.timer);
     game.timer = setTimeout(async () => {
         if (games[chatId]) {
-            await conn.sendMessage(chatId, { text: `⏱️ Tempo scaduto! Partita terminata.` });
+            await conn.sendMessage(chatId, { text: `⏱️ Tempo scaduto! La partita è stata chiusa per inattività.` });
             delete games[chatId];
         }
     }, 60000);
