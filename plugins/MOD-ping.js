@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     const totalMemGB = (totalMem / 1024 / 1024 / 1024).toFixed(2);
     const usedMemGB = (usedMem / 1024 / 1024 / 1024).toFixed(2);
 
-    const botName = global.db?.data?.nomedelbot || "𝐒𝐛𝐨𝐫𝐫𝐚 𝐁𝐨𝐭";
+    const botName = global.db?.data?.nomedelbot || "ᴅᴛʜ-ʙᴏᴛ";
 
     const botStartTime = new Date(Date.now() - uptimeMs);
     const activationTime = botStartTime.toLocaleString('it-IT', {
