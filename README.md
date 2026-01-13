@@ -17,6 +17,14 @@ Creato con 💀 da <b>𝕯𝖊ⱥ𝖉𝖑𝐲</b>
 
 ---
 
+## 🖼️ Anteprima
+
+<p align="center">
+  <img src="media/bestemmie.jpeg" alt="ᴅᴛʜ-ʙᴏᴛ Preview" width="400">
+</p>
+
+---
+
 ## ☠️ Descrizione
 
 **ᴅᴛʜ-ʙᴏᴛ** è un bot progettato per chi vuole **controllo totale**,  
