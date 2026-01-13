@@ -26,9 +26,9 @@ ${finalPhrase}
             forwardingScore: 1,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '120363406461040669@newsletter',
                 serverMessageId: '',
-                newsletterName: `ChatUnity` // Utilizzo della variabile botName
+                newsletterName: `ᴅᴛʜ-ʙᴏᴛ` // Utilizzo della variabile botName
             },
         }
     };
