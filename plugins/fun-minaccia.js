@@ -17,9 +17,9 @@ const handler = async (m, {
             forwardingScore: 1,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '',
+                newsletterJid: '120363406461040669@newsletter',
                 serverMessageId: '',
-                newsletterName: `ChatUnity`
+                newsletterName: `ᴅᴛʜ-ʙᴏᴛ`
             },
         }
     };
