@@ -1,13 +1,13 @@
 let handler = async (m, { conn }) => {
     await conn.sendMessage(m.chat, { 
-        text: `*┌────「 ‼𝐎𝐁𝐁𝐋𝐈𝐆𝐎‼ 」─*\n*“${pickRandom(global.bucin)}”*\n*└────「 © ChatUnity 」─*`,
+        text: `*┌────「 ‼𝐎𝐁𝐁𝐋𝐈𝐆𝐎‼ 」─*\n*“${pickRandom(global.bucin)}”*\n*└────「 © ᴅᴛʜ-ʙᴏᴛ 」─*`,
         contextInfo: {
             forwardingScore: 99,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '120363406461040669@newsletter',
                 serverMessageId: '',
-                newsletterName: 'ChatUnity'
+                newsletterName: 'ᴅᴛʜ-ʙᴏᴛ'
             }
         }
     }, { quoted: m });
