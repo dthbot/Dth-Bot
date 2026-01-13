@@ -19,7 +19,7 @@ ${finalPhrase}
             forwardingScore: 0,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363259442839354@newsletter',
+                newsletterJid: '120363406461040669@newsletter',
                 serverMessageId: '',
                 newsletterName: `${conn.user.name}`
             }
