@@ -48,7 +48,7 @@ if (message.messageStubType === 29 && detectEnabled) {
     }  
 
     await conn.sendMessage(message.chat, {  
-        text: `@${sender.split('@')[0]} 𝐡𝐚 𝐝𝐚𝐭𝐨 𝐢 𝐩𝐨𝐭𝐞𝐫𝐢 𝐚 @${promotedUser.split('@')[0]} 𝐨𝐫𝐚 𝐫𝐢𝐧𝐠𝐫𝐚𝐳𝐢𝐚`,  
+        text: `@${sender.split('@')[0]} ha promosso @${promotedUser.split('@')[0]}`,  
         contextInfo: {  
             mentionedJid: [sender, promotedUser],  
             externalAdReply: {  
