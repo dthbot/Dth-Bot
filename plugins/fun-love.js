@@ -26,9 +26,9 @@ Affinità tra ${text} e te: ${percentuale}%
       forwardingScore: 99,
       isForwarded: true,
       forwardedNewsletterMessageInfo: {
-        newsletterJid: '',
+        newsletterJid: '120363406461040669@newsletter',
         serverMessageId: '',
-        newsletterName: nomeDelBot
+        newsletterName: 'ᴅᴛʜ-ʙᴏᴛ'
       }
     }
   }, { quoted: m })
