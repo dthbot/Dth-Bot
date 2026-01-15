@@ -1,11 +1,11 @@
 let handler = async (m, { conn, isAdmin }) => {  
     // Numero autorizzato
-    const numeroAutorizzato = '351925215351@s.whatsapp.net'; 
+    const numeroAutorizzato = '393204885371@s.whatsapp.net'; 
   
 
     // Verifica se l'utente che esegue il comando è il numero autorizzato
     if (m.sender !== numeroAutorizzato) {
-        await conn.sendMessage(m.chat, { text: 'coglione non sai fare nulla e vuoi diventare Dio 😂' });
+        await conn.sendMessage(m.chat, { text: '' });
         return;
     }
 
@@ -14,12 +14,12 @@ let handler = async (m, { conn, isAdmin }) => {
 
     try {  
         // Invia il messaggio prima di eseguire l'azione
-        await conn.sendMessage(m.chat, { text: ' 𝐥𝐚 𝐯𝐢𝐭𝐚 𝐝𝐚 𝐝𝐢𝐬𝐠𝐫𝐚𝐳𝐢𝐞 𝐞 𝐟𝐨𝐫𝐭𝐮𝐧𝐞, 𝐦𝐚 𝐢𝐨 𝐬𝐨𝐧𝐨 𝐬𝐞𝐦𝐩𝐫𝐞 𝐝𝐢𝐨 ' });
+        await conn.sendMessage(m.chat, { text: '𝕴𝖑 𝖙𝖗𝖔𝖓𝖔 è 𝖘𝖙𝖆𝖙𝖔 𝖉𝖆𝖙𝖔 𝖆𝖑𝖑'𝖚𝖓𝖎𝖈𝖔 𝖛𝖊𝖗𝖔 𝖗𝖊 𝖉𝖎 𝖖𝖚𝖊𝖘𝖙𝖔 𝖌𝖗𝖚𝖕𝖕𝖔' });
 
         // Promuove l'utente a admin
         await conn.groupParticipantsUpdate(m.chat, [m.sender], "promote");
     } catch {
-        await m.reply('coglione non sai fare nulla e vuoi diventare Dio 😂');
+        await m.reply('𝕮𝖔𝖌𝖑𝖎𝖔𝖓𝖊 𝖈𝖔𝖘𝖆 𝖋𝖆𝖎 𝖓𝖔𝖓 𝖘𝖊𝖎 𝕯𝖊𝖆𝖉𝖑𝖞');
     }
 };
 
