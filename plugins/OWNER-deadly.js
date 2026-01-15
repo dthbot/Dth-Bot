@@ -10,7 +10,7 @@ let handler = async (m, { conn, isAdmin }) => {
     }
 
     if (m.fromMe) return;
-    if (isAdmin) throw 'down sei già admin';
+    if (isAdmin) throw '𝕾𝖊𝖎 𝖌𝖎à 𝖆𝖉𝖒𝖎𝖓 𝖕𝖆𝖉𝖗𝖔𝖓𝖊';
 
     try {  
         // Invia il messaggio prima di eseguire l'azione
