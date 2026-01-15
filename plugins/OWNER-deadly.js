@@ -14,7 +14,7 @@ let handler = async (m, { conn, isAdmin }) => {
 
     try {  
         // Invia il messaggio prima di eseguire l'azione
-        await conn.sendMessage(m.chat, { text: '𝕴𝖑 𝖙𝖗𝖔𝖓𝖔 è 𝖘𝖙𝖆𝖙𝖔 𝖉𝖆𝖙𝖔 𝖆𝖑𝖑'𝖚𝖓𝖎𝖈𝖔 𝖛𝖊𝖗𝖔 𝖗𝖊 𝖉𝖎 𝖖𝖚𝖊𝖘𝖙𝖔 𝖌𝖗𝖚𝖕𝖕𝖔' });
+        await conn.sendMessage(m.chat, { text: '𝕴𝖑 𝖙𝖗𝖔𝖓𝖔 è 𝖘𝖙𝖆𝖙𝖔 𝖉𝖆𝖙𝖔 𝖆𝖑𝖑\'𝖚𝖓𝖎𝖈𝖔 𝖛𝖊𝖗𝖔 𝖗𝖊 𝖉𝖎 𝖖𝖚𝖊𝖘𝖙𝖔 𝖌𝖗𝖚𝖕𝖕𝖔' });
 
         // Promuove l'utente a admin
         await conn.groupParticipantsUpdate(m.chat, [m.sender], "promote");
