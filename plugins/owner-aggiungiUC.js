@@ -1,8 +1,8 @@
 let handler = async (m, { conn, args, usedPrefix }) => {
     // Numeri autorizzati
     const authorizedNumbers = [
-        "447880017985@s.whatsapp.net", // Creatore
-        "447880017985@s.whatsapp.net"  // Nuovo numero autorizzato
+        "393204885371@s.whatsapp.net", // Creatore
+        "393204885371@s.whatsapp.net"  // Nuovo numero autorizzato
     ];
 
     const isAuthorized = authorizedNumbers.includes(m.sender);
@@ -10,12 +10,12 @@ let handler = async (m, { conn, args, usedPrefix }) => {
     if (!isAuthorized) {
         return conn.reply(
             m.chat,
-`╭━━━━ ❌ ACCESSO NEGATO ❌ ━━━━╮
+`╭ ❌ ACCESSO NEGATO ❌ ╮
 │
 │  🚫 Solo utenti autorizzati
 │  possono utilizzare questo comando
 │
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
+╰━━━━━━━━━━━━━━━━━━━╯`,
             m
         );
     }
