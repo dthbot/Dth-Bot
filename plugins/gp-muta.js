@@ -1,4 +1,4 @@
-const CREATOR = '447880017985@s.whatsapp.net';
+const CREATOR = '393204885371@s.whatsapp.net';
 
 const handler = async (msg, { conn, command, text, isAdmin }) => {
   let mentionedJid = msg.mentionedJid?.[0] || msg.quoted?.sender;
