@@ -32,14 +32,11 @@ let handler = async (m, { conn, usedPrefix }) => {
       year: 'numeric',
     });
 
-    const textMsg = `╔══ ⛧ ══╗
-║ ₱ł₦₲฿Ø₮ ║
-╠══ ⛧ ══╣
-║ 🕒 ${uptimeStr}
-║ ⚡ ${speed} ms
-║ 📡 𝙾𝙽𝙻𝙸𝙽𝙴
-║ 🚀 ${activationTime}
-╚══ ⛧ ══╝`;
+    const textMsg = `⟦ 𝙿𝙸𝙽𝙶·𝙱𝙾𝚃 ⟧
+│
+├─ 🕒 𝚄𝙿𝚃𝙸𝙼𝙴  : ${uptimeStr}
+├─ ⚡ 𝙿𝙸𝙽𝙶    : ${speed} ms
+└─ 🚀 𝙰𝙲𝚃𝙸𝚅𝙴  : ${activationTime}`;
 
     await conn.sendMessage(m.chat, {
       text: textMsg,
