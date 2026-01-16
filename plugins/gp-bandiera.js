@@ -1,5 +1,3 @@
-// ====== BANDIERA EMOJI GAME (REPLY FIXED) ======
-
 global.bandieraEmojiGame = global.bandieraEmojiGame || {}
 global.bandieraEmojiLeaderboard = global.bandieraEmojiLeaderboard || {}
 
@@ -57,10 +55,9 @@ const flags = [
   { emoji: "🇮🇸", answers: ["islanda"] }
 ]
 
-// ===== UTILS =====
+// 🔧 UTILS
 function normalize(str = '') {
-  return str
-    .toLowerCase()
+  return str.toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s]/g, '')
@@ -70,80 +67,61 @@ function normalize(str = '') {
 function similarity(a, b) {
   const wa = a.split(' ')
   const wb = b.split(' ')
-  const matches = wa.filter(w =>
-    wb.some(x => x.includes(w) || w.includes(x))
-  )
-  return matches.length / Math.max(wa.length, wb.length)
+  let match = wa.filter(w => wb.some(x => x.includes(w) || w.includes(x)))
+  return match.length / Math.max(wa.length, wb.length)
 }
 
-// ===== COMMAND HANDLER =====
+// 🎮 COMANDI
 let handler = async (m, { conn, command, isAdmin }) => {
   const chat = m.chat
 
-  // CLASSIFICA
   if (command === 'classificabandiera') {
-    const lb = global.bandieraEmojiLeaderboard[chat]
-    if (!lb) return m.reply('📉 Nessun dato disponibile')
+    let lb = global.bandieraEmojiLeaderboard[chat]
+    if (!lb) return m.reply('📉 Nessun dato')
 
-    let rank = Object.entries(lb)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-
-    let text = '🏆 *CLASSIFICA BANDIERE*\n\n'
-    rank.forEach(([u, p], i) => {
-      text += `${i + 1}. @${u.split('@')[0]} → *${p}* punti\n`
+    let rank = Object.entries(lb).sort((a,b)=>b[1]-a[1]).slice(0,10)
+    let txt = '🏆 *CLASSIFICA BANDIERE*\n\n'
+    rank.forEach(([u,p],i)=> {
+      txt += `${i+1}. @${u.split('@')[0]} → *${p}*\n`
     })
 
-    return conn.sendMessage(chat, {
-      text,
-      mentions: rank.map(r => r[0])
-    })
+    return conn.sendMessage(chat,{text:txt,mentions:rank.map(r=>r[0])})
   }
 
-  // SKIP
   if (command === 'skipbandiera') {
-    if (!global.bandieraEmojiGame[chat])
-      return m.reply('❌ Nessuna partita attiva')
-
-    if (!isAdmin && !m.fromMe)
-      return m.reply('❌ Solo admin')
+    if (!global.bandieraEmojiGame[chat]) return m.reply('❌ Nessuna partita')
+    if (!isAdmin && !m.fromMe) return m.reply('❌ Solo admin')
 
     clearTimeout(global.bandieraEmojiGame[chat].timeout)
     let r = global.bandieraEmojiGame[chat].flag.answers[0]
     delete global.bandieraEmojiGame[chat]
-
-    return m.reply(`⏩ *Partita saltata*\n🎯 Risposta: *${r.toUpperCase()}*`)
+    return m.reply(`⏩ *Saltata!* Risposta: *${r.toUpperCase()}*`)
   }
 
-  // AVVIO GIOCO
   if (command === 'bandiera') {
-    if (global.bandieraEmojiGame[chat])
-      return m.reply('⚠️ C’è già una partita attiva')
+    if (global.bandieraEmojiGame[chat]) return m.reply('⚠️ Partita già attiva')
 
-    const flag = flags[Math.floor(Math.random() * flags.length)]
+    let flag = flags[Math.floor(Math.random()*flags.length)]
 
-    const msg = await conn.sendMessage(chat, {
+    let msg = await conn.sendMessage(chat,{
       text:
-`🌍 *INDOVINA LA BANDIERA* 🌍
+`🌍 *INDOVINA LA BANDIERA*
 
 ${flag.emoji}
 
-📩 *Rispondi a QUESTO messaggio*
-⏱️ *Tempo: 30 secondi*`
+📩 *Rispondi a questo messaggio*
+⏱️ *30 secondi*`
     })
 
     global.bandieraEmojiGame[chat] = {
-      messageId: msg.key.id,
+      id: msg.key.id,
       flag,
       tentativi: {},
       suggerito: false,
-      timeout: setTimeout(() => {
-        if (global.bandieraEmojiGame[chat]) {
-          conn.reply(
-            chat,
-            `⏳ *Tempo scaduto!*\n🎯 Risposta: *${flag.answers[0].toUpperCase()}*`,
-            msg
-          )
+      start: Date.now(),
+      timeout: setTimeout(()=>{
+        if(global.bandieraEmojiGame[chat]){
+          conn.reply(chat, `⏳ *Tempo scaduto!*\nRisposta: *${flag.answers[0].toUpperCase()}*`, msg)
           delete global.bandieraEmojiGame[chat]
         }
       }, 30000)
@@ -151,63 +129,50 @@ ${flag.emoji}
   }
 }
 
-// ===== REPLY HANDLER (FIX DEFINITIVO) =====
-handler.before = async (m, { conn }) => {
+// 🧠 RISPOSTE (SOLO REPLY)
+handler.before = async (m,{conn})=>{
   const chat = m.chat
   const game = global.bandieraEmojiGame[chat]
+  if(!game || !m.quoted || m.quoted.id !== game.id || !m.text) return
 
-  if (!game) return
-  if (!m.quoted) return
-  if (!m.quoted.key) return
-  if (m.quoted.key.id !== game.messageId) return
-  if (!m.text) return
-
-  const userAnswer = normalize(m.text)
-  const correctAnswer = normalize(game.flag.answers[0])
-  const sim = similarity(userAnswer, correctAnswer)
+  let userAns = normalize(m.text)
+  let correct = normalize(game.flag.answers[0])
+  let sim = similarity(userAns, correct)
 
   game.tentativi[m.sender] ??= 0
-  if (game.tentativi[m.sender] >= 3)
-    return conn.reply(chat, '❌ Tentativi esauriti', m)
+  if(game.tentativi[m.sender] >= 3)
+    return conn.reply(chat,'❌ Tentativi esauriti',m)
 
-  if (userAnswer === correctAnswer || sim >= 0.8) {
+  if(userAns === correct || sim >= 0.8){
     clearTimeout(game.timeout)
-
     global.bandieraEmojiLeaderboard[chat] ??= {}
     global.bandieraEmojiLeaderboard[chat][m.sender] =
-      (global.bandieraEmojiLeaderboard[chat][m.sender] || 0) + 1
+      (global.bandieraEmojiLeaderboard[chat][m.sender]||0)+1
 
-    await conn.sendMessage(chat, {
+    await conn.sendMessage(chat,{
       text:
-`🏆 *RISPOSTA CORRETTA!*
-
+`🏆 *CORRETTO!*
 🌍 ${game.flag.emoji}
-🎯 *${game.flag.answers[0].toUpperCase()}*
-
-🔥 Punti totali: *${global.bandieraEmojiLeaderboard[chat][m.sender]}*`,
-      mentions: [m.sender]
+🎯 ${game.flag.answers[0].toUpperCase()}
+🔥 Punti: *${global.bandieraEmojiLeaderboard[chat][m.sender]}*`,
+      mentions:[m.sender]
     })
-
     delete global.bandieraEmojiGame[chat]
-  } else if (sim >= 0.6 && !game.suggerito) {
+  } else if(sim >= 0.6 && !game.suggerito){
     game.suggerito = true
-    conn.reply(chat, '👀 *Ci sei quasi!*', m)
+    conn.reply(chat,'👀 *Ci sei quasi!*',m)
   } else {
     game.tentativi[m.sender]++
     let r = game.flag.answers[0]
-    if (game.tentativi[m.sender] === 2) {
-      conn.reply(
-        chat,
-        `💡 *Suggerimento*\nInizia con *${r[0].toUpperCase()}* • ${r.length} lettere`,
-        m
-      )
+    if(game.tentativi[m.sender] === 2){
+      conn.reply(chat,`💡 Inizia con *${r[0].toUpperCase()}* • ${r.length} lettere`,m)
     } else {
-      conn.reply(chat, '❌ Risposta errata, riprova!', m)
+      conn.reply(chat,'❌ Risposta errata, riprova!',m)
     }
   }
 }
 
-handler.command = ['bandiera', 'skipbandiera', 'classificabandiera']
+handler.command = ['bandiera','skipbandiera','classificabandiera']
 handler.tags = ['game']
 handler.help = handler.command
 handler.group = true
