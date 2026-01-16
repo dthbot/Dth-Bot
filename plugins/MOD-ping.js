@@ -35,8 +35,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     const textMsg = `⟦ 𝙿𝙸𝙽𝙶·𝙱𝙾𝚃 ⟧
 │
 ├─ 🕒 𝚄𝙿𝚃𝙸𝙼𝙴  : ${uptimeStr}
-├─ ⚡ 𝙿𝙸𝙽𝙶    : ${speed} ms
-└─ 🚀 𝙰𝙲𝚃𝙸𝚅𝙴  : ${activationTime}`;
+└─ ⚡ 𝙿𝙸𝙽𝙶    : ${speed} ms`;
 
     await conn.sendMessage(m.chat, {
       text: textMsg,
