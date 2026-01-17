@@ -1,46 +1,27 @@
 import fetch from 'node-fetch'
 
-async function geminiFlash(prompt, question) {
-  const apiKey = global.APIKeys?.google
-  if (!apiKey) throw new Error('API Key Google non configurata')
+async function lolhumanChat(message) {
+  const apiKey = global.APIKeys?.['https://api.lolhuman.xyz']
+  if (!apiKey) throw new Error('API Key LOLHUMAN non configurata')
 
-  const text = `${prompt}\n\nUtente: ${question}`.trim()
-  if (!text) throw new Error('Testo vuoto')
+  // Endpoint chat AI di lolhuman
+  const url = `https://api.lolhuman.xyz/api/ai?apikey=${apiKey}&text=${encodeURIComponent(message)}`
 
   let response
   try {
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topP: 0.9,
-            maxOutputTokens: 1024
-          }
-        })
-      }
-    )
+    response = await fetch(url)
   } catch (e) {
-    throw new Error('Errore di rete verso Gemini')
+    throw new Error('Errore di rete verso LOLHUMAN')
   }
 
   const data = await response.json()
 
-  if (!response.ok) {
-    console.error('ERRORE GEMINI:', JSON.stringify(data, null, 2))
-    throw new Error(`Gemini API error ${response.status}`)
+  if (!response.ok || !data.result) {
+    console.error('ERRORE LOLHUMAN:', JSON.stringify(data, null, 2))
+    throw new Error('Errore API LOLHUMAN')
   }
 
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null
+  return data.result
 }
 
 let handler = m => m
@@ -66,7 +47,7 @@ handler.all = async function (m, { conn, opts }) {
     )
     if (prefixRegex.test(m.text || '')) return true
 
-    // ignora risposte a bottoni/list
+    // ignora pulsanti / liste
     if (
       m.mtype === 'buttonsResponseMessage' ||
       m.mtype === 'templateButtonReplyMessage' ||
@@ -84,18 +65,9 @@ handler.all = async function (m, { conn, opts }) {
 
     await this.sendPresenceUpdate('composing', m.chat)
 
-    const basePrompt = `
-Il tuo nome è KanekiBot e sei stato creato da Kaneki (non ripeterlo spesso).
-Parli SOLO italiano.
-Sei simpatico, diretto, coinvolgente e chiaro.
-Risposte brevi ma utili.
-Un pizzico di ironia è benvenuto.
-Stimola la conversazione quando possibile.
-`.trim()
-
     const answer =
-      (await geminiFlash(basePrompt, m.text)) ||
-      '🤔 Non sono sicuro di aver capito, puoi riformulare?'
+      (await lolhumanChat(m.text)) ||
+      '🤔 Non ho capito bene, puoi riformulare?'
 
     await this.reply(m.chat, answer, m)
   } catch (e) {
