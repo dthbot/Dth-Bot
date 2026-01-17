@@ -17,29 +17,32 @@ let handler = async (m, { conn }) => {
         }
     })
 
-    // Ordina per numero di messaggi
-    const sorted = members.sort((a, b) => b.messages - a.messages)
+    // Ordina per messaggi e prende solo i primi 5
+    const top5 = members
+        .sort((a, b) => b.messages - a.messages)
+        .slice(0, 5)
 
     let message = `
 ═══════════════════
-🏆 𝐂𝐋𝐀𝐒𝐒𝐈𝐅𝐈𝐂𝐀 𝐌𝐄𝐒𝐒𝐀𝐆𝐆𝐈 🏆
+🏆 𝐓𝐎𝐏 𝟓 — 𝐂𝐋𝐀𝐒𝐒𝐈𝐅𝐈𝐂𝐀 𝐌𝐄𝐒𝐒𝐀𝐆𝐆𝐈 🏆
 ═══════════════════
 `.trim() + '\n\n'
 
     const mentions = []
 
-    sorted.forEach((u, i) => {
+    top5.forEach((u, i) => {
         const medal =
             i === 0 ? '🥇' :
             i === 1 ? '🥈' :
-            i === 2 ? '🥉' : `#${i + 1}`
+            i === 2 ? '🥉' :
+            i === 3 ? '4️⃣' : '5️⃣'
 
         message += `✦ ${medal}  @${u.id.split('@')[0]} — 💬 Messaggi: ${u.messages}\n`
         message += '───────────────────\n'
         mentions.push(u.id)
     })
 
-    message += '\n🔥 Continuate a scrivere! 🔥'
+    message += '\n🔥 TOP 5 più attivi del gruppo! 🔥'
 
     await conn.sendMessage(m.chat, {
         text: message,
