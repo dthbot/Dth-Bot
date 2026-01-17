@@ -7,35 +7,40 @@ async function geminiFlash(prompt, question) {
   const text = `${prompt}\n\nUtente: ${question}`.trim()
   if (!text) throw new Error('Testo vuoto')
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text }]
+  let response
+  try {
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.9,
+            maxOutputTokens: 1024
           }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          maxOutputTokens: 1024
-        }
-      })
-    }
-  )
+        })
+      }
+    )
+  } catch (e) {
+    throw new Error('Errore di rete verso Gemini')
+  }
 
   const data = await response.json()
 
   if (!response.ok) {
-    console.error('Errore Gemini completo:', JSON.stringify(data, null, 2))
-    throw new Error(`Errore Gemini: ${response.status}`)
+    console.error('ERRORE GEMINI:', JSON.stringify(data, null, 2))
+    throw new Error(`Gemini API error ${response.status}`)
   }
 
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+  return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null
 }
 
 let handler = m => m
@@ -69,7 +74,7 @@ handler.all = async function (m, { conn, opts }) {
       m.message?.interactiveResponseMessage
     ) return true
 
-    // risponde SOLO se menzionato o citato
+    // risponde solo se menzionato o citato
     const botMenzionato =
       m.mentionedJid?.includes(this.user.jid) ||
       (m.quoted && m.quoted.sender === this.user.jid)
@@ -88,16 +93,17 @@ Un pizzico di ironia è benvenuto.
 Stimola la conversazione quando possibile.
 `.trim()
 
-    const answer = await geminiFlash(basePrompt, m.text)
-
-    if (!answer) throw new Error('Risposta vuota da Gemini')
+    const answer =
+      (await geminiFlash(basePrompt, m.text)) ||
+      '🤔 Non sono sicuro di aver capito, puoi riformulare?'
 
     await this.reply(m.chat, answer, m)
   } catch (e) {
-    console.error(e)
+    console.error('ERRORE KANEKIBOT:', e)
+
     await this.reply(
       m.chat,
-      `⚠️ Scusa, al momento non riesco a rispondere.\nRiprova tra poco.`,
+      '⚠️ Scusa, al momento non riesco a rispondere.\nRiprova tra poco.',
       m
     )
   }
