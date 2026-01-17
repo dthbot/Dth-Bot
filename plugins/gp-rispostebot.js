@@ -1,11 +1,14 @@
 import fetch from 'node-fetch'
 
-async function lolhumanChat(message) {
-  const apiKey = global.APIKeys?.['https://api.lolhuman.xyz']
+async function lolhumanChat(text) {
+  const apiUrl = global.APIs?.lol
+  if (!apiUrl) throw new Error('API LOLHUMAN non configurata (global.APIs.lol)')
+
+  const apiKey = global.APIKeys?.[apiUrl]
   if (!apiKey) throw new Error('API Key LOLHUMAN non configurata')
 
-  // Endpoint chat AI di lolhuman
-  const url = `https://api.lolhuman.xyz/api/ai?apikey=${apiKey}&text=${encodeURIComponent(message)}`
+  const url =
+    `${apiUrl}/api/ai?apikey=${apiKey}&text=${encodeURIComponent(text)}`
 
   let response
   try {
@@ -16,12 +19,12 @@ async function lolhumanChat(message) {
 
   const data = await response.json()
 
-  if (!response.ok || !data.result) {
+  if (!response.ok || !data?.result) {
     console.error('ERRORE LOLHUMAN:', JSON.stringify(data, null, 2))
-    throw new Error('Errore API LOLHUMAN')
+    throw new Error('Risposta non valida da LOLHUMAN')
   }
 
-  return data.result
+  return data.result.trim()
 }
 
 let handler = m => m
