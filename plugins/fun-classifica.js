@@ -3,21 +3,19 @@ let handler = async (m, { conn }) => {
         return conn.sendMessage(m.chat, { text: '❌ Comando utilizzabile solo nei gruppi' })
     }
 
-    // Prende i metadata del gruppo
     const groupMetadata = await conn.groupMetadata(m.chat)
     const participants = groupMetadata.participants
 
-    // Estrae i nomi (fallback al numero se manca il nome)
-    const members = participants.map(p => 
-        p.notify || p.name || p.id.split('@')[0]
-    )
+    // Membri con id + nome
+    const members = participants.map(p => ({
+        id: p.id,
+        name: p.notify || p.name || p.id.split('@')[0]
+    }))
 
-    // Genera punteggi casuali
     const scores = members.map(() => Math.floor(Math.random() * 100))
 
-    // Ordina classifica
     const sorted = members
-        .map((name, i) => ({ name, score: scores[i] }))
+        .map((u, i) => ({ ...u, score: scores[i] }))
         .sort((a, b) => b.score - a.score)
 
     let message = `
@@ -26,20 +24,24 @@ let handler = async (m, { conn }) => {
 ═══════════════════
 `.trim() + '\n\n'
 
+    const mentions = []
+
     sorted.forEach((u, i) => {
         const medal =
             i === 0 ? '🥇' :
             i === 1 ? '🥈' :
             i === 2 ? '🥉' : `#${i + 1}`
 
-        message += `✦ ${medal}  ${u.name} — 𝑷𝒖𝒏𝒕𝒊: ${u.score}\n`
+        message += `✦ ${medal}  @${u.id.split('@')[0]} — 𝑷𝒖𝒏𝒕𝒊: ${u.score}\n`
         message += '───────────────────\n'
+        mentions.push(u.id)
     })
 
     message += '\n🎉 Complimenti ai partecipanti! 🎉'
 
     const messageOptions = {
         contextInfo: {
+            mentionedJid: mentions,
             forwardingScore: 0,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
