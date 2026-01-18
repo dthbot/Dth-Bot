@@ -17,7 +17,7 @@ const frasiOffese = [
     "Messaggio ricevuto. Salvataggio dell'offesa nel database 'Umani da ignorare'..."
 ];
 
-const rispondiSeOffeso = (message) => {
+export function rispondiSeOffeso(message) {
     const text = message.body.toLowerCase();
     const botRegex = /\bbot\b/;
 
@@ -25,6 +25,4 @@ const rispondiSeOffeso = (message) => {
         const risposta = frasiOffese[Math.floor(Math.random() * frasiOffese.length)];
         message.reply(risposta);
     }
-};
-
-export default rispondiSeOffeso;
+}
