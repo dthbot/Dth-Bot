@@ -18,20 +18,13 @@ const frasiOffese = [
 ];
 
 const rispondiSeOffeso = (message) => {
-    // Trasforma il testo in minuscolo per il controllo
     const text = message.body.toLowerCase();
-
-    // Regex per trovare "bot" come parola intera
     const botRegex = /\bbot\b/;
 
     if (botRegex.test(text)) {
-        // Seleziona una frase casuale
-        const indiceCasuale = Math.floor(Math.random() * frasiOffese.length);
-        const risposta = frasiOffese[indiceCasuale];
-
-        // Invia la risposta
+        const risposta = frasiOffese[Math.floor(Math.random() * frasiOffese.length)];
         message.reply(risposta);
     }
 };
 
-module.exports = rispondiSeOffeso;
+export default rispondiSeOffeso;
