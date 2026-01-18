@@ -17,6 +17,10 @@ const frasiOffese = [
     "Messaggio ricevuto. Salvataggio dell'offesa nel database 'Umani da ignorare'..."
 ];
 
+/**
+ * Funzione principale del plugin
+ * @param {Object} message - Oggetto messaggio ricevuto
+ */
 export function rispondiSeOffeso(message) {
     const text = message.body.toLowerCase();
     const botRegex = /\bbot\b/;
