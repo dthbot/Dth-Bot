@@ -4,87 +4,129 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
-function downloadYTDLPToFile(url, format = "best", filename) {
-  return new Promise((resolve, reject) => {
-    const args = ["-f", format, "-o", filename];
+/* ================= DOWNLOAD ================= */
 
-    if (format === "bestaudio") {
-      args.push("--extract-audio", "--audio-format", "m4a", "--audio-quality", "0");
+function downloadYTDLP(url, output, type = "audio") {
+  return new Promise((resolve, reject) => {
+
+    let args = [];
+
+    if (type === "audio") {
+      args = [
+        "-f", "bestaudio[ext=m4a]/bestaudio",
+        "--extract-audio",
+        "--audio-format", "m4a",
+        "--audio-quality", "0",
+        "--no-playlist",
+        "-o", output,
+        url
+      ];
+    } else {
+      args = [
+        "-f", "best[ext=mp4]/best",
+        "--no-playlist",
+        "-o", output,
+        url
+      ];
     }
 
-    args.push(url);
+    console.log("YT-DLP:", args.join(" "));
 
     const ytdlp = spawn("yt-dlp", args);
 
-    let error = [];
-    ytdlp.stderr.on("data", chunk => error.push(chunk));
+    let stderr = "";
+
+    ytdlp.stderr.on("data", d => stderr += d.toString());
+    ytdlp.on("error", err => reject(err));
 
     ytdlp.on("close", code => {
-      if (code !== 0) return reject(Buffer.concat(error).toString());
-      resolve(filename);
+      if (code !== 0) return reject(stderr);
+      resolve(output);
     });
   });
 }
 
+/* ================= HANDLER ================= */
+
 const handler = async (m, { conn, text, command }) => {
-  if (!text) return conn.reply(m.chat, "Inserisci un titolo o link YouTube", m);
-
-  let search = await yts(text);
-  let vid = search.videos[0];
-  if (!vid) return conn.reply(m.chat, "Nessun risultato trovato", m);
-
-  let url = vid.url;
-  let thumb = vid.thumbnail;
-  const tempDir = os.tmpdir();
+  if (!text) return conn.reply(m.chat, "✏️ Inserisci titolo o link YouTube", m);
 
   try {
+    const search = await yts(text);
+    const vid = search.videos[0];
+    if (!vid) return conn.reply(m.chat, "❌ Nessun risultato trovato", m);
+
+    const url = vid.url;
+    const thumb = vid.thumbnail;
+    const tmp = os.tmpdir();
+
+    const safeTitle = vid.title
+      .replace(/[/\\?%*:|"<>]/g, "_")
+      .slice(0, 45);
+
+    /* ===== AUDIO ===== */
     if (command === "playaudio-dl") {
-      await conn.reply(m.chat, "🎵 Ora Scarico l’audio…", m);
-      const audioFile = path.join(tempDir, `${vid.title}.m4a`.replace(/[/\\?%*:|"<>]/g, "_"));
-      await downloadYTDLPToFile(url, "bestaudio", audioFile);
+      await conn.reply(m.chat, "🎵 Scarico audio...", m);
+
+      const audioPath = path.join(tmp, `${safeTitle}.m4a`);
+      await downloadYTDLP(url, audioPath, "audio");
 
       await conn.sendMessage(
         m.chat,
-        { audio: fs.readFileSync(audioFile), mimetype: "audio/mp4", fileName: path.basename(audioFile) },
+        {
+          audio: fs.readFileSync(audioPath),
+          mimetype: "audio/mp4",
+          fileName: `${safeTitle}.m4a`
+        },
         { quoted: m }
       );
 
-      fs.unlinkSync(audioFile); // pulisce il file temporaneo
+      fs.unlinkSync(audioPath);
       return;
     }
 
+    /* ===== VIDEO ===== */
     if (command === "playvideo-dl") {
-      await conn.reply(m.chat, "🎬 Scarico il video…", m);
-      const videoFile = path.join(tempDir, `${vid.title}.mp4`.replace(/[/\\?%*:|"<>]/g, "_"));
-      await downloadYTDLPToFile(url, "best[ext=mp4]", videoFile);
+      await conn.reply(m.chat, "🎬 Scarico video...", m);
+
+      const videoPath = path.join(tmp, `${safeTitle}.mp4`);
+      await downloadYTDLP(url, videoPath, "video");
 
       await conn.sendMessage(
         m.chat,
-        { video: fs.readFileSync(videoFile), mimetype: "video/mp4", fileName: path.basename(videoFile) },
+        {
+          video: fs.readFileSync(videoPath),
+          mimetype: "video/mp4",
+          fileName: `${safeTitle}.mp4`
+        },
         { quoted: m }
       );
 
-      fs.unlinkSync(videoFile);
+      fs.unlinkSync(videoPath);
       return;
     }
 
-    // 🔥 Bottoni
+    /* ===== BOTTONI ===== */
     await conn.sendMessage(
       m.chat,
       {
         image: { url: thumb },
-        caption: `🎶 *${vid.title}*\n\n⏱ Durata: ${vid.timestamp}\n👁️ Visualizzazioni: ${vid.views}\n\nScegli cosa scaricare:`,
+        caption:
+          `🎶 *${vid.title}*\n\n` +
+          `⏱ Durata: ${vid.timestamp}\n` +
+          `👁️ Visualizzazioni: ${vid.views}\n\n` +
+          `⬇️ Scegli cosa scaricare:`,
         buttons: [
-          { buttonId: `.playaudio-dl ${url}`, buttonText: { displayText: "🎵 Scarica Audio" }, type: 1 },
-          { buttonId: `.playvideo-dl ${url}`, buttonText: { displayText: "🎬 Scarica Video" }, type: 1 }
+          { buttonId: `.playaudio-dl ${url}`, buttonText: { displayText: "🎵 Audio" }, type: 1 },
+          { buttonId: `.playvideo-dl ${url}`, buttonText: { displayText: "🎬 Video" }, type: 1 }
         ],
         headerType: 4
       },
       { quoted: m }
     );
 
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error("PLAY ERROR:", err);
     return conn.reply(m.chat, "❗ Errore durante il download", m);
   }
 };
