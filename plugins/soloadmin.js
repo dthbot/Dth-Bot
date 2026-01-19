@@ -8,17 +8,15 @@ let handler = async (m, { conn, args }) => {
     }
 
     let chat = global.db.data.chats[m.chat]
-    if (!chat) global.db.data.chats[m.chat] = {}
+    if (!chat) chat = global.db.data.chats[m.chat] = {}
 
     if (args[0].toLowerCase() === 'on') {
         chat.soloAdmin = true
-        await conn.reply(m.chat, '🔒 Modalità *SOLO ADMIN* **ATTIVATA**', m)
-    } 
-    else if (args[0].toLowerCase() === 'off') {
+        await conn.reply(m.chat, '🔒 *SOLO ADMIN* attivato', m)
+    } else if (args[0].toLowerCase() === 'off') {
         chat.soloAdmin = false
-        await conn.reply(m.chat, '🔓 Modalità *SOLO ADMIN* **DISATTIVATA**', m)
-    } 
-    else {
+        await conn.reply(m.chat, '🔓 *SOLO ADMIN* disattivato', m)
+    } else {
         await conn.reply(m.chat, '⚠️ Usa `.soloadmin on` o `.soloadmin off`', m)
     }
 }
@@ -28,33 +26,32 @@ handler.command = ['soloadmin']
 handler.admin = true
 handler.group = true
 
-// MIDDLEWARE AUTOMATICO
-handler.before = async function (m, { conn, participants, isAdmin, isBotAdmin }) {
+// BLOCCO COMANDI (CHATUNITY)
+handler.all = async function (m, { conn, participants }) {
     if (!m.isGroup) return
     if (!m.text) return
+    if (!m.text.startsWith('.')) return
     if (m.text.startsWith('.soloadmin')) return
 
     let chat = global.db.data.chats[m.chat]
     if (!chat?.soloAdmin) return
 
-    const groupAdmins = participants
+    const admins = participants
         .filter(p => p.admin)
         .map(p => p.id)
 
-    const isUserAdmin = groupAdmins.includes(m.sender)
+    const isAdmin = admins.includes(m.sender)
     const isBot = m.sender === conn.user.jid
 
-    if (isUserAdmin || isBot) return
+    if (isAdmin || isBot) return
 
-    // BLOCCA COMANDI AI MEMBRI
-    if (m.text.startsWith('.')) {
-        await conn.reply(
-            m.chat,
-            '🚫 *SOLO ADMIN*\nSolo gli amministratori possono usare i comandi.',
-            m
-        )
-        return true // blocca l'esecuzione del comando
-    }
+    await conn.reply(
+        m.chat,
+        '🚫 *SOLO ADMIN*\nQuesto comando è riservato agli amministratori.',
+        m
+    )
+
+    return true // ⛔ BLOCCA IL COMANDO (ChatUnity)
 }
 
 export default handler
