@@ -88,7 +88,7 @@ export async function handler(chatUpdate) {
       groupData.suspendedUntil = now + 45000
 
       await conn.sendMessage(chatId, {
-        text: `『 ⚠ 』 Anti-spam comandi\n\nTroppi comandi in poco tempo!\nAttendi *45 secondi* prima di usare altri comandi.\n\n> sviluppato da sam aka vare`,
+        text: `『 ⚠ 』 Antispam comandi!!!\naspetta *10 secondi* prima di riutilizzare i comandi.`,
         mentions: [m.sender]
       })
       return
