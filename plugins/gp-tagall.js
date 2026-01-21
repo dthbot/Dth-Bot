@@ -26,7 +26,6 @@ let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
 
     text += `
 ━━━━━━━━━━━━━━━━━━━
-✨ 𝐂𝐨𝐦𝐚𝐧𝐝𝐨 𝐞𝐬𝐞𝐠𝐮𝐢𝐭𝐨 𝐜𝐨𝐧 𝐬𝐭𝐢𝐥𝐞 ✨
 `
 
     // Foto profilo dell’utente (thumbnail piccola)
