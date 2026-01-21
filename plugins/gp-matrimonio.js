@@ -9,7 +9,7 @@ let handler = async (m, { conn, command, usedPrefix, participants }) => {
         case 'sposa':
             return sposa(m, conn, users, usedPrefix, participants)
         case 'divorzia':
-            return divorzia(m, users, participants)
+            return divorzia(m, users)
         case 'adotta':
             return adotta(m, conn, users, usedPrefix, participants)
         case 'famiglia':
@@ -27,24 +27,29 @@ async function sposa(m, conn, users, usedPrefix, participants) {
     const target = m.mentionedJid?.[0] || m.quoted?.sender
 
     if (!target) throw `Usa: ${usedPrefix}sposa @utente`
-    if (target === sender) throw 'Non puoi sposarti da solo'
+    if (target === sender) throw '❌ Non puoi sposarti da solo'
     if (!users[target]) users[target] = {}
 
-    if (users[sender].sposato) throw `Sei già sposato con @${users[sender].coniuge ? users[sender].coniuge.split('@')[0] : 'sconosciuto'}`
-    if (users[target].sposato) throw `Questa persona è già sposata con @${users[target].coniuge ? users[target].coniuge.split('@')[0] : 'sconosciuto'}`
+    if (users[sender].sposato)
+        throw `💍 Sei già sposato con ${tagUser(users[sender].coniuge)}`
+    if (users[target].sposato)
+        throw `💍 ${tagUser(target)} è già sposato`
+
     if (proposals[sender] || proposals[target])
-        throw 'C’è già una proposta in corso'
+        throw '⏳ C’è già una proposta in corso'
 
     proposals[target] = sender
     proposals[sender] = target
 
     await conn.sendMessage(m.chat, {
-        text:
-`💍 *PROPOSTA DI MATRIMONIO*
+        text: 
+`💖 *PROPOSTA DI MATRIMONIO* 💖
 
-@${getName(sender, participants)} vuole sposarti 💖
+${tagUser(sender)} vuole sposare ${tagUser(target)} 💍
 
-Rispondi con *SI* o *NO*.`,
+💬 Rispondi con:
+✔️ *SI* per accettare  
+❌ *NO* per rifiutare`,
         mentions: [sender, target]
     })
 
@@ -63,11 +68,11 @@ async function adotta(m, conn, users, usedPrefix, participants) {
     const target = m.mentionedJid?.[0] || m.quoted?.sender
 
     if (!target) throw `Usa: ${usedPrefix}adotta @utente`
-    if (target === sender) throw 'Non puoi adottare te stesso'
+    if (target === sender) throw '❌ Non puoi adottare te stesso'
     if (!users[target]) users[target] = {}
 
-    if (users[target].genitori && users[target].genitori.length)
-        throw 'Questa persona ha già dei genitori'
+    if (users[target].genitori?.length)
+        throw '❌ Questa persona ha già dei genitori'
 
     adoptions[target] = sender
 
@@ -75,9 +80,11 @@ async function adotta(m, conn, users, usedPrefix, participants) {
         text:
 `👨‍👩‍👧 *RICHIESTA DI ADOZIONE*
 
-@${getName(sender, participants)} vuole adottarti 💖
+${tagUser(sender)} vuole adottare ${tagUser(target)} 💖
 
-Rispondi con *SI* o *NO*.`,
+💬 Rispondi con:
+✔️ *SI* per accettare  
+❌ *NO* per rifiutare`,
         mentions: [sender, target]
     })
 
@@ -92,52 +99,53 @@ Rispondi con *SI* o *NO*.`,
 /* ================= 📜 FAMIGLIA ================= */
 function famiglia(m, users, participants) {
     const user = users[m.sender]
-    let txt = `👨‍👩‍👧 *FAMIGLIA DI ${getName(m.sender, participants)}*\n\n`
-    let mentions = []
+    let txt = `👨‍👩‍👧 *FAMIGLIA DI ${tagUser(m.sender)}*\n\n`
+    let mentions = [m.sender]
 
-    txt += '💑 Coniuge:\n'
+    txt += '💑 *Coniuge*\n'
     if (user.sposato && user.coniuge) {
-        txt += `• ${getName(user.coniuge, participants)}\n`
+        txt += `• ${tagUser(user.coniuge)}\n`
         mentions.push(user.coniuge)
-    } else txt += 'Nessuno\n'
+    } else txt += '• Nessuno\n'
 
-    txt += '\n👤 Genitori:\n'
-    if (user.genitori && user.genitori.length) {
+    txt += '\n👤 *Genitori*\n'
+    if (user.genitori?.length) {
         for (let g of user.genitori) {
-            txt += `• ${getName(g, participants)}\n`
+            txt += `• ${tagUser(g)}\n`
             mentions.push(g)
         }
-    } else txt += 'Nessuno\n'
+    } else txt += '• Nessuno\n'
 
-    txt += '\n👶 Figli:\n'
-    if (user.figli && user.figli.length) {
+    txt += '\n👶 *Figli*\n'
+    if (user.figli?.length) {
         for (let f of user.figli) {
-            txt += `• ${getName(f, participants)}\n`
+            txt += `• ${tagUser(f)}\n`
             mentions.push(f)
         }
-    } else txt += 'Nessuno'
+    } else txt += '• Nessuno'
 
     m.reply(txt, null, { mentions })
 }
 
 /* ================= 💔 DIVORZIO ================= */
-function divorzia(m, users, participants) {
+function divorzia(m, users) {
     const user = users[m.sender]
-    if (!user.sposato) throw 'Non sei sposato'
+    if (!user.sposato) throw '❌ Non sei sposato'
 
     const ex = users[user.coniuge]
     user.sposato = false
     user.coniuge = null
+
     if (ex) {
         ex.sposato = false
         ex.coniuge = null
     }
 
-    m.reply('💔 Siete ufficialmente divorziati')
+    m.reply('💔 Matrimonio terminato. Ora siete divorziati.')
 }
 
-/* ================= 🔒 CONFERME TESTO ================= */
-handler.before = async (m, { conn, participants }) => {
+/* ================= 🔒 CONFERME ================= */
+handler.before = async (m, { conn }) => {
     if (!m.text) return
     const txt = m.text.toLowerCase().trim()
     const users = global.db.data.users
@@ -157,7 +165,7 @@ handler.before = async (m, { conn, participants }) => {
             delete proposals[to]
 
             return conn.sendMessage(m.chat, {
-                text: `💍 ${getName(from, participants)} e ${getName(to, participants)} ora sono sposati!`,
+                text: `💍 ${tagUser(from)} e ${tagUser(to)} ora sono sposati! 💖`,
                 mentions: [from, to]
             })
         }
@@ -176,13 +184,12 @@ handler.before = async (m, { conn, participants }) => {
 
         if (txt === 'si' || txt === 'sì') {
             users[to].genitori = [from]
-
-            if (!users[from].figli) users[from].figli = []
+            users[from].figli = users[from].figli || []
             users[from].figli.push(to)
 
             if (users[from].sposato && users[from].coniuge) {
                 const partner = users[from].coniuge
-                if (!users[partner].figli) users[partner].figli = []
+                users[partner].figli = users[partner].figli || []
                 users[partner].figli.push(to)
                 users[to].genitori.push(partner)
             }
@@ -190,7 +197,7 @@ handler.before = async (m, { conn, participants }) => {
             delete adoptions[to]
 
             return conn.sendMessage(m.chat, {
-                text: `👨‍👩‍👧 ${getName(from, participants)} ha adottato ${getName(to, participants)}`,
+                text: `👨‍👩‍👧 ${tagUser(from)} ha adottato ${tagUser(to)} 💖`,
                 mentions: [from, to]
             })
         }
@@ -209,21 +216,16 @@ function coppie(m, users, participants) {
     let found = false
 
     for (let p of participants) {
-        const userId = p.id
-        const user = users[userId]
-        if (!user || !user.sposato || !user.coniuge) continue
+        const u = users[p.id]
+        if (!u?.sposato || !u.coniuge) continue
+        if (mentions.includes(p.id)) continue
 
-        const spouseId = user.coniuge
-
-        if (mentions.includes(userId) || mentions.includes(spouseId)) continue
-        if (!participants.find(u => u.id === spouseId)) continue
-
-        txt += `• ${getName(userId, participants)} + ${getName(spouseId, participants)}\n`
-        mentions.push(userId, spouseId)
+        txt += `• ${tagUser(p.id)} ❤️ ${tagUser(u.coniuge)}\n`
+        mentions.push(p.id, u.coniuge)
         found = true
     }
 
-    if (!found) txt += 'Nessuna coppia al momento'
+    if (!found) txt += 'Nessuna coppia al momento 😔'
     m.reply(txt, null, { mentions })
 }
 
@@ -233,21 +235,19 @@ function togliFiglio(m, users, participants) {
     const target = m.mentionedJid?.[0] || m.quoted?.sender
     if (!target) throw 'Usa: .toglifiglio @utente'
 
-    if (!user.figli || !user.figli.includes(target)) throw 'Questa persona non è tra i tuoi figli'
+    if (!user.figli?.includes(target))
+        throw '❌ Questa persona non è tuo figlio'
+
     user.figli = user.figli.filter(f => f !== target)
+    users[target].genitori =
+        users[target].genitori?.filter(g => g !== m.sender)
 
-    const child = users[target]
-    if (child && child.genitori) {
-        child.genitori = child.genitori.filter(g => g !== m.sender)
-    }
-
-    m.reply(`✅ Hai rimosso ${getName(target, participants)} dai tuoi figli`)
+    m.reply(`✅ ${tagUser(target)} non è più tuo figlio`, null, { mentions: [target] })
 }
 
-/* ================= Helper per nome ================= */
-function getName(jid, participants) {
-    const p = participants?.find(u => u.id === jid)
-    return p ? p.name || p.notify || jid.split('@')[0] : jid.split('@')[0]
+/* ================= 🏷️ TAG ================= */
+function tagUser(jid) {
+    return '@' + jid.split('@')[0]
 }
 
 /* ================= COMANDI ================= */
