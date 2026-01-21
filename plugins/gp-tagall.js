@@ -1,4 +1,4 @@
-// Plugin fatto da Deadly
+// ✦ Plugin fatto da Deadly
 
 let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
     if (!(isAdmin || isOwner)) return
@@ -7,9 +7,9 @@ let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
     let message = args.join(' ') || '𝑁𝑒𝑠𝑠𝑢𝑛 𝑚𝑒𝑠𝑠𝑎𝑔𝑔𝑖𝑜'
 
     let text = `
-╔════════════╗
+╔══════════════════╗
       🔔 𝐓𝐀𝐆 𝐀𝐋𝐋 🔔
-╚════════════╝
+╚══════════════════╝
 
 🤖 𝐁𝐨𝐭: ${nomebot}
 🗣️ 𝐌𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨:
@@ -26,9 +26,10 @@ let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
 
     text += `
 ━━━━━━━━━━━━━━━━━━━
+✨ 𝐂𝐨𝐦𝐚𝐧𝐝𝐨 𝐞𝐬𝐞𝐠𝐮𝐢𝐭𝐨 𝐜𝐨𝐧 𝐬𝐭𝐢𝐥𝐞 ✨
 `
 
-    // Foto profilo dell’utente che invoca il comando
+    // Foto profilo dell’utente (thumbnail piccola)
     let pp
     try {
         pp = await conn.profilePictureUrl(m.sender, 'image')
@@ -39,9 +40,18 @@ let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
     await conn.sendMessage(
         m.chat,
         {
-            image: { url: pp },
-            caption: text,
-            mentions: participants.map(p => p.id)
+            text,
+            mentions: participants.map(p => p.id),
+            contextInfo: {
+                externalAdReply: {
+                    title: '🔔 TAG ALL',
+                    body: 'Invocazione membri del gruppo',
+                    thumbnailUrl: pp,
+                    mediaType: 1,
+                    renderLargerThumbnail: false,
+                    showAdAttribution: false
+                }
+            }
         },
         { quoted: m }
     )
