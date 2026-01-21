@@ -7,9 +7,9 @@ let handler = async (m, { isOwner, isAdmin, conn, participants, args }) => {
     let message = args.join(' ') || '𝑁𝑒𝑠𝑠𝑢𝑛 𝑚𝑒𝑠𝑠𝑎𝑔𝑔𝑖𝑜'
 
     let text = `
-╔══════════════════╗
+╔════════════╗
       🔔 𝐓𝐀𝐆 𝐀𝐋𝐋 🔔
-╚══════════════════╝
+╚════════════╝
 
 🤖 𝐁𝐨𝐭: ${nomebot}
 🗣️ 𝐌𝐞𝐬𝐬𝐚𝐠𝐠𝐢𝐨:
