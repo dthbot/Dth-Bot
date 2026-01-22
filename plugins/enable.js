@@ -164,6 +164,7 @@ handler.help = ['attiva <feature>', 'disabilita <feature>', 'disattiva <feature>
 handler.tags = ['Impostazioni Bot', 'owner'];
 handler.command = /^(attiva|disabilita|disattiva|enable|disable)/i;
 handler.group = true;
+handler.admin = true;
 handler.ownerOnly = false;
 
 export default handler;
