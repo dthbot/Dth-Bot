@@ -5,20 +5,20 @@ import { fileURLToPath } from 'url';
 
 global.botnumber = '';
 global.confirmCode = '';
-global.nomebot = 'ᴅᴛʜ-ʙᴏᴛ';
-global.packname = 'ᴅᴛʜ-ʙᴏᴛ';
-global.author = '𝕯𝖊𝖉𝖑𝖞';
-global.vs = '2.0';
+global.nomebot = 'nexon-bot';
+global.packname = 'nexon-bot';
+global.author = 'Endy';
+global.vs = '1.0';
 global.collab = 'Demon Slayer';
 global.wm = global.nomebot;
 global.wait = 'ⓘ 𝐂𝐚𝐫𝐢𝐜𝐚𝐦𝐞𝐧𝐭𝐨 ...';
 
 
 global.owner = [
-  ['212782411399', '𝕯𝖊𝖉𝖑𝖞', true],
-  ['48726875208', 'vampexe', true], 
-  ['393801380688', 'vixiie', true],
-  ['212601646793', 'zein', true],
+  ['6285148177865', 'endy', true],
+  ['xxxxxxxxxx',], 
+  ['xxxxxxxxxx'],
+  ['xxxxxxxxxx'],
   ['xxxxxxxxxx'],
   ['xxxxxxxxxx'],
 ];
